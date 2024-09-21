@@ -1,0 +1,1290 @@
+# Copyright (C) 2023 NitroPack Inc.
+# This file is distributed under the GPL2.
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: NitroPack 1.7.1\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/nitropack-"
+"wordpress\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2024-04-30 14:43+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"X-Generator: Loco https://localise.biz/\n"
+"X-Domain: nitropack\n"
+"Language: \n"
+"Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;"
+
+#: diagnostics.php:167
+msgid " is a file not a directory"
+msgstr ""
+
+#: view/dashboard.php:155 view/dashboard.php:159
+#, php-format
+msgid "%1$s out of %2$s"
+msgstr ""
+
+#: view/dashboard.php:71
+msgid ""
+"Activated when manual setups are made. Ideal for advanced NitroPack "
+"optimizations."
+msgstr ""
+
+#: view/dashboard.php:56
+msgid "Active Mode"
+msgstr ""
+
+#: view/modals/modal-modes.php:5
+msgid "Add HTML preconnects"
+msgstr ""
+
+#: view/dashboard.php:62
+msgid ""
+"Adds image lazy loading to standard optimizations. Uses built-in browser "
+"techniques for loading resources."
+msgstr ""
+
+#: view/connect-oneclick.php:40 view/connect.php:72
+msgid "All set!"
+msgstr ""
+
+#: view/help.php:21
+msgid ""
+"An 'optimization' is when our service optimizes a single version of one of "
+"your site URLs. The result is then cached on your website and it is served "
+"to all visitors until the cache is deleted or becomes invalid. After that, a "
+"second optimization is required for the same URL."
+msgstr ""
+
+#: view/connect.php:130
+msgid ""
+"Api details verification failed! Please check whether you entered correct "
+"details."
+msgstr ""
+
+#: view/connect.php:27
+msgid "API Key"
+msgstr ""
+
+#: view/connect.php:37
+msgid "API Key "
+msgstr ""
+
+#: functions.php:2628
+msgid "API Key and API Secret Key cannot be empty"
+msgstr ""
+
+#: view/connect.php:32
+msgid ""
+"API Key is a unique alphanumeric identifier assigned to each website using "
+"NitroPack."
+msgstr ""
+
+#: view/connect.php:41 view/connect.php:51
+msgid "API Secret Key"
+msgstr ""
+
+#: view/dashboard.php:68
+msgid ""
+"Applies deferred JS and advanced resource loading for optimal performance "
+"and Core Web Vitals."
+msgstr ""
+
+#: view/modals/modal-disconnect.php:13 view/modals/modal-disconnect.php:47
+#: view/modals/modal-disconnect.php:59
+msgid "Are you sure you want to disconnect NitroPack?"
+msgstr ""
+
+#: view/modals/modal-purge-cache.php:13
+msgid "Are you sure you want to purge your cache?"
+msgstr ""
+
+#: view/dashboard.php:88
+msgid "Automated Behavior"
+msgstr ""
+
+#. Description of the plugin
+msgid ""
+"Automatic optimization for site speed and Core Web Vitals. Use 35+ features, "
+"including Caching, image optimization, critical CSS, and Cloudflare CDN."
+msgstr ""
+
+#: view/dashboard.php:191
+msgid "Automatically pre-caches your website's page content"
+msgstr ""
+
+#: diagnostics.php:49
+msgid "Bad request."
+msgstr ""
+
+#: view/dashboard.php:173
+msgid "Basic Settings"
+msgstr ""
+
+#: functions.php:1904
+msgid "Cache has been invalidated successfully!"
+msgstr ""
+
+#: functions.php:1886
+msgid "Cache has been purged successfully!"
+msgstr ""
+
+#: view/dashboard.php:184
+msgid "Cache warmup"
+msgstr ""
+
+#: functions.php:3062
+msgid "Cache warmup has been estimated successfully."
+msgstr ""
+
+#: view/help.php:6
+msgid ""
+"Can I use another page caching plugin and NitroPack.io at the same time?"
+msgstr ""
+
+#: functions.php:2711
+msgid "Can't establish connection with NitroPack's servers"
+msgstr ""
+
+#: view/modals/modal-disconnect.php:19
+#: view/modals/modal-optimization-mode.php:20
+#: view/modals/modal-test-mode.php:19 view/modals/modal-test-mode.php:59
+msgid "Cancel"
+msgstr ""
+
+#: view/dashboard.php:257
+msgid "Cart cache"
+msgstr ""
+
+#: view/dashboard.php:158
+msgid "CDN bandwidth"
+msgstr ""
+
+#: view/modals/modal-optimization-mode.php:13
+msgid "Change optimization mode?"
+msgstr ""
+
+#: view/modals/modal-modes.php:129 view/modals/modal-posttypes.php:51
+msgid "Close"
+msgstr ""
+
+#: view/modals/modal-disconnect.php:10 view/modals/modal-modes.php:70
+#: view/modals/modal-optimization-mode.php:10
+#: view/modals/modal-purge-cache.php:10 view/modals/modal-test-mode.php:11
+msgid "Close modal"
+msgstr ""
+
+#: view/modals/modal-modes.php:14 view/modals/modal-modes.php:20
+msgid "Combine CSS"
+msgstr ""
+
+#: view/modals/modal-modes.php:11
+msgid "Combine JavaScript"
+msgstr ""
+
+#: view/dashboard.php:224
+msgid ""
+"Compressing the structure of your HTML, ensures faster page rendering and an "
+"optimized browsing experience for your users."
+msgstr ""
+
+#: view/dashboard.php:457
+msgid ""
+"Compression is already enabled on your server! There is no need to enable it "
+"in NitroPack."
+msgstr ""
+
+#: diagnostics.php:144
+msgid "Config file constant is not defined."
+msgstr ""
+
+#: diagnostics.php:141
+msgid "Config file not found."
+msgstr ""
+
+#: diagnostics.php:138
+msgid "Config found, but unable to get contents."
+msgstr ""
+
+#: view/modals/modal-posttypes.php:8
+msgid "Configure post types"
+msgstr ""
+
+#: view/modals/modal-posttypes.php:9
+msgid "Configure post types that can be optimized"
+msgstr ""
+
+#: diagnostics.php:53
+msgid ""
+"Conflict. There is another operation, which prevents accepting optimization "
+"requests at the moment. Please, contact NP support for details."
+msgstr ""
+
+#: view/connect.php:59
+msgid "Connect"
+msgstr ""
+
+#: view/connect.php:63
+msgid "connect automatically"
+msgstr ""
+
+#: functions.php:3492
+msgid "Connect NitroPack&nbsp;&nbsp;"
+msgstr ""
+
+#: view/connect-oneclick.php:6 view/connect.php:6
+msgid "Connect to NitroPack account"
+msgstr ""
+
+#: view/connect-oneclick.php:28
+msgid "Connect to NitroPack OneClick"
+msgstr ""
+
+#: functions.php:2701
+msgid "Connected"
+msgstr ""
+
+#: view/dashboard.php:464
+msgid ""
+"Could not determine compression status automatically. Please configure it "
+"manually."
+msgstr ""
+
+#: view/dashboard.php:49
+msgid "Custom"
+msgstr ""
+
+#: view/diagnostics.php:50
+msgid "Customize Report"
+msgstr ""
+
+#: view/modals/modal-modes.php:32
+msgid "Delay loading of non-critical resources"
+msgstr ""
+
+#: view/diag.php:7
+msgid "Diagnostics report"
+msgstr ""
+
+#: view/safemode.php:12
+msgid "Did you know?"
+msgstr ""
+
+#: diagnostics.php:169
+msgid "Directory not found"
+msgstr ""
+
+#: view/modals/modal-disconnect.php:20
+msgid "Disconnect"
+msgstr ""
+
+#: view/dashboard.php:301
+msgid "Disconnect NitroPack plugin"
+msgstr ""
+
+#: functions.php:2764
+msgid "Disconnected"
+msgstr ""
+
+#: view/modals/modal-disconnect.php:60
+msgid ""
+"Disconnecting NitroPack will delete your page optimizations, potentially "
+"slowing down your website and worsening the user experience."
+msgstr ""
+
+#: view/modals/modal-disconnect.php:48
+msgid ""
+"Disconnecting NitroPack will immediately stop page optimizations, "
+"potentially slowing down your site and affecting user experience."
+msgstr ""
+
+#: view/modals/modal-disconnect.php:90
+msgid "Disconnecting..."
+msgstr ""
+
+#: functions.php:1129
+msgid "Dismiss"
+msgstr ""
+
+#: view/diagnostics.php:42
+msgid "Download"
+msgstr ""
+
+#: view/modals/modal-test-mode.php:20 view/modals/modal-test-mode.php:60
+msgid "Enable"
+msgstr ""
+
+#: view/modals/modal-test-mode.php:14 view/modals/modal-test-mode.php:55
+msgid "Enable Test Mode?"
+msgstr ""
+
+#: functions.php:2645
+msgid ""
+"Error when trying to communicate with NitroPack's servers. Please try again "
+"in a few minutes. If the issue persists, please"
+msgstr ""
+
+#: view/dashboard.php:426
+msgid "Error while fetching plan data"
+msgstr ""
+
+#: functions.php:2709
+msgid "Error while fetching remote config: "
+msgstr ""
+
+#: view/modals/modal-optimization-mode.php:60
+msgid "Error while fetching the optimization level settings"
+msgstr ""
+
+#: view/modals/modal-disconnect.php:123 view/modals/modal-test-mode.php:114
+msgid "Error!"
+msgstr ""
+
+#: functions.php:2066 wp-cli.php:112
+msgid "Error! There was an error and the cache was not invalidated!"
+msgstr ""
+
+#: functions.php:1894 functions.php:2012 functions.php:2030 wp-cli.php:81
+msgid "Error! There was an error and the cache was not purged!"
+msgstr ""
+
+#: functions.php:1930
+msgid "Error! There was an error clearing the residual cache!"
+msgstr ""
+
+#: functions.php:2982
+msgid "Error! There was an error while disabling the cache warmup!"
+msgstr ""
+
+#: functions.php:2960
+msgid "Error! There was an error while enabling the cache warmup!"
+msgstr ""
+
+#: functions.php:3085 functions.php:3097
+msgid "Error! There was an error while fetching warmup stats!"
+msgstr ""
+
+#: functions.php:3002
+msgid "Error! There was an error while starting the cache warmup!"
+msgstr ""
+
+#: functions.php:3211
+msgid "Error! There was an SDK error while fetching status of safe mode!"
+msgstr ""
+
+#: view/admin.php:195 view/oneclick.php:137
+msgid "Error:"
+msgstr ""
+
+#: diagnostics.php:80
+msgid "Error: "
+msgstr ""
+
+#: diagnostics.php:83 diagnostics.php:92 diagnostics.php:101
+#: diagnostics.php:102
+msgid "Error: Cannot get an SDK instance"
+msgstr ""
+
+#: view/admin.php:197 view/oneclick.php:139
+msgid ""
+"Error: We were unable to restore the connection. Please contact our support "
+"team to get this resolved."
+msgstr ""
+
+#: functions.php:1098
+msgid "Estimating optimizations usage"
+msgstr ""
+
+#: view/help.php:83
+msgid ""
+"Finally, Medium does not have the resource loader enabled, ensuring better "
+"stability, but it does not give the best PageSpeed scores."
+msgstr ""
+
+#: view/modals/modal-modes.php:56
+msgid "Font-display value"
+msgstr ""
+
+#: view/dashboard.php:139
+msgid "Free"
+msgstr ""
+
+#: view/modals/modal-modes.php:23
+msgid "Generate critical CSS"
+msgstr ""
+
+#: view/diag.php:66
+msgid "Generate&nbsp;Report"
+msgstr ""
+
+#: view/dashboard.php:125
+msgid "Go to app"
+msgstr ""
+
+#: view/connect.php:62
+msgid ""
+"Having trouble connecting? Explore our <a href=\"#\" class=\"btn-manual-"
+"connect\">manual connect</a> option, browse our <a href=\"https://support."
+"nitropack.io/en/collections/6175768-nitropack-for-wordpress-and-"
+"woocommerce\" target=\"_blank\">FAQ section</a>, or reach out to our <a "
+"href=\"https://support.nitropack.io/en/\" target=\"_blank\">support team</a>."
+msgstr ""
+
+#: view/connect.php:52
+msgid "here"
+msgstr ""
+
+#: view/help.php:46
+msgid "How often should I purge / invalidate the cache?"
+msgstr ""
+
+#: view/dashboard.php:223
+msgid "HTML Compression"
+msgstr ""
+
+#. Author URI of the plugin
+msgid "https://nitropack.io/"
+msgstr ""
+
+#. URI of the plugin
+msgid "https://nitropack.io/platform/wordpress"
+msgstr ""
+
+#: view/modals/modal-purge-cache.php:20 view/modals/modal-test-mode.php:77
+msgid "I will do it later"
+msgstr ""
+
+#: view/help.php:58
+msgid ""
+"If I modify an image/CSS/JS file on my site, why is it not updated in the "
+"NitroPack.io CDN?"
+msgstr ""
+
+#: view/modals/modal-test-mode.php:76
+msgid ""
+"If you have made changes to NitroPack configuration or your website while "
+"you were using test mode, we recommend you to purge your cache. In this way "
+"we will update NitroPack cache with your recent changes."
+msgstr ""
+
+#: view/modals/modal-modes.php:44
+msgid "iFrames lazy load"
+msgstr ""
+
+#: view/modals/modal-modes.php:47
+msgid "Image optimization"
+msgstr ""
+
+#: view/modals/modal-modes.php:50
+msgid "Image quality"
+msgstr ""
+
+#: view/modals/modal-modes.php:38
+msgid "Images lazy-loading"
+msgstr ""
+
+#: view/diag.php:22 view/diagnostics.php:10
+msgid "Include active plugins list"
+msgstr ""
+
+#: view/diag.php:33 view/diagnostics.php:17
+msgid "Include conflicting plugins list"
+msgstr ""
+
+#: view/diag.php:55
+msgid "Include directory info(structure,permissions)"
+msgstr ""
+
+#: view/diagnostics.php:3
+msgid "Include NitroPack info (version, methods, environment)"
+msgstr ""
+
+#: view/diag.php:11
+msgid "Include NitroPack info(version, methods, environment)"
+msgstr ""
+
+#: view/diagnostics.php:24
+msgid "Include plugin config"
+msgstr ""
+
+#: view/diag.php:44
+msgid "Include user config"
+msgstr ""
+
+#: view/dashboard.php:65
+msgid ""
+"Includes smart resource loading on top of Medium optimizations. Balances "
+"speed boost with stability."
+msgstr ""
+
+#: functions.php:2576
+msgid "Incomplete site config. Please reinstall the plugin!"
+msgstr ""
+
+#: functions.php:2713
+msgid ""
+"Incorrect API credentials. Please make sure that you copied them correctly "
+"and try again."
+msgstr ""
+
+#: functions.php:2636
+msgid "Invalid API Key or API Secret Key value"
+msgstr ""
+
+#: functions.php:3017
+msgid "Invalid estimation ID!"
+msgstr ""
+
+#: classes/Integration/Plugin/AdvancedMathCaptcha.php:316
+msgid "Invalid request."
+msgstr ""
+
+#: functions.php:3555
+msgid "Invalidate Current Page"
+msgstr ""
+
+#: view/help.php:35
+msgid ""
+"Invalidate only marks the cached content as \"stale\", but keeps serving it "
+"until newly optimized content is available. As a result, your visitors "
+"always see optimized content, even though it may be outdated for a short "
+"while."
+msgstr ""
+
+#: view/safemode.php:16
+msgid ""
+"It is not necessary to deactivate NitroPack for troubleshooting. You can use "
+"our Test Mode insted. Do you still want to deactivate?"
+msgstr ""
+
+#: view/modals/modal-purge-cache.php:17
+msgid ""
+"It will take us a few minutes to re-optimize all your pages and start "
+"serving optimized content to your visitors."
+msgstr ""
+
+#: view/dashboard.php:288
+msgid ""
+"Keep accurate product availability on your WooCommerce site. Turn on this "
+"feature if you display stock quantities, and enjoy automatic cache clearance "
+"when stock decreases."
+msgstr ""
+
+#: view/dashboard-oneclick.php:18 view/dashboard.php:25
+msgid "Last cache purge"
+msgstr ""
+
+#: view/dashboard-oneclick.php:40
+msgid "Learn More"
+msgstr ""
+
+#: view/dashboard.php:191 view/dashboard.php:206 view/dashboard.php:224
+msgid "Learn more"
+msgstr ""
+
+#: view/connect.php:52
+msgid "Learn where to find your site's API details"
+msgstr ""
+
+#: view/connect.php:19
+msgid ""
+"Let's boost your website's page load speed and improve your Core Web Vitals."
+msgstr ""
+
+#: view/dashboard.php:199
+msgid "Loading cache warmup status"
+msgstr ""
+
+#: view/dashboard.php:216
+msgid "Loading test mode status"
+msgstr ""
+
+#: view/dashboard.php:49 view/modals/modal-modes.php:2
+msgid "Ludicrous"
+msgstr ""
+
+#: view/help.php:79
+msgid ""
+"Ludicrous mode ensures you receive the highest possible PageSpeed score, as "
+"it uses a resource loader script which alters the way your CSS and JS "
+"resources are loaded/rendered (in some cases, some resources are delayed). "
+"The resource loader is generally stable, but on some themes, it may cause "
+"unexpected behavior."
+msgstr ""
+
+#: view/dashboard-oneclick.php:41
+msgid "Manage"
+msgstr ""
+
+#: view/dashboard.php:140
+msgid "Manage subscription"
+msgstr ""
+
+#: view/dashboard.php:49 view/modals/modal-modes.php:2
+msgid "Medium"
+msgstr ""
+
+#: view/modals/modal-modes.php:17
+msgid "Merge screen and all media styles"
+msgstr ""
+
+#: view/modals/modal-modes.php:8
+msgid "Minify resources"
+msgstr ""
+
+#: view/modals/modal-modes.php:65
+msgid "Modes comparison"
+msgstr ""
+
+#: view/dashboard-oneclick.php:18 view/dashboard.php:25
+msgid "Never"
+msgstr ""
+
+#: view/dashboard.php:150
+msgid "Next billing"
+msgstr ""
+
+#: view/dashboard.php:146
+msgid "Next reset"
+msgstr ""
+
+#. Name of the plugin
+#: view/oneclick.php:9
+msgid "NitroPack"
+msgstr ""
+
+#: diagnostics.php:61
+msgid "NitroPack Diagnostic Agent"
+msgstr ""
+
+#. Author of the plugin
+msgid "NitroPack Inc."
+msgstr ""
+
+#: view/dashboard-oneclick.php:39
+msgid ""
+"NitroPack OneClick is technically a one-click version of NitroPack "
+"preconfigured with essential features for immediate use. Activate is "
+"effortlessly and enjoy an instant boost in page speed."
+msgstr ""
+
+#: view/dashboard.php:460
+msgid "No compression was detected! We will now enable it in NitroPack."
+msgstr ""
+
+#: view/dashboard.php:147 view/dashboard.php:151
+msgid "No ETA"
+msgstr ""
+
+#: view/safemode.php:20
+msgid "No, enable “Test Mode”"
+msgstr ""
+
+#: diagnostics.php:181
+msgid "None detected"
+msgstr ""
+
+#: diagnostics.php:190
+msgid "Not found"
+msgstr ""
+
+#: view/admin.php:18 view/oneclick.php:15
+msgid "Notifications"
+msgstr ""
+
+#: diagnostics.php:32 diagnostics.php:47 diagnostics.php:48 diagnostics.php:103
+msgid "OK"
+msgstr ""
+
+#: diagnostics.php:94
+msgid "OK for drop-in"
+msgstr ""
+
+#: view/dashboard.php:38
+msgid "Optimization mode"
+msgstr ""
+
+#: view/dashboard-oneclick.php:7 view/dashboard.php:14
+msgid "Optimized pages"
+msgstr ""
+
+#: view/help.php:65
+msgid ""
+"Option 1) Save the file with a different name, and update your site content "
+"to use the new name. After that, please make sure to invalidate all "
+"NitroPack cache. Doing this is the best way to ensure the updated content "
+"will be re-cached while avoiding excessive traffic to your server."
+msgstr ""
+
+#: view/help.php:67
+msgid ""
+"Option 2) Do a complete purge of your NitroPack cache, forcing our service "
+"to re-download all resources."
+msgstr ""
+
+#: view/connect.php:63
+msgid "or"
+msgstr ""
+
+#: view/modals/modal-modes.php:53
+msgid "Override font rendering behavior"
+msgstr ""
+
+#: view/dashboard.php:107
+msgid "Page optimization"
+msgstr ""
+
+#: view/dashboard.php:154
+msgid "Page views"
+msgstr ""
+
+#: view/dashboard-oneclick.php:11 view/dashboard.php:18
+msgid "page(s) in the background"
+msgstr ""
+
+#: diagnostics.php:50
+msgid "Payment required. Please, contact NP support for details."
+msgstr ""
+
+#: functions.php:2707
+msgid "Permission Error: "
+msgstr ""
+
+#: view/diag.php:106 view/diagnostics.php:107
+msgid "Please select at least one of the report options"
+msgstr ""
+
+#: view/modals/modal-disconnect.php:61
+msgid ""
+"Please use \"Test Mode\" for troubleshooting potential issues without "
+"negatively impacting your site’s performance."
+msgstr ""
+
+#: view/connect-oneclick.php:5 view/connect.php:5
+msgid "Plugin activation"
+msgstr ""
+
+#: view/dashboard-oneclick.php:10 view/dashboard.php:17
+msgid "Processing"
+msgstr ""
+
+#: view/dashboard.php:96
+msgid "Purge affected cache when content is updated or published"
+msgstr ""
+
+#: view/dashboard-oneclick.php:22
+msgid "Purge Cache"
+msgstr ""
+
+#: view/dashboard.php:28 view/dashboard.php:95
+msgid "Purge cache"
+msgstr ""
+
+#: view/modals/modal-test-mode.php:75
+msgid "Purge cache after disabling Test Mode?"
+msgstr ""
+
+#: view/modals/modal-purge-cache.php:21 view/modals/modal-test-mode.php:78
+msgid "Purge cache now"
+msgstr ""
+
+#: functions.php:3543
+msgid "Purge Current Page"
+msgstr ""
+
+#: view/help.php:37
+msgid ""
+"Purge deletes the cached file from your site, meaning your site visitors "
+"will see the updated content immediately, but it will not be optimized for a "
+"few requests until NitroPack prepares the newly optimized content. Usually, "
+"this takes between a few seconds to a few minutes."
+msgstr ""
+
+#: functions.php:3528
+msgid "Purge Entire Cache"
+msgstr ""
+
+#: view/dashboard.php:287
+msgid "Real-time Stock Refresh"
+msgstr ""
+
+#: view/dashboard-oneclick.php:19 view/dashboard.php:26
+msgid "Reason"
+msgstr ""
+
+#: view/dashboard.php:184
+msgid "Recommended"
+msgstr ""
+
+#: view/modals/modal-modes.php:26
+msgid "Remove render-blocking resources"
+msgstr ""
+
+#: view/diag.php:148 view/diagnostics.php:153
+msgid "Report generated successfully."
+msgstr ""
+
+#: view/modals/modal-modes.php:35
+msgid "Resource loading strategy"
+msgstr ""
+
+#: view/diag.php:150 view/diagnostics.php:155
+msgid "Response is empty. Report generation failed."
+msgstr ""
+
+#: view/dashboard.php:232
+msgid "Run compression test"
+msgstr ""
+
+#: diagnostics.php:54
+msgid "Runtime error."
+msgstr ""
+
+#: view/modals/modal-posttypes.php:52
+msgid "Save Changes"
+msgstr ""
+
+#: view/dashboard.php:78
+msgid "See modes comparison"
+msgstr ""
+
+#: view/dashboard.php:43
+msgid ""
+"Select from our range of predefined optimization modes to boost your site's "
+"performance."
+msgstr ""
+
+#: view/dashboard.php:108
+msgid "Select what post/page types get optimized"
+msgstr ""
+
+#: diagnostics.php:55
+msgid "Service unavailable."
+msgstr ""
+
+#: functions.php:3516
+msgid "Settings"
+msgstr ""
+
+#: functions.php:1097 functions.php:1957
+msgid "Settings updated."
+msgstr ""
+
+#: diagnostics.php:37
+msgid "Site config cannot be found, because "
+msgstr ""
+
+#: diagnostics.php:51
+msgid "Site disabled. Please, contact NP support for details."
+msgstr ""
+
+#: view/connect.php:46
+msgid ""
+"Site secret is a confidential alphanumeric key associated with your website, "
+"designed to ensure secure communication between NitroPack and your site."
+msgstr ""
+
+#: view/modals/modal-modes.php:41
+msgid "Size images preemtively"
+msgstr ""
+
+#: functions.php:1096 functions.php:1959
+msgid "Something went wrong."
+msgstr ""
+
+#: view/dashboard.php:49 view/modals/modal-modes.php:2
+msgid "Standard"
+msgstr ""
+
+#: view/dashboard.php:59
+msgid ""
+"Standard optimization features enabled for your site. Ideal choice for "
+"maximum stability."
+msgstr ""
+
+#: view/dashboard.php:49 view/modals/modal-modes.php:2
+msgid "Strong"
+msgstr ""
+
+#: view/help.php:81
+msgid ""
+"Strong mode also has a resource loader, but it is loading your resources "
+"without delaying them - this produces better stability, but also gives lower "
+"PageSpeed scores compared to Ludicrous mode."
+msgstr ""
+
+#: view/dashboard.php:135
+msgid "Subscription"
+msgstr ""
+
+#: functions.php:2057 wp-cli.php:105
+msgid "Success! Cache has been invalidated successfully!"
+msgstr ""
+
+#: functions.php:2003 functions.php:2022 wp-cli.php:74
+msgid "Success! Cache has been purged successfully!"
+msgstr ""
+
+#: functions.php:2976
+msgid "Success! Cache warmup has been disabled successfully!"
+msgstr ""
+
+#: functions.php:2954
+msgid "Success! Cache warmup has been enabled successfully!"
+msgstr ""
+
+#: functions.php:2996
+msgid "Success! Cache warmup has been started successfully!"
+msgstr ""
+
+#: functions.php:1924
+msgid "Success! The residual cache has been cleared successfully!"
+msgstr ""
+
+#: view/modals/modal-optimization-mode.php:21
+msgid "Switch mode"
+msgstr ""
+
+#: view/modals/modal-disconnect.php:106
+msgid "Switching to Test Mode..."
+msgstr ""
+
+#: view/dashboard.php:242
+msgid "Sync NitroPack Purge with Beaver Builder"
+msgstr ""
+
+#: view/diagnostics.php:38
+msgid "System Info Report"
+msgstr ""
+
+#: view/dashboard.php:205
+msgid "Test Mode"
+msgstr ""
+
+#: functions.php:3717
+msgid ""
+"Test Mode is enabled for your site and visitors are accessing your "
+"unoptimized pages. Make sure to disable it once you are done testing."
+msgstr ""
+
+#: view/dashboard.php:206
+msgid "Test NitroPack's features without affecting your visitors' experience"
+msgstr ""
+
+#: view/dashboard.php:444
+msgid "Testing current compression status"
+msgstr ""
+
+#: functions.php:3743
+msgid ""
+"The file /wp-content/advanced-cache.php cannot be created because a "
+"conflicting plugin is active. Please make sure to disable all conflicting "
+"plugins."
+msgstr ""
+
+#: functions.php:3735 functions.php:3745
+msgid ""
+"The file /wp-content/advanced-cache.php cannot be created. Please make sure "
+"that the /wp-content/ directory is writable and refresh this page."
+msgstr ""
+
+#: functions.php:3732
+msgid ""
+"The file /wp-content/advanced-cache.php was either missing or not the one "
+"generated by NitroPack. NitroPack re-installed its version of the file, so "
+"it can function properly. Possibly there is another active page caching "
+"plugin in your system. For correct operation, please deactivate any other "
+"page caching plugins."
+msgstr ""
+
+#: view/diag.php:70
+msgid ""
+"The generated report will be saved to your computer and can later be "
+"attached to your ticket."
+msgstr ""
+
+#: functions.php:3771
+msgid ""
+"The NitroPack data directory cannot be created. Please make sure that the "
+"/wp-content/ directory is writable and refresh this page."
+msgstr ""
+
+#: functions.php:3780
+msgid ""
+"The NitroPack plugin data directory cannot be created. Please make sure that "
+"the /wp-content/ directory is writable and refresh this page."
+msgstr ""
+
+#: functions.php:3796
+msgid ""
+"The NitroPack static config file cannot be created. Please make sure that "
+"the /wp-content/nitropack/ directory is writable and refresh this page."
+msgstr ""
+
+#: functions.php:3799 functions.php:3854
+msgid ""
+"The NitroPack static config file cannot be updated. Please make sure that "
+"the /wp-content/nitropack/ directory is writable and refresh this page."
+msgstr ""
+
+#: view/diagnostics.php:39
+msgid ""
+"The system info report provides detailed insights into your NitroPack setup, "
+"including website configuration. Sharing this report with our support team "
+"enables them to quickly diagnose and resolve any issues you might face."
+msgstr ""
+
+#: functions.php:3760
+msgid ""
+"The WP_CACHE constant cannot be set in the wp-config.php file. This can lead "
+"to slower cache delivery. Please make sure that the /wp-config.php file is "
+"writable and refresh this page."
+msgstr ""
+
+#: functions.php:3758
+msgid ""
+"The WP_CACHE setting is not enabled. Please go to your FlyWheel control "
+"panel and enable this setting. You can find more information <a href='https:"
+"//getflywheel.com/wordpress-support/how-to-enable-wp_cache/' target='_blank'>"
+"in this document</a>."
+msgstr ""
+
+#: functions.php:1912
+msgid "There was an error and the cache was not invalidated!"
+msgstr ""
+
+#: view/diag.php:154 view/diagnostics.php:159
+msgid "There was an error while generating the report."
+msgstr ""
+
+#: view/modals/modal-optimization-mode.php:17
+msgid ""
+"This action will change some of your current settings with the predefined of "
+"the selected mode."
+msgstr ""
+
+#: view/modals/modal-test-mode.php:58
+msgid ""
+"This allows you to assess and fine-tune NitroPack’s performance before "
+"implementing optimizations site-wide."
+msgstr ""
+
+#: view/dashboard.php:279
+msgid "This feature is available on paid subscription."
+msgstr ""
+
+#: view/help.php:61
+msgid ""
+"To avoid excessive traffic to your site, we need to cache your image/CSS/JS "
+"files on our servers. If you modify the file contents on your end, this will "
+"not update it on our end. This expected behavior is a common practice on "
+"many other caching solutions (CDN, browser caching, etc.)"
+msgstr ""
+
+#: view/help.php:63
+msgid "To force NitroPack to download the new file, you can either:"
+msgstr ""
+
+#: view/modals/modal-test-mode.php:57
+msgid ""
+"To view how a NitroPack optimised page will load and behave simply append <b>"
+"?testnitro=1</b> to any URL (e.g. https://yourwebsite.com/?testnitro=1)"
+msgstr ""
+
+#: diagnostics.php:94
+msgid "Turned off"
+msgstr ""
+
+#: view/help.php:49
+msgid ""
+"Typically, you should not need to do a cache purge / invalidate manually. "
+"You can take these actions in case you want to force NitroPack.io to re-"
+"cache the updated site content immediately. In most cases, NitroPack.io "
+"takes care of updating the content automatically."
+msgstr ""
+
+#: functions.php:3766
+msgid ""
+"Unable to configure LiteSpeed specific rules for maximum performance. Please "
+"make sure your .htaccess file is writable or contact support."
+msgstr ""
+
+#: functions.php:3819
+msgid ""
+"Unable to configure webhooks. This can impact the stability of the plugin. "
+"Please disconnect and connect again in order to retry configuring the "
+"webhooks."
+msgstr ""
+
+#: functions.php:2573
+msgid "Unable to get SDK instance"
+msgstr ""
+
+#: diagnostics.php:90 diagnostics.php:93 diagnostics.php:94 diagnostics.php:95
+#: diagnostics.php:96 diagnostics.php:98 diagnostics.php:99 diagnostics.php:100
+#: diagnostics.php:155
+msgid "Undefined"
+msgstr ""
+
+#: view/dashboard-oneclick.php:19 view/dashboard.php:26
+msgid "Unknown"
+msgstr ""
+
+#: diagnostics.php:56
+msgid "Unknown."
+msgstr ""
+
+#: view/dashboard.php:279
+msgid "Upgrade here"
+msgstr ""
+
+#: diagnostics.php:52
+msgid "URL used for the API poll request returned 404. Please ignore this."
+msgstr ""
+
+#: view/modals/modal-modes.php:29
+msgid "Use resource loader script"
+msgstr ""
+
+#: view/connect-oneclick.php:31
+msgid ""
+"Visit your hosting provider page to connect NitroPack with your WordPress "
+"site."
+msgstr ""
+
+#: functions.php:3059 functions.php:3073
+msgid "Warmup estimation failed."
+msgstr ""
+
+#: functions.php:3066
+msgid ""
+"Warmup estimation failed. Please try again or contact support if the issue "
+"persists"
+msgstr ""
+
+#: diagnostics.php:103
+msgid "Warning: \"stream_socket_client\" function is disabled."
+msgstr ""
+
+#: diagnostics.php:32
+msgid "Warning: Webhooks do not match this site"
+msgstr ""
+
+#: functions.php:3064
+msgid "We could not find any links for warming up on your home page."
+msgstr ""
+
+#: view/help.php:97
+msgid ""
+"We recommend you to use the Strong mode. If your score is below 80 points on "
+"it, we recommend trying the Ludicrous mode. If Ludicrous mode seems too "
+"aggressive (as it is delaying the loading of most of the resources), you can "
+"stick to using Strong mode."
+msgstr ""
+
+#: functions.php:2570
+msgid "Webhook Error: "
+msgstr ""
+
+#: view/connect.php:18
+msgid "Welcome to NitroPack for WordPress"
+msgstr ""
+
+#: view/connect-oneclick.php:18
+msgid "Welcome to NitroPack OneClick for WordPress"
+msgstr ""
+
+#: view/help.php:76
+msgid ""
+"What are the advantages and disadvantages of Medium, Strong, and Ludicrous?"
+msgstr ""
+
+#: view/help.php:18
+msgid "What is an optimization?"
+msgstr ""
+
+#: view/dashboard-oneclick.php:35
+msgid "What is NitroPack OneClick?"
+msgstr ""
+
+#: view/help.php:30
+msgid "What is the difference between Invalidate and Purge?"
+msgstr ""
+
+#: view/dashboard.php:243
+msgid ""
+"When Beaver Builder cache is purged, NitroPack will perform a full cache "
+"purge keeping your site's content up-to-date."
+msgstr ""
+
+#: view/help.php:33
+msgid ""
+"When our service optimizes the content for a specific page, this content is "
+"cached on your site, and it is subsequently served to future visitors. There "
+"are two ways to refresh this content - Invalidate and Purge."
+msgstr ""
+
+#: view/modals/modal-test-mode.php:56
+msgid ""
+"When you enable Test Mode, we disable all NitroPack’s optimizations and your "
+"site visitors are accessing your regular, unoptimized URLs."
+msgstr ""
+
+#: view/dashboard.php:77
+msgid "Which optimization mode to choose?"
+msgstr ""
+
+#: view/help.php:94
+msgid "Which optimization mode would you recommend me to use?"
+msgstr ""
+
+#: view/help.php:85
+msgid ""
+"Which option is best for you depends on the way your theme is coded, and the "
+"3rd party CSS and JS resources it utilizes. As a rule of thumb, the best "
+"mode is the one which produces the highest scores with the least user "
+"experience issues."
+msgstr ""
+
+#: view/help.php:9
+msgid ""
+"WordPress is designed in a way that you can use only a single page cache "
+"solution at a time. Such is the case with other page cache solutions too. "
+"You can use other non-page cache optimization solutions perfectly well with "
+"NitroPack.io (example: ShortPixel)."
+msgstr ""
+
+#: view/safemode.php:19
+msgid "Yes, deactivate"
+msgstr ""
+
+#: view/dashboard.php:124
+msgid ""
+"You can further configure how NitroPack's optimization behaves through your "
+"account"
+msgstr ""
+
+#: view/dashboard.php:166
+msgid ""
+"You will be notified by email when your website reaches the subscription "
+"resource limits."
+msgstr ""
+
+#: view/connect-oneclick.php:19
+msgid "Your license is managed by your hosting provider."
+msgstr ""
+
+#: view/connect-oneclick.php:41 view/connect.php:73
+msgid ""
+"Your setup is complete – you're all set to experience a seamless journey "
+"ahead."
+msgstr ""
+
+#: view/dashboard.php:258
+msgid ""
+"Your visitors will enjoy full site speed while browsing with items in cart. "
+"Fully optimized page cache will be served."
+msgstr ""

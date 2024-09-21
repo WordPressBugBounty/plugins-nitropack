@@ -1,0 +1,102 @@
+@use "variables" as *;
+//@use "helpers" as *;
+
+.nitro-notification {
+    margin-bottom: $gutter;
+    .notification-inner {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        color: $gray-700;
+        background-color: $gray-100;
+        padding: $gutter;
+        //width: 100%;
+    }
+    p {
+        color: $gray-700;
+        margin: 0;
+    }
+    .title-wrapper {
+        display: flex;
+        align-items: center;
+    }
+    .icon {
+        margin-right: 0.5rem;
+        width: 1rem;
+        height: 1rem;
+    }
+    .title {
+        font-weight: bold;
+        font-size: 0.875rem;
+        text-transform: capitalize;
+        margin: 0;
+    }
+    &.notification-danger .notification-inner {
+        background-color: $red-100;
+        .btn.btn-secondary {
+            @include btn_color($red-600);
+            &:hover {
+                background-color: $red-200;
+            }
+        }
+    }
+    &.notification-warning .notification-inner {
+        background-color: $yellow-100;
+        .btn.btn-secondary {
+            @include btn_color($yellow-700);
+            &:hover {
+                background-color: $yellow-200;
+            }
+        }
+    }
+    &.notification-success .notification-inner {
+        background-color: #e9fffb;
+        .btn.btn-secondary {
+            @include btn_color($green-500);
+            &:hover {
+                background-color: $green-100;
+            }
+        }
+    }
+    &.notification-info .notification-inner {
+        background-color: $purple-100;
+        .btn.btn-secondary {
+            @include btn_color($purple-700);
+            &:hover {
+                background-color: $purple-700;
+                color: #fff;
+            }
+        }
+    }
+    .msg {
+        .btn {
+            margin-left: 1rem;
+        }
+    }
+    .actions {
+        flex-grow: 1;
+        display: flex;
+        flex-wrap: nowrap;
+        justify-content: flex-end;
+        margin-left: 1rem;
+    }
+    .btn {
+        @include btn();
+        line-height: 1.5;
+        text-decoration: none;
+        min-height: initial;
+        white-space: nowrap;
+        + .btn {
+            margin-left: 0.25rem;
+        }
+    }
+}
+body:not(.toplevel_page_nitropack) {
+    .nitro-notification {
+        margin-top: 0.5rem;
+
+        .notification-inner {
+            width: calc(100% - 70px);
+        }
+    }
+}

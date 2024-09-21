@@ -1,0 +1,75 @@
+/* Colors */
+//green
+$green-800: #005f4d;
+$green-700: #007761;
+$green-500: #00c7a2;
+$green-400: #33d2b5;
+$green-300: #3ff6d4;
+$green-100: #b8fff2;
+$green-50: #E9FFFB;
+//purple
+$purple-700: #4600cc;
+$purple-500: #8240ff;
+$purple-300: #b994ff;
+$purple-100: #efe8ff;
+$purple-50: #f7f3ff;
+//gray
+$gray-700: #1b004e;
+$gray-600: #493371;
+$gray-500: #776795;
+$gray-300: #dbd7e3;
+$gray-100: #f5f4f6;
+//red
+$red-800: #970928;
+$red-600: #cf0c35;
+$red-200: #f7d9df;
+$red-100: #fbecef;
+$red-50: #fdf2f2;
+//blue
+$blue-700: #1a56db;
+$blue-200: #83bfffee;
+$blue-100: #e1effe;
+//yellow
+$yellow-700: #987e00;
+$yellow-500: #ffd400;
+$yellow-200: #ffefa3;
+$yellow-100: #fff8d7;
+//assign
+$primary-color: $purple-700;
+$primary-hover: #3800a3;
+$text-color: $gray-600;
+$divider-color: #edebf1;
+$toggle-color: #ada3bf;
+$overlay-color: rgba(42, 0, 122, 0.5);
+/* Typography */
+$font: "Inter", sans-serif;
+$font-size: 0.875rem;
+$line-height: 24px;
+/* Box Shadow */
+$shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.08);
+$dropdown-shadow: 0 1px 3px rgba(27, 0, 78, 0.15);
+$toast-shadow: 0 4px 12px rgba(0,0,0,.1);
+/* Borders */
+$border-radius: 4px;
+/* layout */
+$gutter: 1.5rem;
+$transition: ease-in-out 0.3s;
+
+@mixin btn() {
+    padding: 0.4rem 1.25rem;
+    border-radius: $border-radius;
+    border: 1px solid $primary-color;
+    color: $primary-color;
+    cursor: pointer;
+    transition: background-color $transition;
+    min-height: 2.25rem;
+    display: inline-block;
+    font-weight: 500;
+    text-wrap: nowrap;
+    text-decoration: none;
+    background: transparent;
+}
+@mixin btn_color($color) { 
+    color: $color;
+    border-color: $color;
+}

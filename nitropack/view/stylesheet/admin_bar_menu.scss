@@ -1,0 +1,57 @@
+#wp-admin-bar-nitropack-top-menu {
+    &.nitropack-menu .ab-item {
+        display: flex;
+        align-items: center;
+    }
+    .circle {
+        height: 0.5rem;
+        width: 0.5rem;
+        background-color: #bbb;
+        border-radius: 50%;
+        display: inline-block;
+    }
+    .icon {
+        margin-left: 0.5rem;
+        width: 1rem;
+    }
+    .loading.icon {
+        width: 0.875rem;
+    }
+    .nitro-status-ok {
+        background-color: #28a745;
+    }
+
+    .nitro-status-blue {
+        background-color: royalblue;
+    }
+
+    .nitro-status-error {
+        background-color: red;
+    }
+
+    .nitro-status-warning {
+        background-color: orange;
+    }
+    .circle-with-text {
+        display: inline-block;
+        vertical-align: top;
+        box-sizing: border-box;
+        margin: 1px 0 -1px .5rem;
+        padding: 0 5px;
+        min-width: 18px;
+        height: 18px;
+        border-radius: 9px;
+        background-color: #d63638;
+        color: #fff;
+        font-size: 11px;
+        line-height: 1.6;
+        text-align: center;
+        z-index: 26;
+    }
+    .nitro-color-notification {
+        background-color: #72aee6;
+    }
+    .nitro-color-issues {
+        background-color: #d63638;
+    }
+}
