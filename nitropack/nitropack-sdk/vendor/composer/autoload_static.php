@@ -4,7 +4,7 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInit76c9e5d56ba5d0ba815a53660a11224a
+class ComposerStaticInitbef34892d88f9542b3192d2d270b6e1f
 {
     public static $prefixLengthsPsr4 = array (
         'P' => 
@@ -26,7 +26,7 @@ class ComposerStaticInit76c9e5d56ba5d0ba815a53660a11224a
     public static $prefixDirsPsr4 = array (
         'Psr\\Log\\' => 
         array (
-            0 => __DIR__ . '/..' . '/psr/log/src',
+            0 => __DIR__ . '/..' . '/psr/log/Psr/Log',
         ),
         'NitroPack\\Url\\' => 
         array (
@@ -53,9 +53,9 @@ class ComposerStaticInit76c9e5d56ba5d0ba815a53660a11224a
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInit76c9e5d56ba5d0ba815a53660a11224a::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInit76c9e5d56ba5d0ba815a53660a11224a::$prefixDirsPsr4;
-            $loader->classMap = ComposerStaticInit76c9e5d56ba5d0ba815a53660a11224a::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInitbef34892d88f9542b3192d2d270b6e1f::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInitbef34892d88f9542b3192d2d270b6e1f::$prefixDirsPsr4;
+            $loader->classMap = ComposerStaticInitbef34892d88f9542b3192d2d270b6e1f::$classMap;
 
         }, null, ClassLoader::class);
     }

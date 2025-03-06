@@ -1,0 +1,6 @@
+site_name: Cloud SDK Repository
+site_description: NitroPack Cloud SDK in PHP.
+repo_url: https://github.com/wpengine/np-cloud-sdk
+
+nav:
+  - Home: README.md

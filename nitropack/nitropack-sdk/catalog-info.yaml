@@ -1,0 +1,34 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: np-cloud-sdk
+  title: Cloud SDK
+  description: NitroPack Cloud SDK in PHP.
+  links:
+  - url: https://wpengine.slack.com/archives/C07KK2PBREX
+    title: '#team-vortechs-public'
+    icon: chat
+  - url: https://github.com/wpengine/np-cloud-sdk
+    title: GitHub repo
+    icon: github
+  - url: mailto:pe-team-vortechs@wpengine.com
+    title: pe-team-vortechs@wpengine.com
+    icon: email
+  - url: https://wpengine.atlassian.net/browse/VOR
+    title: 'JIRA: VORTECHS'
+    icon: jira
+  tags:
+    - php
+  annotations:
+    backstage.io/techdocs-ref: dir:.
+    github.com/project-slug: wpengine/np-cloud-sdk
+spec:
+  type: service
+  lifecycle: production
+  owner: team-vortechs
+  system: nitropack
+  dependsOn:
+    - component:np-httpclient
+    - component:np-url
+  dependencyOf:
+    - component:np-wordpress-plugin
