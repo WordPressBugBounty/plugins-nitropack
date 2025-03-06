@@ -10,14 +10,21 @@ class ACF {
     }
 
     public function init($stage) {
-        /* By using 5 priority the function is called before the ACF save_post action, 10 is after */
+        if (!self::isActive()) return;
+
+        /* By using 5 priority the function is called before the ACF save_post action, 10 is after */        
         add_action('acf/save_post', [$this, 'invalidate_post_due_to_acf_change'], 5);
+        
     }
 
     public function invalidate_post_due_to_acf_change($post_id) {
         if (!get_option("nitropack-autoCachePurge", 1)) return;
 
         $allowed_cpts = get_option('nitropack-cacheableObjectTypes');
+
+        //refresh option if not set when activating already connected NitroPack
+        if (!is_array($allowed_cpts)) update_option("nitropack-cacheableObjectTypes", nitropack_get_default_cacheable_object_types());
+
         if (!in_array(get_post_type($post_id), $allowed_cpts)) return;
 
         //acf update check
@@ -36,7 +43,7 @@ class ACF {
         $metaIsEqual = nitropack_compare_posts($metaAfter, $metaBefore);
         if (!$metaIsEqual) {
             $post = get_post($post_id);
-            if ($post->post_status === 'publish' && !defined('NITROPACK_PURGE_CACHE') ) {
+            if ($post->post_status === 'publish' && !defined('NITROPACK_PURGE_CACHE')) {
                 nitropack_clean_post_cache($post, null, true, sprintf("Invalidate related pages due to modifying ACF fields in %s '%s'", $post->post_type, $post->post_title));
                 define('NITROPACK_PURGE_CACHE', true);
             }

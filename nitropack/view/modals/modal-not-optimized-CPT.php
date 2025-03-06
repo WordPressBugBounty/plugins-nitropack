@@ -96,7 +96,7 @@
                     cacheableObjectTypes: $('.optimize-cacheable-post-type:checked').map(function(i, el) {
                         return el.name;
                     }).get(),
-                    append: true,
+                    append: "yes",
                 },
                 dataType: "json",
                 success: function(resp) {

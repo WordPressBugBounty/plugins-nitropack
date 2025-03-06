@@ -1,4 +1,6 @@
-<?php $diagnostic_settings = array(
+<?php
+$settings = new \NitroPack\WordPress\Settings();
+$diagnostic_settings = array(
   array(
     'name' => esc_html__('Include NitroPack info (version, methods, environment)', 'nitropack'),
     'desc' => '',
@@ -41,9 +43,9 @@
   <div class="col-span-1">
     <div class="card">
       <div class="flex">
-        <div class="" style="flex-basis: 66%;">
+        <div class="" style="flex-basis: 80%;">
           <h3><?php esc_html_e('System Info Report', 'nitropack'); ?></h3>
-          <p><?php esc_html_e('The system info report provides detailed insights into your NitroPack setup, including website configuration. Sharing this report with our support team enables them to quickly diagnose and resolve any issues you might face.', 'nitropack'); ?></p>
+          <p><?php esc_html_e('This report gives a clear picture of how NitroPack is set up on your site. It checks for anything that might cause problems, like plugins that don’t work well with NitroPack or server issues. If something isn’t working as expected, share this report with support to help them fix it quickly.', 'nitropack'); ?></p>
         </div>
         <div class="ml-auto">
           <a id="gen-report-btn" href="javascript:void(0);" class="btn btn-secondary"><img src="<?php echo plugin_dir_url(__FILE__) . 'images/download.svg'; ?> " class="icon-left" /> <span class="btn-text"><?php esc_html_e('Download', 'nitropack'); ?></span></a>
@@ -75,6 +77,15 @@
                 <?php endforeach; ?>
               </div>
             </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-body">
+        <div class="nitro-option" id="minimum-log-level-widget">
+          <div class="nitro-option-main">
+            <?php $settings->logger->render(); ?>
           </div>
         </div>
       </div>
@@ -171,5 +182,6 @@
         }
       });
     });
+
   })(jQuery);
 </script>

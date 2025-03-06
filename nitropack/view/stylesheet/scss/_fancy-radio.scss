@@ -1,0 +1,57 @@
+@use "variables" as *;
+.fancy-radio {
+    border: 1px solid $primary-color;
+    border-radius: 50%;
+    display: flex;
+    min-width: 1rem;
+    max-width: 1rem;
+    height: 1rem;
+    align-items: center;
+    justify-content: center;
+    .input-fancy-radio {
+        width: 0.5rem;
+        height: 0.5rem;
+        display: block;
+        border-radius: 50%;
+        padding: 5px;
+    }
+    &.selected .input-fancy-radio {
+        background-color: $primary-color;
+    }
+}
+.radio-options-group {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: $gutter;
+    @media (max-width: 768px) {
+        grid-template-columns: 1fr;
+        gap: 0.5rem;
+    }
+}
+.fancy-radio-container {
+    padding: 1rem $gutter;
+    border: 1px solid $divider-color;
+    display: flex;
+    align-items: center;
+    gap: $gutter;
+    border-radius: $border-radius * 2;
+    margin: 0.5rem 0;
+    transition: 0.3s all ease;
+    cursor: pointer;
+
+    &:hover {
+        border-color: $primary-color;
+    }
+    label {
+        font-size: 0.875rem;
+        font-weight: 700;
+        cursor: pointer;
+        p {
+            font-weight: 400;
+        }
+    }
+    &.selected {
+        background-color: $purple-50;
+        border-color: $primary-color;
+    }
+}

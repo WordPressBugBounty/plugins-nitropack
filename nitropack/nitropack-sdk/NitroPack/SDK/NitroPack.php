@@ -234,9 +234,8 @@ class NitroPack {
                 $langCode = $matches["code"];
                 $langVariant = !empty($matches["variant"]) ? $matches["variant"] : "";
                 $weight = !empty($matches["weight"]) ? (float)$matches["weight"] : 1;
+                $preferences[] = [$langCode, $langVariant, $weight];
             }
-
-            $preferences[] = [$langCode, $langVariant, $weight];
         }
 
         return $preferences;

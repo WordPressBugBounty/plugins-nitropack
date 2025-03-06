@@ -6,7 +6,9 @@ $vendorDir = dirname(__DIR__);
 $baseDir = dirname($vendorDir);
 
 return array(
+    'Psr\\Log\\' => array($vendorDir . '/psr/log/src'),
     'NitroPack\\Url\\' => array($vendorDir . '/nitropack/url/src'),
     'NitroPack\\SDK\\' => array($baseDir . '/NitroPack/SDK'),
     'NitroPack\\HttpClient\\' => array($vendorDir . '/nitropack/httpclient/src'),
+    'Monolog\\' => array($vendorDir . '/monolog/monolog/src/Monolog'),
 );

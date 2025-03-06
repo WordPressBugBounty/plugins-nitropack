@@ -55,8 +55,17 @@ abstract class TestCase extends \PHPUnit\Framework\TestCase
             return $pid;
         }
 
-        (new HttpServer(new StreamingRequestMiddleware(), $callback))
-            ->listen(new SocketServer(static::MOCKSERVER_ADDR));
+        $httpServer = new HttpServer(new StreamingRequestMiddleware(), $callback);
+
+//        $httpServer->on('error', function ($e) {
+//            file_put_contents(__DIR__ .'/../reactphp.log', 'Error: ' . $e->getMessage() . PHP_EOL, FILE_APPEND);
+//
+//            if ($e->getPrevious() !== null) {
+//                file_put_contents(__DIR__ .'/../reactphp.log', 'Previous: ' . $e->getPrevious()->getMessage() . PHP_EOL, FILE_APPEND);
+//            }
+//        });
+
+        $httpServer->listen(new SocketServer(static::MOCKSERVER_ADDR));
 
         (Loop::get())->run();
 

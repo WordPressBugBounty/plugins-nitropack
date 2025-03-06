@@ -2,9 +2,9 @@
 Contributors: nitropack
 Tags: speed, cache, performance, optimize pagespeed, lazy load, cdn, cache, critical css
 Requires at least: 4.7
-Tested up to: 6.6.2
+Tested up to: 6.7.2
 Requires PHP: 5.6
-Stable tag: 1.17.0
+Stable tag: 1.17.7
 License: GNU General Public License, version 2
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -276,8 +276,30 @@ Yes, the plugin uses the [Intercom Chat Widget](https://widget.intercom.io), whi
 4. Lean code = fast site
 5. The only solution you will ever need
 
-
 == Changelog ==
+= 1.17.7 =
+2024-03-06
+* Improvement: Refactor notifications & UI improvement
+* Improvement: Compatibility with GeoTargetingWP
+* Improvement: Compatibility with CURCY Multicurrency
+* Improvement: Compatibility with NestifyCDN
+* Bug fix: Residual Cache clear
+* Bug fix: WooCommerce product_cat links to uppercase to avoid 301 redirect
+* Bug fix: Overall stability and fixes
+
+= 1.17.6 =
+2025-01-09
+* New Feature: Display NitroPack settings for Page Speed Boost users
+* New Feature: Option to allow editors to purge cache
+* New Feature: Debug Logs
+* New Feature: New CLI commands
+* Improvement: Better WCML compatibility using cookies
+* Improvement: Move config file to default location for WP Engine clients
+* Bug fix: Vulnerability Fix for admin notifications
+* Bug fix: Inability to remove the last shortcode from NitroPack settings
+* Bug fix: Hide features that PSB users can't access
+* Bug fix: Overall stability and fixes
+
 = 1.17.0 =
 * New Feature: Auto-optimize Custom Post Types
 * New Feature: AJAX shortcodes with UI setting

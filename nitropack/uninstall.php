@@ -15,6 +15,7 @@ $nitropackOptions = array(
     'nitropack-bbCacheSyncPurge',
     'nitropack-legacyPurge',
     'nitropack-distribution',
+    'nitropack-minimumLogLevel',
 );
 if (defined('MULTISITE') && MULTISITE) {
     $blogs = array_map(function($blog) { return $blog->blog_id; }, get_sites());

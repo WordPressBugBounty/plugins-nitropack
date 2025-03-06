@@ -1,21 +1,135 @@
 {
     "packages": [
         {
+            "name": "monolog/monolog",
+            "version": "3.8.1",
+            "version_normalized": "3.8.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/Seldaek/monolog.git",
+                "reference": "aef6ee73a77a66e404dd6540934a9ef1b3c855b4"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/Seldaek/monolog/zipball/aef6ee73a77a66e404dd6540934a9ef1b3c855b4",
+                "reference": "aef6ee73a77a66e404dd6540934a9ef1b3c855b4",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=8.1",
+                "psr/log": "^2.0 || ^3.0"
+            },
+            "provide": {
+                "psr/log-implementation": "3.0.0"
+            },
+            "require-dev": {
+                "aws/aws-sdk-php": "^3.0",
+                "doctrine/couchdb": "~1.0@dev",
+                "elasticsearch/elasticsearch": "^7 || ^8",
+                "ext-json": "*",
+                "graylog2/gelf-php": "^1.4.2 || ^2.0",
+                "guzzlehttp/guzzle": "^7.4.5",
+                "guzzlehttp/psr7": "^2.2",
+                "mongodb/mongodb": "^1.8",
+                "php-amqplib/php-amqplib": "~2.4 || ^3",
+                "php-console/php-console": "^3.1.8",
+                "phpstan/phpstan": "^2",
+                "phpstan/phpstan-deprecation-rules": "^2",
+                "phpstan/phpstan-strict-rules": "^2",
+                "phpunit/phpunit": "^10.5.17 || ^11.0.7",
+                "predis/predis": "^1.1 || ^2",
+                "rollbar/rollbar": "^4.0",
+                "ruflin/elastica": "^7 || ^8",
+                "symfony/mailer": "^5.4 || ^6",
+                "symfony/mime": "^5.4 || ^6"
+            },
+            "suggest": {
+                "aws/aws-sdk-php": "Allow sending log messages to AWS services like DynamoDB",
+                "doctrine/couchdb": "Allow sending log messages to a CouchDB server",
+                "elasticsearch/elasticsearch": "Allow sending log messages to an Elasticsearch server via official client",
+                "ext-amqp": "Allow sending log messages to an AMQP server (1.0+ required)",
+                "ext-curl": "Required to send log messages using the IFTTTHandler, the LogglyHandler, the SendGridHandler, the SlackWebhookHandler or the TelegramBotHandler",
+                "ext-mbstring": "Allow to work properly with unicode symbols",
+                "ext-mongodb": "Allow sending log messages to a MongoDB server (via driver)",
+                "ext-openssl": "Required to send log messages using SSL",
+                "ext-sockets": "Allow sending log messages to a Syslog server (via UDP driver)",
+                "graylog2/gelf-php": "Allow sending log messages to a GrayLog2 server",
+                "mongodb/mongodb": "Allow sending log messages to a MongoDB server (via library)",
+                "php-amqplib/php-amqplib": "Allow sending log messages to an AMQP server using php-amqplib",
+                "rollbar/rollbar": "Allow sending log messages to Rollbar",
+                "ruflin/elastica": "Allow sending log messages to an Elastic Search server"
+            },
+            "time": "2024-12-05T17:15:07+00:00",
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-main": "3.x-dev"
+                }
+            },
+            "installation-source": "dist",
+            "autoload": {
+                "psr-4": {
+                    "Monolog\\": "src/Monolog"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Jordi Boggiano",
+                    "email": "j.boggiano@seld.be",
+                    "homepage": "https://seld.be"
+                }
+            ],
+            "description": "Sends your logs to files, sockets, inboxes, databases and various web services",
+            "homepage": "https://github.com/Seldaek/monolog",
+            "keywords": [
+                "log",
+                "logging",
+                "psr-3"
+            ],
+            "support": {
+                "issues": "https://github.com/Seldaek/monolog/issues",
+                "source": "https://github.com/Seldaek/monolog/tree/3.8.1"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/Seldaek",
+                    "type": "github"
+                },
+                {
+                    "url": "https://tidelift.com/funding/github/packagist/monolog/monolog",
+                    "type": "tidelift"
+                }
+            ],
+            "install-path": "../monolog/monolog"
+        },
+        {
             "name": "nitropack/httpclient",
             "version": "dev-master",
             "version_normalized": "dev-master",
             "source": {
                 "type": "git",
-                "url": "git@bitbucket.org:nitropack/httpclient.git",
-                "reference": "278749d494cfa7303bc1208e5ff55bf86ed6193b"
+                "url": "git@github.com:wpengine/np-httpclient.git",
+                "reference": "2e6c4494c24ffadffea9c6583cd1ba364e50398d"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/wpengine/np-httpclient/zipball/2e6c4494c24ffadffea9c6583cd1ba364e50398d",
+                "reference": "2e6c4494c24ffadffea9c6583cd1ba364e50398d",
+                "shasum": ""
             },
             "require": {
+                "ext-json": "*",
+                "monolog/monolog": "^1.1|^2.0|^3.0",
                 "nitropack/url": "dev-master",
                 "php": "^5.6|^7.0|^8.0"
             },
             "require-dev": {
                 "ext-pcntl": "*",
-                "monolog/monolog": "^3.6",
+                "ext-posix": "*",
                 "phpunit/phpunit": "^10",
                 "react/http": "^1.8",
                 "react/socket": "^1.12",
@@ -24,10 +138,10 @@
                 "symfony/process": "^6.4",
                 "symfony/var-dumper": "^6.4"
             },
-            "time": "2024-08-08T15:32:40+00:00",
+            "time": "2025-03-05T16:06:25+00:00",
             "default-branch": true,
             "type": "library",
-            "installation-source": "source",
+            "installation-source": "dist",
             "autoload": {
                 "psr-4": {
                     "NitroPack\\HttpClient\\": "src/"
@@ -43,10 +157,10 @@
                     "composer prepare-test-image && composer run-unit-tests && composer run-feature-tests"
                 ],
                 "prepare-test-image": [
-                    "docker build -t nitropack-httpclient:latest ."
+                    "docker build --build-arg PHP_VERSION=$(php -r \"echo PHP_MAJOR_VERSION.'.'.PHP_MINOR_VERSION;\") -t nitropack-httpclient:latest ."
                 ],
                 "run-unit-tests": [
-                    "vendor/bin/phpunit --testdox --testsuite unit"
+                    "vendor/bin/phpunit --testsuite unit"
                 ],
                 "run-feature-tests": [
                     "vendor/bin/phpunit --testsuite feature"
@@ -72,19 +186,25 @@
             "version_normalized": "dev-master",
             "source": {
                 "type": "git",
-                "url": "git@bitbucket.org:nitropack/url.git",
-                "reference": "345d42a8fe92ea0b22215325b154d4cadbdaa485"
+                "url": "git@github.com:wpengine/np-url.git",
+                "reference": "4e4cc7b3039230c0921032676ff1f82ee4fe751d"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/wpengine/np-url/zipball/4e4cc7b3039230c0921032676ff1f82ee4fe751d",
+                "reference": "4e4cc7b3039230c0921032676ff1f82ee4fe751d",
+                "shasum": ""
             },
             "require": {
                 "php": "^5.6|^7.0|^8.0"
             },
             "require-dev": {
-                "phpunit/phpunit": "^5.7"
+                "phpunit/phpunit": "^5.7||^6.0||^7.0||^10.0||^11.0"
             },
-            "time": "2024-08-27T11:43:23+00:00",
+            "time": "2025-03-05T16:06:29+00:00",
             "default-branch": true,
             "type": "library",
-            "installation-source": "source",
+            "installation-source": "dist",
             "autoload": {
                 "psr-4": {
                     "NitroPack\\Url\\": "src/"
@@ -107,7 +227,64 @@
                 "php",
                 "url"
             ],
+            "support": {
+                "source": "https://github.com/wpengine/np-url/tree/master",
+                "issues": "https://github.com/wpengine/np-url/issues"
+            },
             "install-path": "../nitropack/url"
+        },
+        {
+            "name": "psr/log",
+            "version": "3.0.2",
+            "version_normalized": "3.0.2.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/php-fig/log.git",
+                "reference": "f16e1d5863e37f8d8c2a01719f5b34baa2b714d3"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/php-fig/log/zipball/f16e1d5863e37f8d8c2a01719f5b34baa2b714d3",
+                "reference": "f16e1d5863e37f8d8c2a01719f5b34baa2b714d3",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=8.0.0"
+            },
+            "time": "2024-09-11T13:17:53+00:00",
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "3.x-dev"
+                }
+            },
+            "installation-source": "dist",
+            "autoload": {
+                "psr-4": {
+                    "Psr\\Log\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "PHP-FIG",
+                    "homepage": "https://www.php-fig.org/"
+                }
+            ],
+            "description": "Common interface for logging libraries",
+            "homepage": "https://github.com/php-fig/log",
+            "keywords": [
+                "log",
+                "psr",
+                "psr-3"
+            ],
+            "support": {
+                "source": "https://github.com/php-fig/log/tree/3.0.2"
+            },
+            "install-path": "../psr/log"
         }
     ],
     "dev": false,

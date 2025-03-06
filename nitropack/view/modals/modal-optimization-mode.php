@@ -106,21 +106,29 @@
                 xhr.onreadystatechange = function() { // Call a function when the state changes.
                     if (this.readyState === XMLHttpRequest.DONE && this.status === 200) {
                         resolve();
+                        $.post(ajaxurl, {
+                            action: 'nitropack_set_optimization_mode',
+                            nonce: nitroNonce,
+                            mode: value
+                        }, function(response) {
+                            var resp = JSON.parse(response);
+                            NitropackUI.triggerToast(resp.type, resp.message);
+                        });
                     }
                 }
                 xhr.send("setting=" + value);
             });
-        }      
+        }
 
         getQuickSetup();
 
-        $(modes_btn).click(function() {          
+        $(modes_btn).click(function() {
             var mode = $(this).data('mode');
             action_btn.data('mode', mode);
         });
         action_btn.click(function() {
             var mode = $(this).data('mode');
-            setOptimizationMode(mode, true);          
+            setOptimizationMode(mode, true);
         });
 
     });

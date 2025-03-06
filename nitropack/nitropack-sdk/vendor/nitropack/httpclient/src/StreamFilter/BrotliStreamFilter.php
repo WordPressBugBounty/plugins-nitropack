@@ -41,7 +41,7 @@ class BrotliStreamFilter extends \php_user_filter
             }
 
             $consumed += $dataLength;
-            $bucket->data = brotli_uncompress_add($this->decompressorContext, $data, BROTLI_FLUSH);
+            $bucket->data = brotli_uncompress_add($this->decompressorContext, $data);
             stream_bucket_append($out, $bucket);
         }
 
@@ -68,6 +68,7 @@ class BrotliStreamFilter extends \php_user_filter
     {
         return ! in_array(static::STREAM_FILTER_NAME, stream_get_filters())
             && function_exists('brotli_uncompress_init')
-            && function_exists('brotli_uncompress_add');
+            && function_exists('brotli_uncompress_add')
+            && defined('BROTLI_FINISH');
     }
 }

@@ -26,13 +26,15 @@ $red-200: #f7d9df;
 $red-100: #fbecef;
 $red-50: #fdf2f2;
 //blue
+$blue-800: #1e429f;
 $blue-700: #1a56db;
 $blue-200: #83bfffee;
 $blue-100: #e1effe;
 //yellow
 $yellow-700: #987e00;
+$yellow-600: #ccaa00;
 $yellow-500: #ffd400;
-$yellow-200: #ffefa3;
+$yellow-200: #ffefa3; 
 $yellow-100: #fff8d7;
 //assign
 $primary-color: $purple-700;
@@ -68,6 +70,125 @@ $transition: ease-in-out 0.3s;
     text-wrap: nowrap;
     text-decoration: none;
     background: transparent;
+}
+@mixin btns() {
+    @include btn();
+    .icon-left {
+        margin-right: 0.25rem;
+        display: inline-block;
+        vertical-align: middle;
+    }
+    .icon-right {
+        margin-left: 0.5rem;
+        display: inline-block;
+        vertical-align: middle;
+    }
+    &:focus {
+        box-shadow: none;
+    }
+    &.btn-link {
+        border: 0;
+        &:hover {
+            background-color: $purple-100;
+        }
+        &:hover,
+        &:active {
+            color: $primary-color;
+        }
+    }
+    &.btn-primary {
+        background-color: $primary-color;
+        border-color: $primary-color;
+        color: #fff;
+        &:hover {
+            background-color: $primary-hover;
+        }
+        &.btn-ghost {
+            color: $primary-color;
+            &:hover {
+                background-color: $primary-color;
+                color: #fff;
+            }
+        }
+    }
+    &.btn-secondary {
+        &:hover {
+            color: $primary-color;
+            background-color: $purple-100;
+        }
+    }
+    &.btn-danger {
+        background-color: $red-600;
+        border-color: $red-600;
+        color: #fff;
+        &:hover {
+            background-color: $red-800;
+        }
+        &.btn-ghost {
+            color: $red-600;
+            &:hover {
+                background-color: $red-600;
+                color: #fff;
+            }
+        }
+    }
+    &.btn-success {
+        background-color: $green-500;
+        border-color: $green-500;
+        color: #fff;
+        &:hover {
+            background-color: $green-700;
+        }
+        &.btn-ghost {
+            color: $green-500;
+            &:hover {
+                background-color: $green-500;
+                color: #fff;
+            }
+        }
+    }
+    &.btn-warning {
+        background-color: $yellow-500;
+        border-color: $yellow-500;
+        color: $gray-700;
+        &:hover {
+            background-color: $yellow-600;
+            border-color: $yellow-600;
+        }
+        &.btn-ghost {
+            color: $yellow-700;
+            border-color: $yellow-700;
+            &:hover {
+                background-color: $yellow-500;
+                border-color: $yellow-500;
+                color: $gray-700;
+            }
+        }
+    }
+    &.btn-info {
+        background-color: $blue-700;
+        border-color: $blue-700;
+        color: #fff;
+        &:hover {
+            background-color: $blue-800;
+        }
+        &.btn-ghost {
+            color: $blue-700;
+            &:hover {
+                color: #fff;
+                background-color: $blue-700;
+            }
+        }
+    }
+    &.btn-ghost {
+        background-color: transparent;
+    }
+    &.disabled,
+    &:disabled {
+        cursor: not-allowed;
+        pointer-events: none;
+        opacity: 0.5;
+    }
 }
 @mixin btn_color($color) { 
     color: $color;

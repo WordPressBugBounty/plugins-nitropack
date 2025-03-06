@@ -1,10 +1,14 @@
-<?php $processing = 0;
+<?php
+$settings = new \NitroPack\WordPress\Settings();
+$notifications = new \NitroPack\WordPress\Notifications\Notifications();
 $usage = '0 MB';
 $max_usage = '1 GB';
 $page_views = '0';
 $max_page_views = '10000'; ?>
-<?php nitropack_display_admin_notices(); ?>
-<div class="grid grid-cols-2 gap-6 grid-col-1-tablet items-start">
+
+<?php $notifications->nitropack_display_admin_notices();  ?>
+
+<div class="grid grid-cols-2 gap-6 grid-col-1-tablet items-start nitropack-dashboard">
   <div class="col-span-1">
     <!-- Optimized Pages Card -->
     <div class="card card-optimized-pages">
@@ -46,11 +50,14 @@ $max_page_views = '10000'; ?>
       </div>
       <?php $modes = array('standard' => esc_html__('Standard', 'nitropack'), 'medium' =>  esc_html__('Medium', 'nitropack'), 'strong' =>  esc_html__('Strong', 'nitropack'), 'ludicrous' =>  esc_html__('Ludicrous', 'nitropack'), 'custom' =>  esc_html__('Custom', 'nitropack')); ?>
       <div class="tabs-wrapper">
-        <div class="tabs" id="optimization-modes">
-          <?php foreach ($modes as $mode_id => $mode) : ?>
-            <a class="btn tab-link btn-link" data-mode="<?php echo $mode_id; ?>" data-modal-target="modal-optimization-mode" data-modal-toggle="modal-optimization-mode"><?php echo $mode; ?></a>
-          <?php endforeach; ?>
-        </div>
+      <div class="tabs" id="optimization-modes">
+					<?php foreach ( $modes as $mode_id => $mode ) :
+						$disabled = ( $mode_id === 'custom' ) ? 'disabled' : '';
+						?>
+						<a class="btn tab-link btn-link <?php echo $disabled; ?>" data-mode="<?php echo $mode_id; ?>"
+							data-modal-target="modal-optimization-mode" data-modal-toggle="modal-optimization-mode" <?php echo $disabled; ?>><?php echo $mode; ?></a>
+					<?php endforeach; ?>
+				</div>
         <p><?php esc_html_e('Active Mode', 'nitropack'); ?>: <span class="active-mode"></span></p>
         <div class="tab-content-wrapper">
           <div class="hidden tab-content" role="tabpanel" data-tab="standard-tab">
@@ -123,50 +130,7 @@ $max_page_views = '10000'; ?>
       <div class="card-body">
         <div class="options-container">
           <div class="nitro-option" id="ajax-shortcodes-widget">
-            <div class="nitro-option-main">
-              <div class="text-box">
-                <h6><?php esc_html_e('Shortcodes exclusions', 'nitropack'); ?></h6>
-                <p><?php esc_html_e('Load widgets, feeds, and any shortcode with AJAX to bypass the cache and always show the latest content.', 'nitropack'); ?></p>
-              </div>
-              <?php
-              global $shortcode_tags;
-              $nitropack = get_nitropack();
-              $siteConfig = $nitropack->Config->get();
-              $configKey = \NitroPack\WordPress\NitroPack::getConfigKey();
-
-              $ajax_shortcodes = $siteConfig[$configKey]['options_cache']['ajaxShortcodes'];
-              $ajax_shortcodes_enabled = $ajax_shortcodes['enabled'];
-              $shortcode_container_shown = $ajax_shortcodes_enabled ? '' : 'hidden';
-
-              ?>
-              <label class="inline-flex items-center cursor-pointer ml-auto">
-                <input type="checkbox" value="" class="sr-only peer" name="ajax_shortcodes" id="ajax-shortcodes" <?php if ($ajax_shortcodes_enabled) echo "checked"; ?>>
-                <div class="toggle"></div>
-              </label>
-            </div>
-            <div class="ajax-shortcodes <?php echo $shortcode_container_shown; ?>">
-              <div class="select-wrapper">
-                <select class="" name="nitropack-ajaxShortcodes" id="ajax-shortcodes-dropdown" multiple>
-                  <?php
-                  if (isset($ajax_shortcodes['shortcodes'])) {
-                    $ajax_shortcodes_list = $ajax_shortcodes['shortcodes'];
-                    $freely_added_shortcodes = array_diff($ajax_shortcodes_list, array_keys($shortcode_tags));
-                  }
-                  foreach ($shortcode_tags as $shortcode => $function) {
-                    $disable = '';
-                    if ($ajax_shortcodes_list && in_array($shortcode, $ajax_shortcodes_list)) $disable = 'selected="selected"';
-                    echo '<option value="' . $shortcode . '" ' . $disable . '>' . $shortcode . '</option>';
-                  }
-                  if ($freely_added_shortcodes) {
-                    foreach ($freely_added_shortcodes as $shortcode) {
-                      echo '<option value="' . $shortcode . '" selected="selected">' . $shortcode . '</option>';
-                    }
-                  }
-                  ?>
-                </select>
-                <button class="btn btn-primary" id="save-shortcodes"><?php esc_html_e('Save', 'nitropack'); ?></button>
-              </div>
-            </div>
+            <?php $settings->shortcodes->render(); ?>
           </div>
         </div>
       </div>
@@ -246,24 +210,9 @@ $max_page_views = '10000'; ?>
               <img src="<?php echo plugin_dir_url(__FILE__) . 'images/loading.svg'; ?>" alt="loading" class="icon"> <span class="msg"><?php esc_html_e('Loading cache warmup status', 'nitropack'); ?></span>
             </div>
           </div>
-          <div class="nitro-option" id="test-mode-widget">
-            <div class="nitro-option-main">
-              <div class="text-box" id="safemode-status-slider">
-                <h6><?php esc_html_e('Test Mode', 'nitropack'); ?></h6>
-                <p><?php esc_html_e('Test NitroPack\'s features without affecting your visitors\' experience', 'nitropack'); ?>. <a href="https://support.nitropack.io/en/articles/8390292-test-mode" class="text-blue" target="_blank"><?php esc_html_e('Learn more', 'nitropack'); ?></a></p>
-              </div>
 
-              <label class="inline-flex items-center cursor-pointer ml-auto">
-                <input type="checkbox" class="sr-only peer" id="safemode-status">
-
-                <div class="toggle"></div>
-              </label>
-            </div>
-            <div class="msg-container" id="loading-safemode-status">
-              <img src="<?php echo plugin_dir_url(__FILE__) . 'images/loading.svg'; ?>" alt="loading" class="icon"> <?php esc_html_e('Loading test mode status', 'nitropack'); ?>
-            </div>
-            <?php require_once NITROPACK_PLUGIN_DIR . 'view/modals/modal-test-mode.php'; ?>
-          </div>
+          <?php $settings->test_mode->render(); ?>
+          
           <div class="nitro-option" id="compression-widget">
             <div class="nitro-option-main">
               <div class="text-box">
@@ -296,12 +245,23 @@ $max_page_views = '10000'; ?>
               </div>
             </div>
           <?php } ?>
-
+          <div class="nitro-option" id="can-editor-clear-cache-widget">
+            <div class="nitro-option-main">
+              <div class="text-box">
+                <h6><?php esc_html_e('Allow Editors to purge cache', 'nitropack'); ?> <span class="badge badge-success ml-2">New</span></h6>
+                <p><?php esc_html_e('Give Editors the right to purge cache when content is updated.', 'nitropack'); ?></p>
+              </div>
+              <label class="inline-flex items-center cursor-pointer ml-auto">
+                <input type="checkbox" id="can-editor-clear-cache" class="sr-only peer" <?php echo (int)$canEditorClearCache === 1 ? "checked" : ""; ?>>
+                <div class="toggle"></div>
+              </label>
+            </div>
+          </div>
           <?php if (nitropack_render_woocommerce_cart_cache_option()) { ?>
             <div class="nitro-option" id="cart-cache-widget">
               <div class="nitro-option-main">
                 <div class="text-box">
-                  <h6><?php esc_html_e('Cart cache', 'nitropack'); ?> <span class="badge badge-success ml-2">New</span></h6>
+                  <h6><?php esc_html_e('Cart cache', 'nitropack'); ?></h6>
                   <p><?php esc_html_e('Your visitors will enjoy full site speed while browsing with items in cart. Fully optimized page cache will be served.', 'nitropack'); ?></p>
 
                 </div>
@@ -342,6 +302,7 @@ $max_page_views = '10000'; ?>
               </div>
             </div>
           <?php } ?>
+     
         </div>
       </div>
       <div class="card-footer disconnect-container">
@@ -498,7 +459,12 @@ $max_page_views = '10000'; ?>
         NitropackUI.triggerToast('error', '<?php esc_html_e('Error while fetching plan data', 'nitropack'); ?>');
       }, __ => {});
     }
-
+    window.addEventListener("cache.invalidate.success", getOptimizations);
+    if ($('#np-onstate-cache-purge').length) {
+      window.addEventListener("cache.purge.success", function(){setTimeout(function(){document.cookie = "nitropack_apwarning=1; expires=Thu, 01 Jan 1970 00:00:01 GMT; path=<?php echo nitropack_cookiepath(); ?>"; window.location.reload()}, 1500)});
+    } else {
+      window.addEventListener("cache.purge.success", getOptimizations);
+    }
 
     $(document).on('click', "#compression-test-btn", e => {
       e.preventDefault();
@@ -556,6 +522,18 @@ $max_page_views = '10000'; ?>
         NitropackUI.triggerToast(resp.type, resp.message);
       });
     });
+    $("#can-editor-clear-cache").on("click", function(e) {
+      $.post(ajaxurl, {
+        action: 'nitropack_set_can_editor_clear_cache',
+        nonce: nitroNonce,
+        data: {
+          canEditorClearCache: $(this).is(":checked") ? 1 : 0
+        }
+      }, function(response) {
+        var resp = JSON.parse(response);
+        NitropackUI.triggerToast(resp.type, resp.message);
+      });
+    });
 
     $("#auto-purge-status").on("click", function(e) {
       $.post(ajaxurl, {
@@ -590,18 +568,6 @@ $max_page_views = '10000'; ?>
       }, function(response) {
         var resp = JSON.parse(response);
         NitropackUI.triggerToast(resp.type, resp.message);
-      });
-    });
-
-    $("#legacy-purge-status").on("click", function(e) {
-      $.post(ajaxurl, {
-        action: 'nitropack_set_legacy_purge_ajax',
-        nonce: nitroNonce,
-        legacyPurgeStatus: $(this).is(":checked") ? 1 : 0
-      }, function(response) {
-        var resp = JSON.parse(response);
-        NitropackUI.triggerToast(resp.type, resp.message);
-
       });
     });
 

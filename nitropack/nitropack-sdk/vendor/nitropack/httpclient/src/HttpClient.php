@@ -2,6 +2,7 @@
 
 namespace NitroPack\HttpClient;
 
+use Monolog;
 use NitroPack\HttpClient\StreamFilter\BrotliStreamFilter;
 use \NitroPack\Url\Url;
 use \NitroPack\HttpClient\Exceptions\URLInvalidException;
@@ -291,6 +292,11 @@ class HttpClient {
 
     private $dynamicProperties;
 
+    /**
+     * @var Monolog\Logger
+     */
+    private $logger;
+
     public function __get($prop) {
         return !empty($this->dynamicProperties[$prop]) ? $this->dynamicProperties[$prop] : NULL;
     }
@@ -298,7 +304,15 @@ class HttpClient {
     public function __set($name,$prop) {
         $this->dynamicProperties[$name] = $prop;
     }
+
+    /**
+     * @param string $URL
+     * @param null|HttpConfig $httpConfig
+     */
     public function __construct($URL, $httpConfig = NULL) {
+        $this->logger = new Monolog\Logger('HttpClient');
+        $this->logger->pushHandler(new Monolog\Handler\StreamHandler(__DIR__ .'/debug.log', Monolog\Logger::EMERGENCY));
+
         $this->prevUrl = NULL;
         $this->setURL($URL);
         $this->http_method = "GET";
@@ -1170,6 +1184,18 @@ class HttpClient {
                 $chunk = $this->read_chunk_size;
             } else {
                 $chunk = min(($this->data_len - $this->data_size), $this->read_chunk_size);
+
+                if ($chunk < 0) {
+                    // Possibly incorrect Content-Length header. It shouldn't happen, but webservers be dodgy.
+                    $this->logger->warning('Negative chunk size', [
+                        'url' => $this->URL,
+                        'chunk' => $chunk,
+                        'data_size' => $this->data_size,
+                        'data_len' => $this->data_len,
+                    ]);
+
+                    $chunk = $this->read_chunk_size;
+                }
             }
 
             if (!$this->isAsync && $this->emptyRead) {
@@ -1255,7 +1281,10 @@ class HttpClient {
             }
         } while (!$this->isAsync && $this->data_size < $this->data_len && !$this->hasStreamEnded());
 
-        if ($this->data_size == $this->data_len || ($this->is_chunked && $this->hasStreamEnded()) || $this->has_redirect_header || ($this->headers && $this->http_method == "HEAD")) {
+        // Should $this->data_size be bigger than $this->data_len it would indicate either:
+        //   - the content-length header holds an incorrectly low value
+        //   - or we've read more than the maximum allowed size ($this->max_response_size)
+        if ($this->data_size >= $this->data_len || ($this->is_chunked && $this->hasStreamEnded()) || $this->has_redirect_header || ($this->headers && $this->http_method == "HEAD")) {
             $this->content_download = microtime(true) - $this->content_download_start;
 
             $this->buffer = NULL;
@@ -1296,6 +1325,11 @@ class HttpClient {
      */
     private function processHeaders(array $headers)
     {
+        $this->logger->debug('Processing headers', [
+            'url' => $this->URL,
+            'headers' => $headers,
+        ]);
+
         foreach ($headers as $name => $value) {
             switch ($name) {
                 case 'location':
@@ -1348,10 +1382,22 @@ class HttpClient {
     {
         if (count($this->streamFilters) > 0) {
             // Content-Encoding header was already processed and decoding filters were applied.
+            $this->logger->debug('Content-Encoding header was already processed and decoding filters were applied', [
+                'url' => $this->URL,
+                'contentEncodingHeader' => $contentEncodingHeader,
+            ]);
             return;
         }
 
-        foreach ($this->determineStreamDecompressionFilters($contentEncodingHeader) as list($streamDecompressionFilter, $args)) {
+        $streamDecompressionFilters = $this->determineStreamDecompressionFilters($contentEncodingHeader);
+
+        $this->logger->debug('Applying stream decompression filters', [
+            'url' => $this->URL,
+            'contentEncodingHeader' => $contentEncodingHeader,
+            'streamDecompressionFilters' => $streamDecompressionFilters,
+        ]);
+
+        foreach ($streamDecompressionFilters as list($streamDecompressionFilter, $args)) {
             $this->streamFilters[] = stream_filter_append($stream, $streamDecompressionFilter, STREAM_FILTER_WRITE, $args);
         }
     }

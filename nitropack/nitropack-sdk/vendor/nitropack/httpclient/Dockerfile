@@ -1,4 +1,5 @@
-FROM php:8.3-apache-bookworm
+ARG PHP_VERSION=8.3
+FROM php:${PHP_VERSION}-apache-bookworm
 
 RUN apt-get update -q \
     && apt-get install git unzip netcat-openbsd -y -q
