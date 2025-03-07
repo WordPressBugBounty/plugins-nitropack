@@ -163,12 +163,12 @@
             "source": {
                 "type": "git",
                 "url": "git@github.com:wpengine/np-url.git",
-                "reference": "4e4cc7b3039230c0921032676ff1f82ee4fe751d"
+                "reference": "9177dadfc07b986a0f710cc45d06050e428650d6"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/wpengine/np-url/zipball/4e4cc7b3039230c0921032676ff1f82ee4fe751d",
-                "reference": "4e4cc7b3039230c0921032676ff1f82ee4fe751d",
+                "url": "https://api.github.com/repos/wpengine/np-url/zipball/9177dadfc07b986a0f710cc45d06050e428650d6",
+                "reference": "9177dadfc07b986a0f710cc45d06050e428650d6",
                 "shasum": ""
             },
             "require": {
@@ -177,7 +177,7 @@
             "require-dev": {
                 "phpunit/phpunit": "^5.7||^6.0||^7.0||^10.0||^11.0"
             },
-            "time": "2025-03-05T16:06:29+00:00",
+            "time": "2025-03-07T08:51:23+00:00",
             "default-branch": true,
             "type": "library",
             "installation-source": "dist",

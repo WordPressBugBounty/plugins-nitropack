@@ -42,7 +42,7 @@
         'nitropack/url' => array(
             'pretty_version' => 'dev-master',
             'version' => 'dev-master',
-            'reference' => '4e4cc7b3039230c0921032676ff1f82ee4fe751d',
+            'reference' => '9177dadfc07b986a0f710cc45d06050e428650d6',
             'type' => 'library',
             'install_path' => __DIR__ . '/../nitropack/url',
             'aliases' => array(

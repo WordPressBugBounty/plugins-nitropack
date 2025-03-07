@@ -3,7 +3,7 @@
 Plugin Name:  NitroPack
 Plugin URI:   https://nitropack.io/platform/wordpress
 Description:  Automatic optimization for site speed and Core Web Vitals. Use 35+ features, including Caching, image optimization, critical CSS, and Cloudflare CDN.
-Version:      1.17.8
+Version:      1.17.9
 Author:       NitroPack Inc.
 Author URI:   https://nitropack.io/
 License:      GPL2
