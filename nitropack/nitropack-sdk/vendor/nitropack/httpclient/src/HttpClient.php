@@ -293,7 +293,7 @@ class HttpClient {
     private $dynamicProperties;
 
     /**
-     * @var Monolog\Logger
+     * @var Logger
      */
     private $logger;
 
@@ -310,8 +310,7 @@ class HttpClient {
      * @param null|HttpConfig $httpConfig
      */
     public function __construct($URL, $httpConfig = NULL) {
-        $this->logger = new Monolog\Logger('HttpClient');
-        $this->logger->pushHandler(new Monolog\Handler\StreamHandler(__DIR__ .'/debug.log', Monolog\Logger::EMERGENCY));
+        $this->logger = new Logger();
 
         $this->prevUrl = NULL;
         $this->setURL($URL);

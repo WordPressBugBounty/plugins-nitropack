@@ -429,14 +429,26 @@ class NitroPack {
 
     public function hasRemoteCache($layout, $checkIfRequestIsAllowed = true) {
         if ($this->backlog->exists()) return false;
+
         if (
             !$this->isAllowedUrl($this->url) ||
             ($checkIfRequestIsAllowed && !$this->isAllowedRequest()) ||
-            ($this->pageCache->getParent() && !$this->pageCache->getParent()->hasCache()) ||
-            $this->isPageCacheLocked()
+            ($this->pageCache->getParent() && !$this->pageCache->getParent()->hasCache())
         ) return false;
 
+        $isWarmupRequest = !empty($_SERVER["HTTP_X_NITRO_WARMUP"]);
+        $isPageCacheLocked = $this->isPageCacheLocked();
+            
+        if ($isPageCacheLocked && !$isWarmupRequest) {
+            return false;
+        }
+
         $resp = $this->api->getCache($this->url, $this->userAgent, $this->supportedCookiesFilter(self::getCookies()), $this->isAJAXRequest(), $layout, $this->referer);
+
+        if ($isPageCacheLocked) {
+            return false;
+        }
+
         if ($resp->getStatus() == Api\ResponseStatus::OK) {// We have cache response
 
             // Check for invalidated cache and delete it if such is found
@@ -1062,9 +1074,10 @@ class NitroPack {
 
             Filesystem::deleteDir($urlDir);
         } else {
-            Filesystem::rename($urlDir, $urlDirInvalid);
+            if (Filesystem::rename($urlDir, $urlDirInvalid)) {
+                Filesystem::touch($urlDirInvalid);
+            }
         }
-        Filesystem::touch($urlDirInvalid);
     }
 
     public function integrationUrl($widget, $version = null) {

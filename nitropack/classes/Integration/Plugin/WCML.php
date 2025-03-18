@@ -42,10 +42,11 @@ class WCML {
 	}
 	/**
 	 * https://git.onthegosystems.com/glue-plugins/wpml/woocommerce-multilingual/-/wikis/Integrate-caching-for-multicurrency
+	 * /wp-admin/edit.php?post_type=shop_order - becomes unresponsive, so we add the !is_admin() check
 	 * @return string
 	 */
 	public function change_wcml_user_store_strategy() {
-		return 'cookie';
+		if (!is_admin()) return 'cookie';
 	}
 	/**
 	 * Set np_wc_currency currency cookie based on WCML currency

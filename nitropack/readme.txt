@@ -4,7 +4,7 @@ Tags: speed, cache, performance, optimize pagespeed, lazy load, cdn, cache, crit
 Requires at least: 4.7
 Tested up to: 6.7.2
 Requires PHP: 5.6
-Stable tag: 1.17.9
+Stable tag: 1.18.0
 License: GNU General Public License, version 2
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -277,6 +277,11 @@ Yes, the plugin uses the [Intercom Chat Widget](https://widget.intercom.io), whi
 5. The only solution you will ever need
 
 == Changelog ==
+= 1.18.0 =
+2025-03-18
+* Bug fix: Remove Monolog and PSR/LOG dependency
+* Bug fix: Overall stability and fixes
+
 = 1.17.9 =
 2025-03-07
 * Improvement: Remove unnecessary files

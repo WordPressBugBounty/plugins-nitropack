@@ -3,7 +3,7 @@
 Plugin Name:  NitroPack
 Plugin URI:   https://nitropack.io/platform/wordpress
 Description:  Automatic optimization for site speed and Core Web Vitals. Use 35+ features, including Caching, image optimization, critical CSS, and Cloudflare CDN.
-Version:      1.17.9
+Version:      1.18.0
 Author:       NitroPack Inc.
 Author URI:   https://nitropack.io/
 License:      GPL2
@@ -147,8 +147,7 @@ if (is_admin()) {
     add_action('update_option_nitropack-enableCompression', 'nitropack_handle_compression_toggle', 10, 2);
     add_action('add_meta_boxes', 'nitropack_add_meta_box');
 
-    add_filter('get_nitropack_notifications', 'nitropack_ignore_dismissed_notifications', 10, 2);  
-
+    add_filter('get_nitropack_notifications', 'nitropack_ignore_dismissed_notifications', 10, 2);  	
 } else {
 	if ( null !== $nitro = get_nitropack_sdk() ) {
 		$GLOBALS["NitroPack.instance"] = $nitro;
@@ -256,7 +255,7 @@ add_action( 'init', function () {
 
 /**
  * Load text domain for translations
- *
+ * http://stackoverflow.com/questions/79198701/notice-function-load-textdomain-just-in-time-was-called-incorrectly - for WP 6.7
  * @return void
  */
 function nitropack_load_textdomain() {
@@ -271,4 +270,4 @@ function nitropack_load_textdomain() {
 	load_plugin_textdomain( $domain, false, basename( dirname( __FILE__ ) ) . '/languages/' );
 }
 
-add_action( 'plugins_loaded', 'nitropack_load_textdomain' );
+add_action( 'init', 'nitropack_load_textdomain' );

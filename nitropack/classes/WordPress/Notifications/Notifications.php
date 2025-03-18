@@ -13,7 +13,12 @@ class Notifications {
 	private static $instance = NULL;
 	public function __construct() {
 		add_action( 'admin_notices', [ $this, 'nitropack_admin_notices' ] );
-		add_action( 'plugins_loaded', [ $this, 'nitropack_plugin_notices' ] );
+
+		/* Using 'init' because it fixes issue when get_home_url() in updateCurrentBlogConfig() is not found in multisites */
+		add_action( 'init', function () { 			
+		    add_action( 'plugins_loaded', [ $this, 'nitropack_plugin_notices' ] );
+		});
+
 		//ajax
 		add_action( 'wp_ajax_nitropack_safemode_notification', [ $this, 'nitropack_safemode_notification' ] );
 		add_action( 'wp_ajax_nitropack_dismiss_notification', [ $this, 'nitropack_dismiss_notification' ] );
@@ -353,7 +358,7 @@ class Notifications {
 					}
 				}
 
-				if ( empty( $_COOKIE["nitropack_webhook_sync"] ) || !$siteConfig["webhookToken"] ) {
+				if ( empty( $_COOKIE["nitropack_webhook_sync"] ) || !$siteConfig["webhookToken"]) {
 					if ( null !== $nitro = get_nitropack_sdk() ) {
 						try {
 							if ( ! headers_sent() ) {
