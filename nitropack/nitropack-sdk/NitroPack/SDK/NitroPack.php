@@ -913,11 +913,11 @@ class NitroPack {
     }
 
     public function isAllowedBrowser() {
-        if (empty($_SERVER["HTTP_USER_AGENT"])) return true;
+        // Right now this function always returns true but is kept in case of possible future exclusions
 
-        if (preg_match("~MSIE|Internet Explorer~i", $_SERVER["HTTP_USER_AGENT"]) || strpos($_SERVER["HTTP_USER_AGENT"], "Trident/7.0; rv:11.0") !== false) { // Skip IE
-            return false;
-        }
+        if (empty($_SERVER["HTTP_USER_AGENT"])) {
+            return true;
+        } 
 
         return true;
     }

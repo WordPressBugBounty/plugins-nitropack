@@ -83,7 +83,9 @@ p {
 }
 
 /* Buttons */
-@include btns();
+.btn {
+    @include btns();
+}
 
 .btn-link {
     cursor: pointer;

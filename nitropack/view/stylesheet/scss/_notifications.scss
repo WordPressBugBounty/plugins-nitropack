@@ -2,7 +2,7 @@
 .nitro-notification {
     margin-bottom: $gutter;
     &.compact .notification-inner {
-        padding: $gutter / 2;
+        padding: calc($gutter / 2);
     }
     .notification-inner {
         display: flex;
@@ -93,7 +93,7 @@
         display: flex;
         flex-wrap: nowrap;
         justify-content: flex-end;
-        gap: $gutter / 2;
+        gap: calc($gutter / 2);
     }
     .btn {
         @include btns();

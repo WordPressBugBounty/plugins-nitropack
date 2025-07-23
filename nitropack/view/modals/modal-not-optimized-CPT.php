@@ -62,8 +62,8 @@
                 url: ajaxurl,
                 type: "POST",
                 data: {
-                    action: "nitropack_dismiss_notice_forever",
-                    notice: "nitropack-noticeOptimizeCPT",
+                    action: "nitropack_dismiss_permanently_notification",
+                    notification_id: "OptimizeCPT",
                     nonce: nitroNonce
                 }             
             });

@@ -224,7 +224,7 @@ jQuery(document).ready(function ($) {
           templateSelection: shortcodeTagTemplate,
         }),
         shortcodes_val = select2.val();
-      if (shortcodes_val.length > 0) {
+      if (shortcodes_val && shortcodes_val.length > 0) {
         nitroSelf.initial_settings.ajaxShortcodes.shortcodes = select2.val();
       } else {
         nitroSelf.initial_settings.ajaxShortcodes.shortcodes = [];
@@ -709,27 +709,38 @@ jQuery(document).ready(function ($) {
         };
       })();
     }
+    setupCacheEventListeners(nitroSelf) {
+      window.addEventListener(
+        "cache.invalidate.request",
+        nitroSelf.clearCacheHandler("invalidate")
+      );
+      window.addEventListener(
+        "cache.purge.request",
+        nitroSelf.clearCacheHandler("purge")
+      );
+      if ($("#np-onstate-cache-purge").length) {
+        window.addEventListener("cache.purge.success", function () {
+          setTimeout(function () {
+            document.cookie =
+              "nitropack_apwarning=1; expires=Thu, 01 Jan 1970 00:00:01 GMT; path=/";
+            window.location.reload();
+          }, 1500);
+        });
+      }
+    }
     nitropackAddEventListeners() {
       const nitroSelf = this;
-      $(window).on("load", (_) => {
-        window.addEventListener(
-          "cache.invalidate.request",
-          nitroSelf.clearCacheHandler("invalidate")
-        );
-        window.addEventListener(
-          "cache.purge.request",
-          nitroSelf.clearCacheHandler("purge")
-        );
-        if ($("#np-onstate-cache-purge").length) {
-          window.addEventListener("cache.purge.success", function () {
-            setTimeout(function () {
-              document.cookie =
-                "nitropack_apwarning=1; expires=Thu, 01 Jan 1970 00:00:01 GMT; path=/";
-              window.location.reload();
-            }, 1500);
-          });
-        }
-      });
+
+      // Check if document is already complete
+      if (document.readyState === 'complete') {
+        // Page already loaded - run immediately
+        this.setupCacheEventListeners(nitroSelf);
+      } else {
+        // Page still loading - wait for load event
+        window.addEventListener("load", () => {
+          this.setupCacheEventListeners(nitroSelf);
+        }, { once: true });
+      }
     }
     clearResidualCache() {
       let isClearing = false;

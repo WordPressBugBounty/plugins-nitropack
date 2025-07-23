@@ -132,7 +132,6 @@ class RemoteConfigFetcher extends Base {
         }
         // We jump trough some hoops to match the internals errors as closely as possible
         $argc = func_num_args();
-        $params = func_get_args();
 
         if ($argc < 2) {
             trigger_error("hash_equals() expects at least 2 parameters, {$argc} given", E_USER_WARNING);

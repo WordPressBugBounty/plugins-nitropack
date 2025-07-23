@@ -417,13 +417,6 @@ class NitroPack {
 
 		$configSetResult = $this->Config->set( $staticConfig );
 
-		if ( \NitroPack\Integration\Plugin\AeliaCurrencySwitcher::isActive() ) {
-			try {
-				\NitroPack\Integration\Plugin\AeliaCurrencySwitcher::configureVariationCookies();
-			} catch (\Exception $e) {
-				$this->getLogger()->error( $e->getMessage() );
-			}
-		}
 		if ( \NitroPack\Integration\Plugin\GeoTargetingWP::isActive() ) {
 			try {
 				\NitroPack\Integration\Plugin\GeoTargetingWP::configureVariationCookies();

@@ -3,14 +3,13 @@
 namespace NitroPack;
 
 use NitroPack\Integration\Plugin\AeliaCurrencySwitcher;
-use NitroPack\Integration\Plugin\GeoTargetingWP;
 
 class PluginStateHandler {
     const eventHandlersMap = [
-        'woocommerce-aelia-currencyswitcher/woocommerce-aelia-currencyswitcher.php' => [
-            'activateCallback' => 'HandleAeliaCurrencyActivation',
-            'deactivateCallback' => 'HandleAeliaCurrencyDeactivation',
-        ],
+        // 'woocommerce-aelia-currencyswitcher/woocommerce-aelia-currencyswitcher.php' => [
+        //     'activateCallback' => 'HandleAeliaCurrencyActivation',
+        //     'deactivateCallback' => 'HandleAeliaCurrencyDeactivation',
+        // ],
     ];
     private static $instance;
 
@@ -49,22 +48,5 @@ class PluginStateHandler {
         } else if (in_array('woocommerce/woocommerce.php', $deactivated_plugins)) {
             nitropack_event("platform_change", null, array("platform" => 'WordPress'));
         }
-    }
-
-    // maybe have these handlers be part of each plugin compatibility class (maybe even have a class PluginCompatibility that they extend).
-    public static function HandleAeliaCurrencyActivation() {
-        initVariationCookies(AeliaCurrencySwitcher::customVariationCookies);
-    }
-
-    public static function HandleAeliaCurrencyDeactivation() {
-        removeVariationCookies(AeliaCurrencySwitcher::customVariationCookies);
-    }
-
-    public static function HandleGeowpActivation() {
-        initVariationCookies(GeoTargetingWP::getCustomVariationCookies());
-    }
-
-    public static function HandleGeowpDeactivation() {
-        removeVariationCookies(GeoTargetingWP::allGeoWpCookies);
     }
 }

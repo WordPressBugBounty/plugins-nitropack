@@ -177,7 +177,7 @@ SCRIPT;
         $resp = [];
         foreach ($tags as $sc) {
             $attrFlat = is_array($sc["attr"]) ? array_map(function ($k, $v) {
-                return "$k=$v";
+                return "$k=\"$v\"";
             }, array_keys($sc["attr"]), array_values($sc["attr"])) : [];
             $arrKey = base64_encode(json_encode($sc));
             $resp[$arrKey] = do_shortcode("[{$sc['tag']} " . implode(" ", $attrFlat) . "]");

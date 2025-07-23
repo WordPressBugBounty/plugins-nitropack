@@ -36,6 +36,7 @@ class AppNotifications {
 
 		if ( isset( $this->notifications[ $this->getSiteId ] ) ) {
 			$result = $this->notifications[ $this->getSiteId ];
+		
 			if ( $type ) {
 				$notifications = isset( $result['notifications'][ $type ] ) ? $result['notifications'][ $type ] : [];
 			} else {

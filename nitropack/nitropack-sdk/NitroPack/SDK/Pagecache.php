@@ -373,7 +373,7 @@ class Pagecache
                     if (preg_match("/^nitro_geot_(.*)/", $cookieName, $matches)) {
                         $geotComponent = $matches[1];
                         if (property_exists($this->geotVariations, $geotComponent) && !empty($this->geotVariations->$geotComponent) && !in_array($cookieValue, $this->geotVariations->$geotComponent)) {
-                            $prefix .= $cookieName . '=' . $this->geotVariations->$geotComponent[0] . ';'; // Use the first variation as default
+                            $prefix .= $cookieName . '=' . $this->geotVariations->{$geotComponent}[0] . ';'; // Use the first variation as default
                             continue;
                         }
                     }

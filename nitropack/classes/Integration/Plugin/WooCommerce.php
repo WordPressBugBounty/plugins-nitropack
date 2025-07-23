@@ -20,6 +20,10 @@ class WooCommerce {
 		add_action( 'updated_post_meta', [ $this, 'update_cached_sale_products' ], 10, 4 );
 		add_action( 'added_post_meta', [ $this, 'update_cached_sale_products' ], 10, 4 );
 		add_action( 'deleted_post_meta', [ $this, 'update_cached_sale_products' ], 10, 4 );
+		//update transient on post status change
+		add_action( 'transition_post_status', [ $this, 'update_product_from_transient' ], 10, 3 );
+		//delete transient on post delete
+		add_action( 'delete_post', [ $this, 'remove_deleted_product_from_transient' ] );
 		if ( nitropack_is_optimizer_request() ) {
 			add_action( 'template_redirect', [ $this, 'purge_site_cache_on_sale_start_and_end' ] );
 		}
@@ -140,7 +144,10 @@ class WooCommerce {
 				$sale_dates[ $scheduled_sale_product_id ] = $current_product_sale_dates;
 			}
 		}
-		//mostly it will be empty array
+		/* 
+		 * If there are no products with sale dates, set the transient to false
+		 * to avoid unnecessary queries in the future.
+		 */
 		set_transient( 'nitropack_sale_product_dates', $sale_dates );
 	}
 
@@ -226,5 +233,51 @@ class WooCommerce {
 
 		return $product_ids;
 	}
+	/**
+	 * Updates the product in the transient cache when its status changes.
+	 *
+	 * This function updates the cached sale product dates when the product's
+	 * status changes. It ensures that the cached products are updated accordingly
+	 * and removes the product from the cache if it is moved to trash.
+	 *
+	 * @param string $new The new status of the post.
+	 * @param string $old The old status of the post.
+	 * @param \WP_Post $post The post object being updated.
+	 * @return void
+	 */
+	public function update_product_from_transient( $new, $old, $post ) {
+		if ( $new === "auto-draft" || ( $new === "draft" && $old === "auto-draft" ) || ( $new === "draft" && $old != "publish" ) || $new === "inherit" ) { // Creating a new post or draft, don't do anything for now. 
+			return;
+		}
+		$post_id = $post->ID;
+		$cached_products = get_transient( 'nitropack_sale_product_dates' );
 
+		if ( $new === "trash" && ! empty( $cached_products[ $post_id ] ) ) {
+			unset( $cached_products[ $post_id ] );
+			set_transient( 'nitropack_sale_product_dates', $cached_products );
+		}
+		if ( $new === "publish" ) {
+			$meta = get_post_meta( $post_id );
+			if ( ! empty( $meta['_sale_price_dates_from'] ) ) {
+				$cached_products[ $post_id ]['from'] = $meta['_sale_price_dates_from'][0];
+			}
+			if ( ! empty( $meta['_sale_price_dates_to'] ) ) {
+				$cached_products[ $post_id ]['to'] = $meta['_sale_price_dates_to'][0];
+			}
+			set_transient( 'nitropack_sale_product_dates', $cached_products );
+		}
+	}
+	/**
+	 * Deletes the product from the transient cache when it is force/fully deleted.
+	 * @param int $post_id The ID of the post being deleted.
+	 * @return void
+	 */
+	public function remove_deleted_product_from_transient( $post_id ) {
+		$cached_products = get_transient( 'nitropack_sale_product_dates' );
+		if ( empty( $cached_products[ $post_id ] ) ) {
+			return;
+		}
+		unset( $cached_products[ $post_id ] );
+		set_transient( 'nitropack_sale_product_dates', $cached_products );
+	}
 }

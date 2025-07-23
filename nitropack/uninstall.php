@@ -10,12 +10,12 @@ $nitropackOptions = array(
     'nitropack-webhookToken',
     'nitropack-checkedCompression',
     'nitropack-cacheablePostTypes',
-    'nitropack-wcNotice',
     'nitropack-safeModeStatus',
     'nitropack-bbCacheSyncPurge',
     'nitropack-legacyPurge',
     'nitropack-distribution',
     'nitropack-minimumLogLevel',
+    'nitropack-dismissed-notices'
 );
 if (defined('MULTISITE') && MULTISITE) {
     $blogs = array_map(function($blog) { return $blog->blog_id; }, get_sites());

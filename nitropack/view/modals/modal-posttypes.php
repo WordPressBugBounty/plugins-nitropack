@@ -25,7 +25,7 @@
                             <li class="list-item" id="type-<?php echo $slug; ?>">
                                 <div class="list-item-body">
                                     <div class="post-type-name"><?php echo $npCPT['name']; ?></div>
-                                    <label class="inline-flex items-center cursor-pointer ml-auto">
+                                    <label class="inline-flex items-center cursor-pointer ml-auto relative">
                                         <input type="checkbox" value="" class="sr-only peer cacheable-post-type" name="<?php echo $slug; ?>" id="post-type-post-status" <?php if ($npCPT['isOptimized']) echo 'checked'; ?>>
                                         <div class="toggle"></div>
                                     </label>
@@ -35,7 +35,7 @@
                                         <ul class="sub-menu">
                                             <div class="list-item-body" id="tax-<?php echo $tax_slug; ?>">
                                                 <div class="post-tax-name"><?php echo $taxonomyType['name']; ?></div>
-                                                <label class="inline-flex items-center cursor-pointer ml-auto">
+                                                <label class="inline-flex items-center cursor-pointer ml-auto relative">
                                                     <input type="checkbox" class="sr-only peer cacheable-post-type" name="<?php echo $tax_slug; ?>" id="post-type-post-status" <?php if ($taxonomyType['isOptimized']) echo 'checked'; ?>>
                                                     <div class="toggle"></div>
                                                 </label>

@@ -12,20 +12,18 @@ use NitroPack\WordPress\Settings\TestMode;
 class Notifications {
 	private static $instance = NULL;
 	public function __construct() {
+
+		add_action( 'admin_init', [ $this, 'move_existing_notices' ] );
 		add_action( 'admin_notices', [ $this, 'nitropack_admin_notices' ] );
-
 		/* Using 'init' because it fixes issue when get_home_url() in updateCurrentBlogConfig() is not found in multisites */
-		add_action( 'init', function () { 			
-		    add_action( 'plugins_loaded', [ $this, 'nitropack_plugin_notices' ] );
-		});
-
+		add_action( 'init', function () {
+			add_action( 'plugins_loaded', [ $this, 'nitropack_plugin_notices' ] );
+		} );
 		//ajax
 		add_action( 'wp_ajax_nitropack_safemode_notification', [ $this, 'nitropack_safemode_notification' ] );
-		add_action( 'wp_ajax_nitropack_dismiss_notification', [ $this, 'nitropack_dismiss_notification' ] );
-		//WC notice
-		add_action( 'wp_ajax_nitropack_dismiss_woocommerce_notice', [ $this, 'nitropack_dismiss_woocommerce_notice' ] );
-		//modal for non-optimized CPTs notice
-		add_action( 'wp_ajax_nitropack_dismiss_notice_forever', [ $this, 'nitropack_dismiss_notice_forever' ] );
+		add_action( 'wp_ajax_nitropack_dismiss_permanently_notification', [ $this, 'nitropack_dismiss_permanently_notification' ] );
+		add_action( 'wp_ajax_nitropack_dismiss_notification_by_transient', [ $this, 'nitropack_dismiss_notification_by_transient' ] );
+		add_action( 'wp_ajax_nitropack_conflict_plugin_deactivate', [ $this, 'nitropack_conflict_plugin_deactivate' ] );
 
 	}
 	public static function getInstance() {
@@ -35,6 +33,7 @@ class Notifications {
 
 		return self::$instance;
 	}
+
 	/**
 	 * Displays general admin notices for the NitroPack plugin in WordPress dashboard.
 	 *
@@ -82,17 +81,23 @@ class Notifications {
 		$warnings = [];
 		$infos = [];
 
-		/* Sets a warning if there are any conflicit plugins - mostly caching plugins. */
-		$conflictingPlugins = nitropack_get_conflicting_plugins();
-		foreach ( $conflictingPlugins as $clashingPlugin ) {
-			$warnings[] = array(
-				'title' => sprintf( "%s is active", $clashingPlugin ),
-				'msg' => sprintf( __( "NitroPack and %s have overlapping functionality and can interfere with each other. Please deactivate %s for best results in NitroPack.", 'nitropack' ), $clashingPlugin, $clashingPlugin ),
-				'actions' => '<a href="' . admin_url() . 'plugins.php" target="_blank" class="btn btn-secondary">Plugins page</a>',
-				'classes' => [ 'conflicting-plugins plugin-' . sanitize_title( $clashingPlugin ) ],
-			);
-		}
+		/* Sets a warning if there are any conflicting plugins - mostly caching plugins. */
+		$conflictingPlugins = \NitroPack\WordPress\ConflictingPlugins::getInstance();
+		$conflictingPlugins_list = $conflictingPlugins->nitropack_get_conflicting_plugins();
 
+		if ( $conflictingPlugins_list ) {
+
+			foreach ( $conflictingPlugins_list as $clashingPlugin ) {
+				$warnings[] = array(
+					'title' => sprintf( "%s is active and may conflict with NitroPack", $clashingPlugin['name'] ),
+					'msg' => esc_html__( "Some of its features overlap with NitroPack's optimizations which could lead to issues. We recommend disabling it to avoid potential conflicts.", 'nitropack' ),
+					'actions' => '<a href="#" class="btn btn-secondary" data-modal-target="modal-plugin-deactivate" data-modal-toggle="modal-plugin-deactivate" title="Disable ' . $clashingPlugin['name'] . ' ">' . sprintf( "Deactivate %s", $clashingPlugin['name'] ) . '</a>',
+					'classes' => [ 'conflicting-plugins plugin-' . sanitize_title( $clashingPlugin['name'] ) ],
+				);
+				require_once NITROPACK_PLUGIN_DIR . 'view/modals/modal-plugin-deactivate.php';
+			}
+
+		}
 		/* Add residual cache notices if found */
 		$residualCachePlugins = \NitroPack\Integration\Plugin\RC::detectThirdPartyCaches();
 		foreach ( $residualCachePlugins as $rcpName ) {
@@ -115,8 +120,8 @@ class Notifications {
 
 		/* Sets a warning if the Test Mode is enabled. */
 		$smStatus = get_option( 'nitropack-safeModeStatus', "-1" );
-		if ( $smStatus === "-1" ){
-			$smStatus = TestMode::getInstance()->nitropack_safemode_status(true);
+		if ( $smStatus === "-1" ) {
+			$smStatus = TestMode::getInstance()->nitropack_safemode_status( true );
 		}
 		if ( $smStatus ) {
 			$safeModeMessage = __( 'Visitors are accessing your unoptimized pages. Make sure to disable it once you are done testing.', 'nitropack' );
@@ -155,7 +160,7 @@ class Notifications {
 								);
 							}
 						} else {
-							if ( ! nitropack_is_conflicting_plugin_active() ) {
+							if ( ! $conflictingPlugins->nitropack_is_conflicting_plugin_active() ) {
 
 								/* Sets an error notifications for not being able to create the advanced-cache.php file due to conflicting caching plugins */
 
@@ -170,7 +175,7 @@ class Notifications {
 				} else {
 					if ( ! defined( "NITROPACK_ADVANCED_CACHE_VERSION" ) || NITROPACK_VERSION != NITROPACK_ADVANCED_CACHE_VERSION ) {
 						if ( ! nitropack_install_advanced_cache() ) {
-							if ( nitropack_is_conflicting_plugin_active() ) {
+							if ( $conflictingPlugins->nitropack_is_conflicting_plugin_active() ) {
 								$errors[] = array(
 									'title' => $notification_title,
 									'msg' => esc_html__( 'The file /wp-content/advanced-cache.php cannot be created because a conflicting plugin is active. Please make sure to disable all conflicting plugins.', 'nitropack' ),
@@ -254,7 +259,6 @@ class Notifications {
 			$webhookToken = esc_attr( get_option( 'nitropack-webhookToken' ) );
 			$blogId = get_current_blog_id();
 			$isConfigOutdated = ! nitropack_is_config_up_to_date();
-
 			if ( ! get_nitropack()->Config->exists() && ! get_nitropack()->updateCurrentBlogConfig( $siteId, $siteSecret, $blogId ) ) {
 				$errors[] = array(
 					'title' => esc_html__( "NitroPack static config file cannot be created", 'nitropack' ),
@@ -267,18 +271,14 @@ class Notifications {
 						'msg' => esc_html__( 'Please make sure that the /wp-content/config-nitropack/ directory is writable and refresh this page.', 'nitropack' ),
 					);
 				} else {
+
 					if ( ! $siteConfig ) {
 						nitropack_event( "update" );
 					} else {
 						$prevVersion = ! empty( $siteConfig["pluginVersion"] ) ? $siteConfig["pluginVersion"] : "1.1.4 or older";
 						nitropack_event( "update", null, array( "previous_version" => $prevVersion ) );
-
 						if ( empty( $siteConfig["pluginVersion"] ) || version_compare( $siteConfig["pluginVersion"], "1.4", "<" ) ) {
 							$nitropack_v1_3_notice_id = 'nitropack_upgrade_to_1_3';
-							if ( ! headers_sent() ) {
-								setcookie( "dismissed_notice_" . $nitropack_v1_3_notice_id, 1, time() + 3600 );
-							}
-							$_COOKIE[ "dismissed_notice_" . $nitropack_v1_3_notice_id ] = 1;
 						}
 					}
 				}
@@ -358,7 +358,7 @@ class Notifications {
 					}
 				}
 
-				if ( empty( $_COOKIE["nitropack_webhook_sync"] ) || !$siteConfig["webhookToken"]) {
+				if ( empty( $_COOKIE["nitropack_webhook_sync"] ) || ! $siteConfig["webhookToken"] ) {
 					if ( null !== $nitro = get_nitropack_sdk() ) {
 						try {
 							if ( ! headers_sent() ) {
@@ -393,11 +393,12 @@ class Notifications {
 					}
 				}
 			}
-			if ( isset( $nitropack_v1_3_notice_id ) && $this->nitropack_is_dismissed_notice( $nitropack_v1_3_notice_id ) ) {
+			if ( isset( $nitropack_v1_3_notice_id ) ) {
 				$warnings[] = array(
 					'title' => esc_html__( "NitroPack upgraded to 1.3", 'nitropack' ),
 					'msg' => esc_html__( 'Your new version of NitroPack has a new better way of recaching updated content. However, it is incompatible with the page relationships built by your previous version. Please invalidate your cache manually one-time so that content updates start working with the updated logic.', 'nitropack' ),
-					'dismissableId' => $nitropack_v1_3_notice_id,
+					'dismissibleId' => $nitropack_v1_3_notice_id,
+					'dismissBy' => 'option',
 				);
 			}
 
@@ -414,7 +415,6 @@ class Notifications {
 			'warning' => $warnings,
 			'info' => $infos
 		];
-
 
 		return $npPluginNotices;
 	}
@@ -435,7 +435,7 @@ class Notifications {
 		$components = new \NitroPack\WordPress\Settings\Components;
 		foreach ( $noticesArray as $type => $notices ) {
 			foreach ( $notices as $notice ) {
-				$components->render_notification( $notice['msg'], $type, $notice['title'], isset( $notice['actions'] ) ? $notice['actions'] : null, isset( $notice['classes'] ) ? $notice['classes'] : null, isset( $notice['dismissibleId'] ) ? $notice['dismissibleId'] : null );
+				$components->render_notification( $notice['msg'], $type, $notice['title'], isset( $notice['actions'] ) ? $notice['actions'] : null, isset( $notice['classes'] ) ? $notice['classes'] : null, isset( $notice['dismissibleId'] ) ? $notice['dismissibleId'] : null, isset( $notice['dismissBy'] ) ? $notice['dismissBy'] : null );
 			}
 		}
 		//render app notifications
@@ -465,7 +465,7 @@ class Notifications {
 				$msg = $notification['message_details']['message'];
 			}
 
-			$components->render_notification( $msg, $type, $title, '', [ 'app-notification' ], $notification['id'], $notification );
+			$components->render_notification( $msg, $type, $title, '', [ 'app-notification' ], $notification['id'], 'transient', $notification );
 		}
 	}
 	/**
@@ -491,18 +491,21 @@ class Notifications {
 		);
 
 		$siteConfig = nitropack_get_site_config();
+
 		if ( $siteConfig && ! empty( $siteConfig["hosting"] ) && array_key_exists( $siteConfig["hosting"], $documentedHostingSetups ) ) {
+
 			$hostingInfo = $documentedHostingSetups[ $siteConfig["hosting"] ];
 			$showNotice = true;
-			if ( $siteConfig["hosting"] == "flywheel" && defined( "WP_CACHE" ) && WP_CACHE )
+			if ( $siteConfig["hosting"] == "flywheel" && defined( "WP_CACHE" ) && WP_CACHE ) {
 				$showNotice = false;
+			}
 
 			if ( $showNotice ) {
 				$components = new \NitroPack\WordPress\Settings\Components;
 				$components->render_notification( esc_html__( "Please follow the instructions in order to make sure that everything works correctly.", 'nitropack' ), 'info',
 					sprintf( esc_html__( 'It looks like you are hosted on %s', 'nitropack' ), $hostingInfo['name'] ),
 					'<a href="' . $hostingInfo["helpUrl"] . '" target="_blank" class="btn btn-info btn-ghost">' . esc_html__( 'Read Instructions', 'nitropack' ) . '</a>',
-					[ 'hosting-notice' ] );
+					[ 'hosting-notice' ], 'hosting-' . $siteConfig["hosting"], 'option' );
 			}
 		}
 	}
@@ -513,22 +516,95 @@ class Notifications {
 	private function nitropack_print_woocommerce_notice() {
 		if ( get_nitropack()->isConnected() ) {
 			if ( class_exists( 'WooCommerce' ) ) {
-				$wcOneTimeNotice = get_option( 'nitropack-wcNotice' );
+				$np_notices = get_option( 'nitropack-dismissed-notices', [] );
+				$woocommerce_notice = in_array( 'WooCommerce', $np_notices, true ) ? true : false;
 
-				if ( ! $wcOneTimeNotice ) {
+				if ( ! $woocommerce_notice ) {
 					$components = new \NitroPack\WordPress\Settings\Components;
 					$components->render_notification( __( 'Your <strong>account</strong>, <strong>cart</strong>, and <strong>checkout</strong> pages are automatically excluded from optimization.', 'nitropack' ),
 						'success',
 						esc_html__( 'WooCommerce detected', 'nitropack' ),
 						'<a class="btn btn-secondary" href="' . admin_url( 'admin.php?page=nitropack' ) . '">' . esc_html__( 'Settings', 'nitropack' ) . '</a>',
 						[ 'woocommerce-notice' ],
-						'nitropack_dismiss_woocommerce_notice' );
+						'WooCommerce', 'option' );
 				}
 			}
 		}
 	}
 
+	public function admin_bar_notices_counter() {
+		if ( ! $this->pass_notification_capabilities() )
+			return;
 
+		$notices = $this->nitropack_plugin_notices();
+
+		$numberOfPluginErrors = 0;
+		$numberOfPluginWarnings = 0;
+		$notificationCount = 0;
+		foreach ( array( "warning", "error", "info" ) as $type ) {
+
+			foreach ( $notices[ $type ] as $notice ) {
+
+				if ( ! empty( $notice['dismissibleId'] ) ) {
+					switch ( $type ) {
+						case "error":
+							$numberOfPluginErrors++;
+							break;
+						case "warning":
+							$numberOfPluginWarnings++;
+							break;
+						case "info":
+							$notificationCount++;
+							break;
+					}
+				}
+
+			}
+		}
+
+		/* Notifications from the app */
+		$app_notifications = AppNotifications::getInstance();
+		foreach ( $app_notifications->get( 'system' ) as $notification ) {
+
+			if ( ! empty( $notification['id'] ) ) {
+
+				/* Don't count if dismissed by transient and the time has passed  */
+				$notice = get_transient( $notification['id'] );
+				if ( ! empty( $notice ) && ( $notice && time() < $notice ) ) {
+					continue;
+				}
+
+				if ( ! empty( $notification['type'] ) ) {
+					switch ( $notification['type'] ) {
+						case 'error':
+							$numberOfPluginErrors++;
+							break;
+						case 'warning':
+							$numberOfPluginWarnings++;
+							break;
+						case 'info':
+							$notificationCount++;
+							break;
+					}
+				} else {
+					$notificationCount++;
+				}
+			}
+		}
+
+		$numberOfPluginIssues = $numberOfPluginErrors + $numberOfPluginWarnings;
+
+		if ( $numberOfPluginErrors > 0 ) {
+			$pluginStatus = 'error';
+		} else if ( $numberOfPluginWarnings > 0 ) {
+			$pluginStatus = 'warning';
+		} else {
+			$pluginStatus = 'ok';
+		}
+		$data = [ 'issues' => $numberOfPluginIssues, 'status' => $pluginStatus, 'errors' => $numberOfPluginErrors, 'warnings' => $numberOfPluginWarnings, 'notifications' => $notificationCount ];
+
+		return $data;
+	}
 	/**
 	 * Checks if the user has capabilities to manage options - administrators typically have this capability.
 	 * @return void|bool
@@ -550,17 +626,15 @@ class Notifications {
 		$this->test_mode_notification_html();
 		wp_die();
 	}
-	public function nitropack_is_dismissed_notice( $id ) {
-		return isset( $_COOKIE[ "dismissed_notice_" . $id ] );
-	}
-	/* Dissmiss notification by using set_transient -> temporary dismissal with auto-expiry */
-	public function nitropack_dismiss_notification() {
+
+	/* Dismiss notification by using set_transient -> temporary dismissal with auto-expiry */
+	public function nitropack_dismiss_notification_by_transient() {
 		if ( ! $this->pass_notification_capabilities() ) {
 			wp_die( __( 'You do not have sufficient permissions.' ) );
 		}
 
-		if ( ! isset( $_POST ) ) {
-			return;
+		if ( empty( $_POST['notification_id'] ) ) {
+			wp_send_json_error( [ 'message' => __( 'Missing notification ID.' ) ] );
 		}
 
 		nitropack_verify_ajax_nonce( $_REQUEST );
@@ -576,36 +650,105 @@ class Notifications {
 		) );
 	}
 
-	/* Dissmiss permanent a notification by using update_option - db way */
-	public function nitropack_dismiss_woocommerce_notice() {
+	/**
+	 * Handles the dismissal of a notification permanently by updating nitropack-dismissed-notices option in the database.
+	 *
+	 * @return void Outputs a JSON response and terminates the script execution.
+	 */
+
+	public function nitropack_dismiss_permanently_notification() {
 		if ( ! $this->pass_notification_capabilities() ) {
-			wp_die( __( 'You do not have sufficient permissions.' ) );
+			wp_send_json_error( [ 'message' => __( 'You do not have sufficient permissions.' ) ] );
+		}
+
+		if ( empty( $_POST['notification_id'] ) ) {
+			wp_send_json_error( [ 'message' => __( 'Missing notification ID.' ) ] );
 		}
 
 		nitropack_verify_ajax_nonce( $_REQUEST );
-		$option = update_option( 'nitropack-wcNotice', 1 );
-		if ( $option ) {
-			nitropack_json_and_exit( array(
-				"type" => "success",
-			) );
-		} else {
-			nitropack_json_and_exit( array(
-				"type" => "error",
-			) );
+
+		$notification_id = sanitize_text_field( wp_unslash( $_POST['notification_id'] ) );
+		$notices = get_option( 'nitropack-dismissed-notices', [] );
+
+		if ( ! in_array( $notification_id, $notices, true ) ) {
+			$notices[] = $notification_id;
+			update_option( 'nitropack-dismissed-notices', $notices );
+		}
+
+		wp_send_json_success();
+	}
+
+	/**
+	 * Moves existing dismissed notices to the new dismissed option as an array.
+	 *
+	 * Notices being migrated:
+	 * - `nitropack-wcNotice` (mapped to `WooCommerce`)
+	 * - `nitropack-noticeOptimizeCPT` (mapped to `OptimizeCPT`)
+	 *
+	 * @return void
+	 */
+
+	public function move_existing_notices() {
+		$existing_notices = [ 'nitropack-wcNotice' => 'WooCommerce', 'nitropack-noticeOptimizeCPT' => 'OptimizeCPT' ];
+		foreach ( $existing_notices as $notice => $new_notice ) {
+			if ( get_option( $notice ) ) {
+				$notices = get_option( 'nitropack-dismissed-notices', [] );
+				if ( ! in_array( $notice, $notices, true ) ) {
+					$notices[] = $new_notice;
+					update_option( 'nitropack-dismissed-notices', $notices );
+				}
+				delete_option( $notice );
+			}
 		}
 	}
-	/* Dissmiss permanent a notification by using update_option - db way */
-	public function nitropack_dismiss_notice_forever() {
+	/**
+	 * Deactivates a conflicting plugin from NitroPack.
+	 *
+	 * It verifies the nonce for security and checks if the specified plugin is in the list of conflicting plugins 
+	 * and finally deactivates it if it is active.
+	 *
+	 * @return void Outputs a JSON response indicating success or failure.
+	 */
+	public function nitropack_conflict_plugin_deactivate() {
 		if ( ! $this->pass_notification_capabilities() ) {
-			wp_die( __( 'You do not have sufficient permissions.' ) );
+			wp_send_json_error( [ 'message' => __( 'You do not have sufficient permissions.' ) ] );
 		}
+
+		if ( empty( $_POST['plugin'] ) ) {
+			wp_send_json_error( [ 'message' => __( 'Missing plugin.' ) ] );
+		}
+		$plugin = sanitize_text_field( wp_unslash( $_POST['plugin'] ) );
+
+		if ( empty( $_POST['plugin_name'] ) ) {
+			wp_send_json_error( [ 'message' => __( 'Missing plugin name.' ) ] );
+		}
+		$plugin_name = sanitize_text_field( wp_unslash( $_POST['plugin_name'] ) );
 
 		nitropack_verify_ajax_nonce( $_REQUEST );
 
-		update_option( 'nitropack-noticeOptimizeCPT', 1 );
+		// Check if the plugin is in the list of conflicting plugins for extra security measures.
+		$conflictingPlugins = \NitroPack\WordPress\ConflictingPlugins::getInstance();
+		$conflictingPlugins_list = $conflictingPlugins->nitropack_get_conflicting_plugins();
+		$plugin_found = false;
+		foreach ( $conflictingPlugins_list as $conflict_plugin ) {
+			if ( $conflict_plugin['plugin'] === $plugin ) {
+				$plugin_found = true;
+				break;
+			}
+		}
+		if ( ! $plugin_found ) {
+			wp_send_json_error( [ 'message' => __( 'Plugin not found in the list of conflicting plugins.' ) ] );
+		}
 
-		nitropack_json_and_exit( array(
-			"type" => "success",
-		) );
+		if ( is_plugin_active( $plugin ) ) {
+			deactivate_plugins( $plugin );
+			if ( ! is_plugin_active( $plugin ) ) {
+				wp_send_json_success( [ 'message' => sprintf( esc_html__( '%s deactivated successfully.', 'nitropack' ), $plugin_name ) ] );
+			} else {
+				wp_send_json_error( [ 'message' => __( 'Failed to deactivate the plugin.' ) ] );
+			}
+		} else {
+			wp_send_json_error( [ 'message' => sprintf( esc_html__( '%s is not active.', 'nitropack' ), $plugin_name ) ] );
+		}
 	}
 }

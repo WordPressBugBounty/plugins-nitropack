@@ -7,25 +7,25 @@
             "source": {
                 "type": "git",
                 "url": "git@github.com:wpengine/np-httpclient.git",
-                "reference": "b12350fa4cb4f137e3b872b348bd8bb68d0df4e3"
+                "reference": "b54767f6881ff455a728b814a28aaaf1499acd54"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/wpengine/np-httpclient/zipball/b12350fa4cb4f137e3b872b348bd8bb68d0df4e3",
-                "reference": "b12350fa4cb4f137e3b872b348bd8bb68d0df4e3",
+                "url": "https://api.github.com/repos/wpengine/np-httpclient/zipball/b54767f6881ff455a728b814a28aaaf1499acd54",
+                "reference": "b54767f6881ff455a728b814a28aaaf1499acd54",
                 "shasum": ""
             },
             "require": {
                 "ext-json": "*",
                 "nitropack/url": "dev-master",
-                "php": "^5.6|^7.0|^8.0"
+                "php": "^7.4|^8.0"
             },
             "require-dev": {
                 "ext-pcntl": "*",
                 "ext-posix": "*",
                 "monolog/monolog": "^1.1|^2.0|^3.0"
             },
-            "time": "2025-03-17T08:38:39+00:00",
+            "time": "2025-07-18T11:57:12+00:00",
             "default-branch": true,
             "type": "library",
             "installation-source": "dist",
@@ -74,21 +74,21 @@
             "source": {
                 "type": "git",
                 "url": "git@github.com:wpengine/np-url.git",
-                "reference": "9177dadfc07b986a0f710cc45d06050e428650d6"
+                "reference": "1987bbdf5152552ad6663a1a125c4e3e9b512950"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/wpengine/np-url/zipball/9177dadfc07b986a0f710cc45d06050e428650d6",
-                "reference": "9177dadfc07b986a0f710cc45d06050e428650d6",
+                "url": "https://api.github.com/repos/wpengine/np-url/zipball/1987bbdf5152552ad6663a1a125c4e3e9b512950",
+                "reference": "1987bbdf5152552ad6663a1a125c4e3e9b512950",
                 "shasum": ""
             },
             "require": {
-                "php": "^5.6|^7.0|^8.0"
+                "php": "^7.4|^8.0"
             },
             "require-dev": {
-                "phpunit/phpunit": "^5.7||^6.0||^7.0||^10.0||^11.0"
+                "phpunit/phpunit": "^9.0||^10.0||^11.0"
             },
-            "time": "2025-03-07T08:51:23+00:00",
+            "time": "2025-06-24T07:02:36+00:00",
             "default-branch": true,
             "type": "library",
             "installation-source": "dist",
