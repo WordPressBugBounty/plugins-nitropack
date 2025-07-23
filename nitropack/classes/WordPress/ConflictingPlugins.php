@@ -71,7 +71,7 @@ class ConflictingPlugins {
 
 		if ( defined( 'WP_SMUSH_VERSION' ) ) {
 			if ( class_exists( 'Smush\\Core\\Settings' ) && defined( 'WP_SMUSH_PREFIX' ) ) {
-				$smushLazy = Smush\Core\Settings::get_instance()->get( 'lazy_load' );
+				$smushLazy = \Smush\Core\Settings::get_instance()->get( 'lazy_load' );
 				if ( $smushLazy ) {
 					$clashingPlugins[] = array( 'name' => 'Smush - Lazy Load', 'plugin' => 'wp-smushit/wp-smush.php' );
 				}
@@ -85,7 +85,7 @@ class ConflictingPlugins {
 		}
 
 		if ( defined( 'WPO_VERSION' ) && class_exists( 'WPO_Cache_Config' ) ) {
-			$wpo_cache_config = WPO_Cache_Config::instance();
+			$wpo_cache_config = \WPO_Cache_Config::instance();
 			if ( $wpo_cache_config->get_option( 'enable_page_caching', false ) ) {
 				$clashingPlugins[] = array( 'name' => 'WP Optimize page caching', 'plugin' => 'wp-optimize/wp-optimize.php' );
 			}
