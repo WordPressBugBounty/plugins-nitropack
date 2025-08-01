@@ -670,9 +670,10 @@ function nitropack_is_allowed_request() {
 			}
 		}
 	}
-
+	
+	//add test mode as disabled reason but not when the testnitro parameter is set
 	$test_mode = get_option( 'nitropack-safeModeStatus');
-	if ( $test_mode ) {
+	if ( empty($_GET['testnitro']) && $test_mode ) {
 		get_nitropack()->setDisabledReason( "Test Mode" );
 		return false;
 	}
@@ -2248,6 +2249,9 @@ function custom_reduce_stock_after_order_placed( $order ) {
 }
 
 function nitropack_detect_changes_and_clean_post_cache( $post ) {
+	if ( ! get_option( "nitropack-autoCachePurge", 1 ) ) {
+		return;
+	}
 
 	$post_before = nitropack_get_post_pre_update( $post );
 	$ignoredComparisonKeys = array( 'post_modified', 'post_modified_gmt' );
