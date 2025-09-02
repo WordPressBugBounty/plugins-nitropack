@@ -91,10 +91,9 @@ class Notifications {
 				$warnings[] = array(
 					'title' => sprintf( "%s is active and may conflict with NitroPack", $clashingPlugin['name'] ),
 					'msg' => esc_html__( "Some of its features overlap with NitroPack's optimizations which could lead to issues. We recommend disabling it to avoid potential conflicts.", 'nitropack' ),
-					'actions' => '<a href="#" class="btn btn-secondary" data-modal-target="modal-plugin-deactivate" data-modal-toggle="modal-plugin-deactivate" title="Disable ' . $clashingPlugin['name'] . ' ">' . sprintf( "Deactivate %s", $clashingPlugin['name'] ) . '</a>',
+					'actions' => '<a class="btn btn-secondary modal-plugin-deactivate" data-plugin-path="'.$clashingPlugin['plugin'].'" data-plugin-name="'.$clashingPlugin['name'].'" title="Disable ' . $clashingPlugin['name'] . ' ">' . sprintf( "Deactivate %s", $clashingPlugin['name'] ) . '</a>',
 					'classes' => [ 'conflicting-plugins plugin-' . sanitize_title( $clashingPlugin['name'] ) ],
 				);
-				require_once NITROPACK_PLUGIN_DIR . 'view/modals/modal-plugin-deactivate.php';
 			}
 
 		}
@@ -119,11 +118,7 @@ class Notifications {
 		}
 
 		/* Sets a warning if the Test Mode is enabled. */
-		$smStatus = get_option( 'nitropack-safeModeStatus', "-1" );
-		if ( $smStatus === "-1" ) {
-			$smStatus = TestMode::getInstance()->nitropack_safemode_status( true );
-		}
-		if ( $smStatus ) {
+		if ( TestMode::getInstance()->is_test_mode_enabled() ) {
 			$safeModeMessage = __( 'Visitors are accessing your unoptimized pages. Make sure to disable it once you are done testing.', 'nitropack' );
 			if ( get_nitropack()->getDistribution() == "oneclick" ) {
 				$safeModeMessage = apply_filters( "nitropack_oneclick_safemode_message", $safeModeMessage );

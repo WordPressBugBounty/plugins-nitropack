@@ -2,6 +2,8 @@
 
 defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 
+use NitroPack\WordPress\Settings\TestMode;
+
 $np_basePath = dirname( __FILE__ ) . '/';
 require_once $np_basePath . 'nitropack-sdk/autoload.php';
 require_once $np_basePath . 'constants.php';
@@ -670,10 +672,9 @@ function nitropack_is_allowed_request() {
 			}
 		}
 	}
-	
+
 	//add test mode as disabled reason but not when the testnitro parameter is set
-	$test_mode = get_option( 'nitropack-safeModeStatus');
-	if ( empty($_GET['testnitro']) && $test_mode ) {
+	if ( empty( $_GET['testnitro'] ) && TestMode::getInstance()->is_test_mode_enabled() ) {
 		get_nitropack()->setDisabledReason( "Test Mode" );
 		return false;
 	}
@@ -2015,9 +2016,18 @@ function nitropack_admin_toast_msgs( $type ) {
 	}
 	return $msg;
 }
-function nitropack_verify_ajax_nonce( $request_data ) {
+/* General verification for AJAX requests
+ * @params array $request_data The request data
+ * @params array|null $allowed_roles The allowed user roles
+ */
+function nitropack_verify_ajax_nonce( $request_data, $allowed_roles = null ) {
 	// If not an ajax request
 	if ( ! defined( 'DOING_AJAX' ) || ! DOING_AJAX ) {
+		return;
+	}
+
+	// Check if WordPress functions are available
+	if ( ! function_exists( 'wp_verify_nonce' ) || ! function_exists( 'wp_die' ) || ! function_exists( 'current_user_can' ) ) {
 		return;
 	}
 
@@ -2025,15 +2035,38 @@ function nitropack_verify_ajax_nonce( $request_data ) {
 	if ( empty( $request_data['nonce'] ) || ! wp_verify_nonce( $request_data['nonce'], NITROPACK_NONCE ) ) {
 		wp_die( 'Unauthorized request' );
 	}
-}
 
+	// Check user permissions
+	if ( $allowed_roles ) {
+		$has_permission = false;
+		foreach ( $allowed_roles as $role ) {
+			if ( current_user_can( $role ) ) {
+				$has_permission = true;
+				break;
+			}
+		}
+		if ( ! $has_permission ) {
+			wp_die( 'Unauthorized request' );
+		}
+	} else {
+		//fallback to admin rights
+		if ( ! current_user_can( 'manage_options' ) ) {		
+			wp_die( 'Unauthorized request' );
+		}
+	}
+}
 function nitropack_has_post_important_change( $post ) {
 	$prevPost = nitropack_get_post_pre_update( $post );
 	return $prevPost && ( $prevPost->post_title != $post->post_title || $prevPost->post_name != $post->post_name || $prevPost->post_excerpt != $post->post_excerpt );
 }
 
 function nitropack_purge_single_cache() {
-	nitropack_verify_ajax_nonce( $_REQUEST );
+	$canEditorPurge = get_option('nitropack-canEditorClearCache');
+	if ($canEditorPurge) {
+		nitropack_verify_ajax_nonce( $_REQUEST, [ 'editor', 'manage_options' ] );
+	} else {
+		nitropack_verify_ajax_nonce( $_REQUEST, [ 'manage_options' ] );
+	}
 	if ( ! empty( $_POST["postId"] ) && is_numeric( $_POST["postId"] ) ) {
 		$postId = $_POST["postId"];
 		$postUrl = ! empty( $_POST["postUrl"] ) ? $_POST["postUrl"] : NULL;
@@ -2091,7 +2124,12 @@ function nitropack_purge_entire_cache() {
 }
 
 function nitropack_invalidate_single_cache() {
-	nitropack_verify_ajax_nonce( $_REQUEST );
+	$canEditorPurge = get_option('nitropack-canEditorClearCache');
+	if ($canEditorPurge) {
+		nitropack_verify_ajax_nonce( $_REQUEST, [ 'editor', 'manage_options' ] );
+	} else {
+		nitropack_verify_ajax_nonce( $_REQUEST, [ 'manage_options' ] );
+	}
 	if ( ! empty( $_POST["postId"] ) && is_numeric( $_POST["postId"] ) ) {
 		$postId = $_POST["postId"];
 		$postUrl = ! empty( $_POST["postUrl"] ) ? $_POST["postUrl"] : NULL;

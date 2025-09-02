@@ -70,13 +70,20 @@ class ConflictingPlugins {
 		}
 
 		if ( defined( 'WP_SMUSH_VERSION' ) ) {
+			//free version
+			$name = 'Smush';
+			$plugin_path = 'wp-smushit/wp-smush.php';
+			if ( is_plugin_active( 'wp-smush-pro/wp-smush.php' ) ) {
+				$name = 'Smush Pro';
+				$plugin_path = 'wp-smush-pro/wp-smush.php';
+			}
 			if ( class_exists( 'Smush\\Core\\Settings' ) && defined( 'WP_SMUSH_PREFIX' ) ) {
 				$smushLazy = \Smush\Core\Settings::get_instance()->get( 'lazy_load' );
 				if ( $smushLazy ) {
-					$clashingPlugins[] = array( 'name' => 'Smush - Lazy Load', 'plugin' => 'wp-smushit/wp-smush.php' );
+					$clashingPlugins[] = array( 'name' => $name . ' - Lazy Load', 'plugin' => $plugin_path );
 				}
 			} else {
-				$clashingPlugins[] = array( 'name' => 'Smush', 'plugin' => 'wp-smushit/wp-smush.php' );
+				$clashingPlugins[] = array( 'name' => $name, 'plugin' => $plugin_path );
 			}
 		}
 

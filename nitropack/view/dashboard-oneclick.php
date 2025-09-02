@@ -6,7 +6,13 @@ $max_usage = '1 GB';
 $page_views = '0';
 $max_page_views = '10000'; ?>
 
-<?php $notifications->nitropack_display_admin_notices(); ?>
+<?php
+$conflictingPlugins = \NitroPack\WordPress\ConflictingPlugins::getInstance();
+$conflictingPlugins_list = $conflictingPlugins->nitropack_get_conflicting_plugins();
+if ( $conflictingPlugins_list ) {
+	require_once NITROPACK_PLUGIN_DIR . 'view/modals/modal-plugin-deactivate.php';
+}
+$notifications->nitropack_display_admin_notices(); ?>
 
 <div class="grid grid-cols-2 gap-6 grid-col-1-tablet items-start nitropack-dashboard">
 	<div class="col-span-1">
@@ -15,7 +21,8 @@ $max_page_views = '10000'; ?>
 			<div class="card-header">
 				<h3><?php esc_html_e( 'Optimized pages', 'nitropack' ); ?></h3>
 				<div class="flex flex-row items-center" style="display: none;" id="pending-optimizations-section">
-					<img src="<?php echo plugin_dir_url( __FILE__ ) . 'images/loading.svg'; ?>" alt="loading" class="w-4 h-4">
+					<img src="<?php echo plugin_dir_url( __FILE__ ) . 'images/loading.svg'; ?>" alt="loading"
+						class="w-4 h-4">
 					<span class="ml-2 mr-1 text-primary"> <?php esc_html_e( 'Processing', 'nitropack' ); ?>
 						<span id="pending-optimizations-count">X</span>
 						<?php esc_html_e( 'page(s) in the background', 'nitropack' ); ?></span>
@@ -114,11 +121,13 @@ $max_page_views = '10000'; ?>
 						<div class="nitro-option-main">
 							<div class="text-box">
 								<h6><?php esc_html_e( 'Purge cache', 'nitropack' ); ?></h6>
-								<p><?php esc_html_e( 'Purge affected cache when content is updated or published', 'nitropack' ); ?></p>
+								<p><?php esc_html_e( 'Purge affected cache when content is updated or published', 'nitropack' ); ?>
+								</p>
 							</div>
 							<label class="inline-flex items-center cursor-pointer ml-auto">
-								<input type="checkbox" value="" class="sr-only peer" name="purge_cache" id="auto-purge-status" <?php if ( $autoCachePurge )
-									echo "checked"; ?>>
+								<input type="checkbox" value="" class="sr-only peer" name="purge_cache"
+									id="auto-purge-status" <?php if ( $autoCachePurge )
+										echo "checked"; ?>>
 								<div class="toggle"></div>
 							</label>
 						</div>
@@ -174,16 +183,18 @@ $max_page_views = '10000'; ?>
 								$toolTipDisplayState = $sitemap ? '' : 'hidden'; ?>
 
 								<h6><?php esc_html_e( 'Cache warmup', 'nitropack' ); ?> <span
-										class="badge badge-primary ml-2"><?php esc_html_e( 'Recommended', 'nitropack' ); ?></span> <span
-										class="tooltip-icon <?php echo $toolTipDisplayState; ?>" data-tooltip-target="tooltip-sitemap">
+										class="badge badge-primary ml-2"><?php esc_html_e( 'Recommended', 'nitropack' ); ?></span>
+									<span class="tooltip-icon <?php echo $toolTipDisplayState; ?>"
+										data-tooltip-target="tooltip-sitemap">
 										<img src="<?php echo plugin_dir_url( __FILE__ ) . 'images/info.svg'; ?>">
 									</span></h6>
 								<div id="tooltip-sitemap" role="tooltip" class="tooltip-container hidden">
 									<?php echo $sitemap; ?>
 									<div class="tooltip-arrow" data-popper-arrow></div>
 								</div>
-								<p><?php esc_html_e( 'Automatically pre-caches your website\'s page content', 'nitropack' ); ?>. <a
-										href="https://support.nitropack.io/en/articles/8390320-cache-warmup" class="text-blue"
+								<p><?php esc_html_e( 'Automatically pre-caches your website\'s page content', 'nitropack' ); ?>.
+									<a href="https://support.nitropack.io/en/articles/8390320-cache-warmup"
+										class="text-blue"
 										target="_blank"><?php esc_html_e( 'Learn more', 'nitropack' ); ?></a></p>
 							</div>
 							<label class="inline-flex items-center cursor-pointer ml-auto">
@@ -192,7 +203,8 @@ $max_page_views = '10000'; ?>
 							</label>
 						</div>
 						<div class="msg-container" id="loading-warmup-status">
-							<img src="<?php echo plugin_dir_url( __FILE__ ) . 'images/loading.svg'; ?>" alt="loading" class="icon">
+							<img src="<?php echo plugin_dir_url( __FILE__ ) . 'images/loading.svg'; ?>" alt="loading"
+								class="icon">
 							<span class="msg"><?php esc_html_e( 'Loading cache warmup status', 'nitropack' ); ?></span>
 						</div>
 					</div>
@@ -202,8 +214,10 @@ $max_page_views = '10000'; ?>
 								<h6><?php esc_html_e( 'Test Mode', 'nitropack' ); ?></h6>
 								<p>
 									<?php esc_html_e( 'Test NitroPack\'s features without affecting your visitors\' experience', 'nitropack' ); ?>.
-									<a href="https://support.nitropack.io/en/articles/8390292-test-mode" class="text-blue"
-										target="_blank"><?php esc_html_e( 'Learn more', 'nitropack' ); ?></a></p>
+									<a href="https://support.nitropack.io/en/articles/8390292-test-mode"
+										class="text-blue"
+										target="_blank"><?php esc_html_e( 'Learn more', 'nitropack' ); ?></a>
+								</p>
 							</div>
 
 							<label class="inline-flex items-center cursor-pointer ml-auto">
@@ -213,7 +227,8 @@ $max_page_views = '10000'; ?>
 							</label>
 						</div>
 						<div class="msg-container" id="loading-safemode-status">
-							<img src="<?php echo plugin_dir_url( __FILE__ ) . 'images/loading.svg'; ?>" alt="loading" class="icon">
+							<img src="<?php echo plugin_dir_url( __FILE__ ) . 'images/loading.svg'; ?>" alt="loading"
+								class="icon">
 							<?php esc_html_e( 'Loading test mode status', 'nitropack' ); ?>
 						</div>
 						<?php require_once NITROPACK_PLUGIN_DIR . 'view/modals/modal-test-mode.php'; ?>
@@ -221,11 +236,15 @@ $max_page_views = '10000'; ?>
 					<div class="nitro-option" id="compression-widget">
 						<div class="nitro-option-main">
 							<div class="text-box">
-								<h6><span id="detected-compression"><?php esc_html_e( 'HTML Compression', 'nitropack' ); ?> </span></h6>
+								<h6><span
+										id="detected-compression"><?php esc_html_e( 'HTML Compression', 'nitropack' ); ?>
+									</span></h6>
 								<p>
 									<?php esc_html_e( 'Compressing the structure of your HTML, ensures faster page rendering and an optimized browsing experience for your users.', 'nitropack' ); ?>
 									<a href="https://support.nitropack.io/en/articles/8390333-nitropack-plugin-settings-in-wordpress#h_29b7ab4836"
-										class="text-blue" target="_blank"><?php esc_html_e( 'Learn more', 'nitropack' ); ?></a></p>
+										class="text-blue"
+										target="_blank"><?php esc_html_e( 'Learn more', 'nitropack' ); ?></a>
+								</p>
 							</div>
 							<label class="inline-flex items-center cursor-pointer ml-auto">
 								<input type="checkbox" id="compression-status" class="sr-only peer" <?php echo (int) $enableCompression === 1 ? "checked" : ""; ?>>
@@ -277,9 +296,10 @@ $max_page_views = '10000'; ?>
 		</div>
 	</div>
 	<?php $notOptimizedCPTs = nitropack_filter_non_optimized();
-	$notices = get_option('nitropack-dismissed-notices', []);
-	$optimizedCPT_notice = in_array( 'OptimizeCPT', $notices, true ) ? true  : false;
-	if (!$optimizedCPT_notice && !empty($notOptimizedCPTs))  require_once NITROPACK_PLUGIN_DIR . 'view/modals/modal-not-optimized-CPT.php'; ?>
+	$notices = get_option( 'nitropack-dismissed-notices', [] );
+	$optimizedCPT_notice = in_array( 'OptimizeCPT', $notices, true ) ? true : false;
+	if ( ! $optimizedCPT_notice && ! empty( $notOptimizedCPTs ) )
+		require_once NITROPACK_PLUGIN_DIR . 'view/modals/modal-not-optimized-CPT.php'; ?>
 </div>
 <?php require_once NITROPACK_PLUGIN_DIR . 'view/modals/modal-unsaved-changes.php'; ?>
 <script>

@@ -10,11 +10,12 @@ $nitropackOptions = array(
     'nitropack-webhookToken',
     'nitropack-checkedCompression',
     'nitropack-cacheablePostTypes',
-    'nitropack-safeModeStatus',
+    'nitropack-safeModeStatus', // This setting is deprecated but still needs to be removed from old installations
     'nitropack-bbCacheSyncPurge',
     'nitropack-legacyPurge',
     'nitropack-distribution',
     'nitropack-minimumLogLevel',
+    'nitropack_minimumLogLevel', // The minimumLogLevel may be set with both syntaxes
     'nitropack-dismissed-notices'
 );
 if (defined('MULTISITE') && MULTISITE) {

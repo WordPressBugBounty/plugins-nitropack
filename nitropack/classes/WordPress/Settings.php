@@ -22,7 +22,6 @@ class Settings {
 	 * - 'nitropack-enableCompression': (int) Flag to enable compression, default is -1.
 	 * - 'nitropack-autoCachePurge': (int) Flag to enable automatic cache purge, default is 1.
 	 * - 'nitropack-cacheableObjectTypes': (array) List of cacheable object types, default is an empty array but gets updated immediately to all CPTs.
-	 * - 'nitropack-safeModeStatus': (int) Status of safe mode, default is 0.
 	 * - 'nitropack-distribution': (string) Distribution type, default is 'regular'.
 	 */
 	private $settings;
@@ -61,7 +60,6 @@ class Settings {
 			'nitropack-enableCompression' => -1,
 			'nitropack-autoCachePurge' => 1,
 			'nitropack-cacheableObjectTypes' => [],
-			'nitropack-safeModeStatus' => 0,
 			'nitropack-distribution' => 'regular',
 		];
 	}

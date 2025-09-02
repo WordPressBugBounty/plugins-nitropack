@@ -1,6 +1,6 @@
 <div id="modal-plugin-deactivate" data-modal-backdrop="" tabindex="-1" class="hidden modal-wrapper popup-modal"
-	data-plugin="<?php echo esc_attr( $clashingPlugin['plugin'] ); ?>"
-	data-plugin-name="<?php echo esc_attr( $clashingPlugin['name'] ); ?>">
+	data-plugin-path=""
+	data-plugin-name="">
 	<div class="popup-container">
 		<div class="popup-inner">
 			<!-- Modal header -->
@@ -15,11 +15,11 @@
 				</button>
 				<img src="<?php echo plugin_dir_url( __FILE__ ) . '../images/info.svg'; ?>" width="46" height="46"
 					class="icon rotate-180">
-				<h3 class="text-center"><?php printf( 'Deactivate %s?', $clashingPlugin['name'] ); ?></h3>
+				<h3 class="text-center"><?php esc_html_e( 'Deactivate', 'nitropack'); ?> <span class="plugin-name"></span>?</h3>
 			</div>
 			<!-- Modal body -->
 			<div class="popup-body text-center">
-				<p><?php printf( esc_html__( 'This will turn off %s to help avoid conflicts with NitroPack. You can turn it back on anytime from the Plugins page.', 'nitropack' ), $clashingPlugin['name'] ); ?>
+				<p><?php  esc_html_e( 'This will turn it off to help avoid conflicts with NitroPack. You can turn it back on anytime from the Plugins page.', 'nitropack' ); ?>
 				</p>
 			</div>
 
@@ -34,19 +34,39 @@
 </div>
 <script>
 	jQuery(document).ready(function ($) {
-		const $targetEl = document.getElementById('modal-plugin-deactivate'),
-			modal = new Modal($targetEl),
-			modal_wrapper = $('#modal-plugin-deactivate'),
+		const modalId = 'modal-plugin-deactivate';
+		const $targetEl = document.getElementById(modalId),
+			modal_options = {
+				closable: true,				
+				onShow: () => {
+					
+				},
+			},
+			instanceOptions = {
+				id: modalId,
+				override: true
+			},
+			modal = new Modal($targetEl, modal_options, instanceOptions),
+			modal_wrapper = $('#' + modalId),
 			modal_text = modal_wrapper.find('.popup-body p'),
 			modal_title = modal_wrapper.find('.popup-header h3'),
 			modal_icon = modal_wrapper.find('.icon'),
 			modal_footer = modal_wrapper.find('.popup-footer'),
 			close_btn = modal_footer.find('.popup-close'),
-			action_btn = modal_footer.find('.popup-action'),
-			plugin = modal_wrapper.data('plugin'),
-			plugin_name = modal_wrapper.data('plugin-name');
+			action_btn = modal_footer.find('.popup-action');			
 
+		$('.modal-plugin-deactivate').click(function (e) {
+			e.preventDefault();
+			
+			const deactivate_plugins_button = $(this);
+			modal_wrapper.attr('data-plugin-name', deactivate_plugins_button.data('plugin-name'));
+			modal_wrapper.attr('data-plugin-path', deactivate_plugins_button.data('plugin-path'));
+			modal_title.find('.plugin-name').text(deactivate_plugins_button.data('plugin-name'));
+			modal.show();
+		});
 		action_btn.click(function (e) {
+			const plugin = modal_wrapper.data('plugin-path'),
+			plugin_name = modal_wrapper.data('plugin-name');
 			$.ajax({
 				url: ajaxurl,
 				type: "POST",

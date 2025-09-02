@@ -82,11 +82,11 @@ class Logger {
 				return;
 			}
 
-			$configLevel = (int) get_option( 'nitropack-minimumLogLevel', null );
+			$configLevel = (int) get_option( 'nitropack_minimumLogLevel', null );
 		}
 
 		// Check if the log level is set and if the current log level meets the minimum log level requirement
-		if ( $configLevel === null || $level < $configLevel ) {
+		if ( !$configLevel || $level < $configLevel ) {
 			return;
 		}
 

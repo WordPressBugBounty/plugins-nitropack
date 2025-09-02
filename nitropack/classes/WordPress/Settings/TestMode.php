@@ -21,17 +21,14 @@ class TestMode {
 	/* Offer test mode instead of disabling NitroPack from Plugins page */
 	public function nitropack_offer_safemode() {
 		global $pagenow;
-		if ( $pagenow == 'plugins.php' ) {
-			$smStatus = get_option( 'nitropack-safeModeStatus', "-1" );
-			if ( $smStatus === "0" ) {
-				add_action( 'admin_enqueue_scripts', function () {
-					wp_enqueue_script( 'np_safemode', NITROPACK_PLUGIN_DIR_URL . 'view/javascript/np_safemode.js', array( 'jquery' ) );
-					wp_enqueue_style( 'np_safemode', NITROPACK_PLUGIN_DIR_URL . 'view/stylesheet/safemode.min.css' );
-				} );
-				add_action( 'admin_footer', function () {
-					require_once NITROPACK_PLUGIN_DIR . 'view/modals/modal-safemode.php';
-				} );
-			}
+		if ( $pagenow == 'plugins.php' && ! $this->is_test_mode_enabled() ) {
+			add_action( 'admin_enqueue_scripts', function () {
+				wp_enqueue_script( 'np_safemode', NITROPACK_PLUGIN_DIR_URL . 'view/javascript/np_safemode.js', array( 'jquery' ) );
+				wp_enqueue_style( 'np_safemode', NITROPACK_PLUGIN_DIR_URL . 'view/stylesheet/safemode.min.css' );
+			} );
+			add_action( 'admin_footer', function () {
+				require_once NITROPACK_PLUGIN_DIR . 'view/modals/modal-safemode.php';
+			} );
 		}
 	}
 	/* Checks test mode in Settings page every visit */
@@ -51,7 +48,6 @@ class TestMode {
 				return NULL;
 			}
 
-			$this->nitropack_cache_safemode_status( $isEnabled );
 			if ( ! $dontExit ) {
 				nitropack_json_and_exit( array(
 					"type" => "success",
@@ -61,7 +57,6 @@ class TestMode {
 			return $isEnabled;
 		}
 
-		$this->nitropack_cache_safemode_status();
 		if ( ! $dontExit ) {
 			NitroPack::getInstance()->getLogger()->error( 'There was an SDK error while fetching status of safe mode' );
 			nitropack_json_and_exit( array(
@@ -72,12 +67,30 @@ class TestMode {
 		return NULL;
 	}
 
-	public function nitropack_cache_safemode_status( $operation = null ) {
-		$sm = "-1";
-		if ( is_bool( $operation ) ) {
-			$sm = $operation ? '1' : '0';
+	/**
+	 * Check if the user has test mode enabled
+	 *
+	 * @return bool
+	 */
+	public function is_test_mode_enabled(): bool {
+		try {
+			$nitro = get_nitropack_sdk();
+			if ( ! $nitro ) {
+				// Return the default value (not enabled) in case we can't get the SDK.
+				return false;
+			}
+
+			if ( isset( $nitro->getConfig()->SafeMode ) ) {
+				return (bool) $nitro->getConfig()->SafeMode;
+			}
+
+			nitropack_fetch_config();
+			return (bool) $nitro->getApi()->isSafeModeEnabled();
+		} catch (\Exception $e) {
+			NitroPack::getInstance()->getLogger()->error( 'There was an SDK error while fetching status of safe mode: ' . $e );
+			// Return the default value (not enabled) in case of error.
+			return false;
 		}
-		return update_option( 'nitropack-safeModeStatus', $sm );
 	}
 
 	public function nitropack_enable_safemode() {
@@ -89,7 +102,6 @@ class TestMode {
 				NitroPack::getInstance()->getLogger()->error( 'Test mode cannot be enabled. Error: ' . $e );
 			}
 
-			$this->nitropack_cache_safemode_status( true );
 			NitroPack::getInstance()->getLogger()->notice( 'Test mode is enabled' );
 			nitropack_json_and_exit( array(
 				"type" => "success",
@@ -115,7 +127,6 @@ class TestMode {
 				NitroPack::getInstance()->getLogger()->error( 'Test mode cannot be disabled. Error: ' . $e );
 			}
 
-			$this->nitropack_cache_safemode_status( false );
 			NitroPack::getInstance()->getLogger()->notice( 'Test mode is disabled' );
 			nitropack_json_and_exit( array(
 				"type" => "success",
@@ -128,7 +139,6 @@ class TestMode {
 		) );
 	}
 	public function render() {
-		$test_mode_option = get_option( 'nitropack-safeModeStatus' );
 		?>
 		<div class="nitro-option" id="test-mode-widget">
 			<div class="nitro-option-main">
@@ -141,7 +151,7 @@ class TestMode {
 				</div>
 
 				<label class="inline-flex items-center cursor-pointer ml-auto">
-					<input type="checkbox" class="sr-only peer" id="safemode-status" <?php echo (int) $test_mode_option === 1 ? "checked" : ""; ?>>
+					<input type="checkbox" class="sr-only peer" id="safemode-status" <?php echo $this->is_test_mode_enabled() ? "checked" : ""; ?>>
 
 					<div class="toggle"></div>
 				</label>

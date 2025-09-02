@@ -110,7 +110,7 @@ class CLI {
 		$host = ! empty( $assocArgs["purge-host"] ) ? $assocArgs["purge-host"] : NULL;
 		$url = ! empty( $assocArgs["purge-url"] ) ? $assocArgs["purge-url"] : NULL;
 		$tag = ! empty( $assocArgs["purge-tag"] ) ? $assocArgs["purge-tag"] : NULL;
-		$reason = ! empty( $assocArgs["purge-reason"] ) ? $assocArgs["purge-reason"] : NULL;
+		$reason = ! empty( $assocArgs["purge-reason"] ) ? $assocArgs["purge-reason"] . ' via WP-CLI' : 'Light purge of all caches via WP-CLI';
 
 		if ( ! empty( $host ) ) {
 			/**
@@ -140,8 +140,6 @@ class CLI {
 				$this->logger->error( 'Cannot purge cache. Error: ' . $e );
 				WP_CLI::error( sprintf( 'Cannot purge cache. Error: %s', $e ) );
 			}
-		} else {
-			nitropack_purge_cache();
 		}
 	}
 
@@ -153,7 +151,7 @@ class CLI {
 	public function nitropack_cli_invalidate( $args, $assocArgs ) {
 		$url = ! empty( $assocArgs["purge-url"] ) ? $assocArgs["purge-url"] : NULL;
 		$tag = ! empty( $assocArgs["purge-tag"] ) ? $assocArgs["purge-tag"] : NULL;
-		$reason = ! empty( $assocArgs["purge-reason"] ) ? $assocArgs["purge-reason"] : NULL;
+		$reason = ! empty( $assocArgs["purge-reason"] ) ? $assocArgs["purge-reason"] . ' via WP-CLI' : 'Manual invalidation of all pages via WP-CLI';
 		if ( $url || $tag || $reason ) {
 			try {
 				if ( nitropack_sdk_invalidate( $url, $tag, $reason ) ) {
@@ -164,8 +162,6 @@ class CLI {
 				$this->logger->error( 'Cannot invalidate cache. Error: ' . $e );
 				WP_CLI::error( sprintf( 'Error, cannot invalidate cache. %s', $e ) );
 			}
-		} else {
-			nitropack_invalidate_cache();
 		}
 	}
 	/**
@@ -296,16 +292,13 @@ class CLI {
 			$command = empty( $args[0] ) ? 'status' : $args[0];
 			if ( 'enable' === $command ) {
 				$sdk->enableSafeMode();
-				nitropack_cache_safemode_status( 1 );
 			} elseif ( 'disable' === $command ) {
 				$sdk->disableSafeMode();
-				nitropack_cache_safemode_status( 0 );
 			} else {
 				$api = $this->get_vendor_api();
 				$status = $api->isSafeModeEnabled();
 				$this->logger->notice( 'Test mode is ' . ( $status ? 'enabled' : 'disabled' ) );
 				WP_CLI::success( sprintf( 'Test mode is %s.', $status ? 'enabled' : 'disabled' ) );
-				nitropack_cache_safemode_status( $status ? 1 : 0 );
 				return;
 			}
 		} catch (\Exception $e) {
