@@ -11,14 +11,16 @@
 
 	<main id="main">
 		<div class="container">
-			<?php if ( ! isset( $_GET['subpage'] ) ) : ?>
-				<?php require_once NITROPACK_PLUGIN_DIR . "view/dashboard.php";
-				?>
-			<?php endif; ?>
-			<?php if ( isset( $_GET['subpage'] ) && $_GET['subpage'] == 'system-report' ) : ?>
+			<?php 
+			$passed_onboarding = get_option( 'nitropack-onboardingPassed');
+			if ( !$passed_onboarding && !empty( $_GET['onboarding'] ) ) {
+				require_once NITROPACK_PLUGIN_DIR . "view/preview-site.php";
+			} else if ( ! isset( $_GET['subpage'] ) ) {
+				require_once NITROPACK_PLUGIN_DIR . "view/dashboard.php";
+			} if ( isset( $_GET['subpage'] ) && $_GET['subpage'] == 'system-report' ) : ?>
 				<?php require_once NITROPACK_PLUGIN_DIR . "view/system-report.php";
 				?>
-			<?php endif; ?>
+			<?php endif; ?>			
 		</div>
 	</main>
 	<?php require_once NITROPACK_PLUGIN_DIR . 'view/templates/template-toast.php'; ?>
@@ -70,13 +72,3 @@
 		<!-- end support widget -->
 	</div>
 <?php } ?>
-<script>
-	(function ($) {
-		window.addEventListener("cache.purge.success", function () {
-			setTimeout(function () {
-				document.cookie = "nitropack_apwarning=1; expires=Thu, 01 Jan 1970 00:00:01 GMT; path=<?php echo nitropack_cookiepath(); ?>";
-				window.location.reload()
-			}, 1500)
-		});
-	})(jQuery);
-</script>

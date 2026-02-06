@@ -189,7 +189,7 @@ class Logger {
 		if ( $minimumLogLevel === null ) {
 			$minimumLogLevel = '';
 		}
-		$updated = update_option( 'nitropack_minimumLogLevel', $minimumLogLevel );
+		$updated = update_option( 'nitropack-minimumLogLevel', $minimumLogLevel );
 		if ( $config_updated && $updated ) {
 
 			nitropack_json_and_exit( array( "type" => "success", "message" => nitropack_admin_toast_msgs( 'success' ) ) );

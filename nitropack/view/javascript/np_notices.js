@@ -47,7 +47,7 @@
                 updateNotificationCount();
               }
             } else {
-              console.log("Error: " + xhr.status);
+              
             }
           }
         };

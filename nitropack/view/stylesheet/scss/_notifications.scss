@@ -16,6 +16,9 @@
             flex-direction: column;
             align-items: start;
         }
+        .title-msg {
+            line-height: 1.5;
+        }
     }
 
     p {
@@ -38,6 +41,9 @@
     }
     &.notification-error .notification-inner {
         background-color: $red-100;
+        p {
+            color: $red-600;
+        }
         .btn.btn-secondary {
             @include btn_color($red-600);
             &:hover {

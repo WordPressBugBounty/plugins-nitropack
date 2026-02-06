@@ -2,7 +2,7 @@
 
 namespace NitroPack\Integration\Plugin;
 
-class CF_Helper extends \CF\WordPress\Hooks {
+class CF_Helper extends \Cloudflare\APO\WordPress\Hooks {
     public function isApoEnabled() {
         if (method_exists($this, "isAutomaticPlatformOptimizationEnabled")) {
             return $this->isAutomaticPlatformOptimizationEnabled();

@@ -23,23 +23,3 @@
         </div>
     </div>
 </div>
-<script>
-    jQuery(document).ready(function($) {
-        const modal_wrapper = $('#modal-purge-cache'),
-            modal_text = modal_wrapper.find('.popup-body p'),
-            modal_title = modal_wrapper.find('.popup-header h3'),
-            modal_icon = modal_wrapper.find('.icon'),
-            modal_footer = modal_wrapper.find('.popup-footer'),
-            close_btn = modal_footer.find('.modal-close'),
-            action_btn = modal_footer.find('.modal-action'),
-            setting_id = '#optimizations-purge-cache';
-
-        const purgeCache = () => {
-            let purgeEvent = new Event("cache.purge.request");
-            window.dispatchEvent(purgeEvent);
-        }       
-        action_btn.click(function(e) {
-            purgeCache();            
-        });
-    });
-</script>

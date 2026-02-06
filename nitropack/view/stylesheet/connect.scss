@@ -1,0 +1,43 @@
+@use "scss/variables" as *;
+
+/* connect screen */
+#nitropack-connect {
+	margin-top: 4rem;
+	padding-left: 4rem;
+	padding-right: 4rem;
+	color: $gray-700;
+	//line-height: $line-height;
+	font-weight: 500;
+	font-size: $font-size;
+	font-family: $font;
+
+	.nitropack-connect-inner {
+		background-color: #fff;
+		padding: 2rem;
+	}
+	.row {
+		display: flex;
+		gap: 2rem;
+		/* width: 100%; */
+		justify-content: space-between;
+	}
+	.headline-container {
+		margin: 2rem 0; 
+	}
+	
+	h1 {
+		font-size: 1.25rem;
+		color: $gray-700;
+		font-weight: bold;
+		margin-bottom: 0.5rem;
+	}
+	.help.main {
+		margin-top: $gutter;
+	}
+	.help.manual {
+		margin-top: $gutter;
+	}
+	#api-details-form {
+		margin-bottom: 2rem;
+	}
+}

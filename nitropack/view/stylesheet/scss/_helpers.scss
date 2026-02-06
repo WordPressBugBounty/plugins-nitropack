@@ -167,6 +167,16 @@ a {
 .bg-success {
     background-color: $green-50 !important;
 }
+.bg-white {
+    background-color: #fff !important;
+}
+.bg-green-500 {
+
+    background-color: $green-500 !important;
+}
+.border-rounded {
+    border-radius: 50%;
+}
 .font-semi-bold {
     font-weight: 500;
 }

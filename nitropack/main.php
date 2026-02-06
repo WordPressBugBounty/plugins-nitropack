@@ -3,7 +3,7 @@
 Plugin Name:  NitroPack
 Plugin URI:   https://nitropack.io/platform/wordpress
 Description:  Automatic optimization for site speed and Core Web Vitals. Use 35+ features, including Caching, image optimization, critical CSS, and Cloudflare CDN.
-Version:      1.18.5
+Version:      1.18.9
 Author:       NitroPack Inc.
 Author URI:   https://nitropack.io/
 License:      GPL2
@@ -24,7 +24,7 @@ require_once $np_basePath . 'helpers.php';
 require_once $np_basePath . 'diagnostics.php';
 
 if ( nitropack_is_wp_cli() ) {
-	$nitropack_cli = new \NitroPack\CLI();
+	$nitropack_cli = new \NitroPack\WordPress\CLI();
 	$nitropack_cli->init();
 }
 
@@ -69,7 +69,7 @@ add_action( 'transition_post_status', 'nitropack_handle_post_transition', 10, 3 
 //add_action('publish_post', 'nitropack_handle_first_publish', 10, 1);
 add_action( 'transition_comment_status', 'nitropack_handle_comment_transition', 10, 3 );
 add_action( 'comment_post', 'nitropack_handle_comment_post', 10, 2 );
-add_action( 'woocommerce_reduce_order_stock', 'custom_reduce_stock_after_order_placed' );
+
 add_action( 'switch_theme', 'nitropack_theme_handler' );
 register_shutdown_function( 'nitropack_execute_purges' );
 register_shutdown_function( 'nitropack_execute_invalidations' );
@@ -118,11 +118,11 @@ if (is_admin()) {
     add_action('wp_ajax_nitropack_clear_residual_cache', 'nitropack_clear_residual_cache');
     add_action('wp_ajax_nitropack_verify_connect', 'nitropack_verify_connect_ajax');
     add_action('wp_ajax_nitropack_disconnect', 'nitropack_disconnect');
-    add_action('wp_ajax_nitropack_set_optimization_mode', 'nitropack_set_optimization_mode');
+
     add_action('wp_ajax_nitropack_test_compression_ajax', 'nitropack_test_compression_ajax');
     add_action('wp_ajax_nitropack_set_compression_ajax', 'nitropack_set_compression_ajax');
     add_action('wp_ajax_nitropack_set_can_editor_clear_cache', 'nitropack_set_can_editor_clear_cache');
-    add_action('wp_ajax_nitropack_set_stock_reduce_status', 'nitropack_set_stock_reduce_status');
+
     add_action('wp_ajax_nitropack_set_auto_cache_purge_ajax', 'nitropack_set_auto_cache_purge_ajax');
     add_action('wp_ajax_nitropack_set_cart_cache_ajax', 'nitropack_set_cart_cache_ajax');
     add_action('wp_ajax_nitropack_set_bb_cache_purge_sync_ajax', 'nitropack_set_bb_cache_purge_sync_ajax');

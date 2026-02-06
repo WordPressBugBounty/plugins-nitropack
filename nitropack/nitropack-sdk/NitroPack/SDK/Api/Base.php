@@ -36,6 +36,12 @@ class Base {
     }
 
     protected function makeRequest($path, $headers = array(), $cookies = array(), $type = 'GET', $bodyData=array(), $async = false, $verifySSL = false) {
+        // If CF-Access-Client-Id and CF-Access-Client-Secret are defined in wordpress, add them to headers
+        if (defined('NITROPACK_CF_ACCESS_CLIENT_ID') && defined('NITROPACK_CF_ACCESS_CLIENT_SECRET')) {
+            $headers['CF-Access-Client-Id'] = NITROPACK_CF_ACCESS_CLIENT_ID;
+            $headers['CF-Access-Client-Secret'] = NITROPACK_CF_ACCESS_CLIENT_SECRET;
+        }
+
         $backlogEntry = array(
             "path" => $path,
             "headers" => $headers,

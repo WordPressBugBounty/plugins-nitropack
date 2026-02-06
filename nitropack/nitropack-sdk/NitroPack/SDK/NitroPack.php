@@ -5,7 +5,7 @@ use \NitroPack\Url\Url;
 use \NitroPack\SDK\Url\Embedjs;
 
 class NitroPack {
-    const VERSION = '0.56.1';
+    const VERSION = '0.56.3';
     const PAGECACHE_LOCK_EXPIRATION_TIME = 300; // in seconds
     private $dataDir;
     private $cachePath = array('data', 'pagecache');
@@ -166,6 +166,10 @@ class NitroPack {
 
         if ($this->config->PageCache->Geot->Status) {
             $this->pageCache->setGeotVariations($this->config->PageCache->Geot->Variations);
+        }
+
+        if (!empty($this->config->UseNotModifiedHeader)) {
+            $this->pageCache->enableNotModifiedHeader();
         }
 
         if ($this->isAJAXRequest() && $this->isAllowedAJAXUrl($this->url) && !empty($_SERVER["HTTP_REFERER"]) && !$this->isAllowedStandaloneAJAXUrl($url)) {

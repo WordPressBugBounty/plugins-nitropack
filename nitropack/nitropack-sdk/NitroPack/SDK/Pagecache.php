@@ -19,6 +19,7 @@ class Pagecache
     private $urlPathVersion;
     private $cookiesProvider;
     private $geotVariations;
+    private $NotModifiedHeaderEnabled = false;
 
     public static function getUrlDir($dataDir, $url, $useInvalidated = false, $pathVersion = 1)
     {
@@ -148,6 +149,11 @@ class Pagecache
     public function setGeotVariations($geotVariations)
     {
         $this->geotVariations = $geotVariations;
+    }
+
+    public function enableNotModifiedHeader()
+    {
+        $this->NotModifiedHeaderEnabled = true;
     }
 
     public function hasCache()
@@ -290,15 +296,112 @@ class Pagecache
 
     public function readfile()
     {
+        $setOwnLastModified = false;
+
+        // 304 Not Modified improvement - only when enabled via config
+        if ($this->NotModifiedHeaderEnabled) {
+            $lastModified = $this->getCacheCreationTime();
+
+            // Set Last-Modified header based on x-cache-ctime
+            if ($lastModified > 0) {
+                $lastModifiedHeader = gmdate('D, d M Y H:i:s', $lastModified) . ' GMT';
+                header('Last-Modified: ' . $lastModifiedHeader);
+                $setOwnLastModified = true;
+
+                // Calculate current variation hash
+                $currentVariationPrefix = $this->getVariationCookiePrefix();
+                $currentVariationHash = md5($currentVariationPrefix);
+
+                // Get last served variation from tracking cookie
+                $lastVariationHash = isset($_COOKIE['np_cache_variation'])
+                    ? $_COOKIE['np_cache_variation']
+                    : '';
+
+                // If variation is different now - bypass 304 mechanism.
+                $variationChanged = ($currentVariationHash !== $lastVariationHash);
+
+                // Update tracking cookie to current variation
+                if ($variationChanged) {
+                    setcookie('np_cache_variation', $currentVariationHash, 0, '/');
+                }
+
+                if (!$variationChanged) {
+                    $httpModifiedSince = isset($_SERVER['HTTP_IF_MODIFIED_SINCE'])
+                        ? strtotime($_SERVER['HTTP_IF_MODIFIED_SINCE'])
+                        : 0;
+
+                    if ($httpModifiedSince && $httpModifiedSince >= $lastModified) {
+                        http_response_code(304);
+                        return;
+                    }
+                }
+                // If variation changed, skip 304 - always serve full response
+            }
+        }
+
+        // Normal flow - serve cache file
         $cacheFileContent = $this->returnCacheFileContent();
         $headers = $cacheFileContent[0];
         $contents = $cacheFileContent[1];
 
         foreach ($headers as $header) {
+            // Skip Last-Modified from cache file only if we set our own from x-cache-ctime
+            if ($setOwnLastModified && strtolower($header['name']) === 'last-modified') {
+                continue;
+            }
             header($header['name'] . ': ' . $header['value'], false);
         }
 
         echo $contents;
+    }
+
+    /**
+     * Get cache creation time from x-cache-ctime header.
+     */
+    private function getCacheCreationTime()
+    {
+        if ($this->useInvalidated) {
+            $filePath = $this->getCachefilePath("stale");
+        } else {
+            $filePath = $this->getCachefilePath();
+        }
+
+        try {
+            $headers = Filesystem::fileGetHeaders($filePath);
+            return !empty($headers["x-cache-ctime"]) ? (int)$headers["x-cache-ctime"] : 0;
+        } catch (\Exception $e) {
+            return 0;
+        }
+    }
+
+    /**
+     * Get variation cookie prefix (only cookies that create cache variations).
+     * Excludes the tracking cookie to prevent circular dependency.
+     * Returns empty string if no variation cookies are present.
+     */
+    private function getVariationCookiePrefix()
+    {
+        $prefix = '';
+
+        $cookies = $this->cookiesProvider ? call_user_func($this->cookiesProvider) : $this->cookies;
+        ksort($cookies);
+
+        foreach ($cookies as $cookieName => $cookieValue) {
+            // Exclude our tracking cookie to prevent circular dependency
+            // (tracking cookie value depends on this prefix)
+            if ($cookieName === 'np_cache_variation') {
+                continue;
+            }
+
+            foreach ($this->supportedCookies as $cookie) {
+                if (preg_match('/' . NitroPack::wildcardToRegex($cookie) . '/', $cookieName)) {
+                    $prefix .= $cookieName . '=' . $cookieValue . ';';
+                    break;
+                }
+            }
+        }
+
+        return $prefix;
     }
 
     public function returnCacheFileContent()

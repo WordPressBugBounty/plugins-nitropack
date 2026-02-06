@@ -74,8 +74,7 @@
 				});
 
 				action_btn.click(function () {
-					enableSafemode().then(function (respType) {
-						console.log(respType, test_mode_notification.length);
+					enableSafemode().then(function (respType) {					
 						if (respType && !test_mode_notification.length) {
 							return renderNotification();
 						} else if (!respType && test_mode_notification.length) {
@@ -145,34 +144,10 @@
 				action: 'nitropack_disable_safemode',
 				nonce: nitroNonce
 			}, function (response) {
-				var resp = JSON.parse(response);
-				console.log(resp);
+				var resp = JSON.parse(response);			
 				if (resp.type == "success") $(document).find('.nitro-notification.test-mode').remove();
 
 				NitropackUI.triggerToast(resp.type, resp.message);
-			});
-		};
-
-		var loadSafemodeStatus = () => {
-			$("#loading-safemode-status").removeClass('hidden');
-			return $.ajax({
-				url: ajaxurl,
-				type: "POST",
-				data: {
-					action: "nitropack_safemode_status",
-					nonce: nitroNonce
-				},
-				dataType: "json"
-			}).done(function (resp) {
-				if (resp.type == "success") {
-					$("#safemode-status").attr("checked", !!resp.isEnabled);
-					$("#loading-safemode-status").hide();
-				} else {
-					setTimeout(loadSafemodeStatus, 500);
-				}
-				return resp.isEnabled;
-			}).fail(function () {
-				console.error("Error loading safemode status");
 			});
 		};
 
@@ -191,14 +166,5 @@
 				console.error("Error rendering notification");
 			});
 		};
-
-		loadSafemodeStatus().then(function (resp) {
-			if (resp.isEnabled && !test_mode_notification.length) {
-				return renderNotification();
-			} else if (!resp.isEnabled && test_mode_notification.length) {
-				test_mode_notification.remove();
-			}
-		});
-
 	});
 </script>

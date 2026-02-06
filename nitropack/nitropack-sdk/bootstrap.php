@@ -197,14 +197,23 @@ function nitropack_handle_webhook() {
             }
             break;
         case "cache_clear":
+
+            $doAction = ! empty( $_POST['useInvalidate'] )
+                ? static function ( $url = null ) {
+                    nitropack_sdk_invalidate_local( $url );
+                }
+                : static function ( $url = null ) {
+                    nitropack_sdk_purge_local( $url );
+                };
+
             if (!empty($_POST["url"])) {
                 $urls = is_array($_POST["url"]) ? $_POST["url"] : array($_POST["url"]);
                 foreach ($urls as $url) {
                     $sanitizedUrl = nitropack_sanitize_url_input($url);
-                    nitropack_sdk_purge_local($sanitizedUrl);
+                    $doAction($sanitizedUrl);
                 }
             } else {
-                nitropack_sdk_purge_local();
+                $doAction();
                 nitropack_sdk_delete_backlog();
             }
             break;
@@ -224,7 +233,7 @@ function nitropack_sanitize_url_input($url) {
     return $result;
 }
 
-function nitropack_sdk_invalidate($url = NULL, $tag = NULL, $reason = NULL) {
+function nitropack_sdk_invalidate_local($url = NULL, $tag = NULL, $reason = NULL) {
     if (null !== $nitro = nitropack_get_instance()) {
         try {
             if ($tag) {
@@ -248,6 +257,13 @@ function nitropack_sdk_invalidate($url = NULL, $tag = NULL, $reason = NULL) {
     }
 
     return false;
+}
+
+/**
+ * @deprecated For SDK version >= 0.56.2 use nitropack_sdk_invalidate_local instead.
+ */
+function nitropack_sdk_invalidate($url = NULL, $tag = NULL, $reason = NULL) {
+    return nitropack_sdk_invalidate_local($url = NULL, $tag = NULL, $reason = NULL);
 }
 
 function nitropack_sdk_purge($url = NULL, $tag = NULL, $reason = NULL, $type = \NitroPack\SDK\PurgeType::COMPLETE) {

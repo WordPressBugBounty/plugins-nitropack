@@ -6,7 +6,7 @@ $green-500: #00c7a2;
 $green-400: #33d2b5;
 $green-300: #3ff6d4;
 $green-100: #b8fff2;
-$green-50: #E9FFFB;
+$green-50: #e9fffb;
 //purple
 $purple-700: #4600cc;
 $purple-500: #8240ff;
@@ -34,7 +34,7 @@ $blue-100: #e1effe;
 $yellow-700: #987e00;
 $yellow-600: #ccaa00;
 $yellow-500: #ffd400;
-$yellow-200: #ffefa3; 
+$yellow-200: #ffefa3;
 $yellow-100: #fff8d7;
 //assign
 $primary-color: $purple-700;
@@ -50,7 +50,7 @@ $line-height: 24px;
 /* Box Shadow */
 $shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.08);
 $dropdown-shadow: 0 1px 3px rgba(27, 0, 78, 0.15);
-$toast-shadow: 0 4px 12px rgba(0,0,0,.1);
+$toast-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 /* Borders */
 $border-radius: 4px;
 /* layout */
@@ -190,7 +190,7 @@ $transition: ease-in-out 0.3s;
         opacity: 0.5;
     }
 }
-@mixin btn_color($color) { 
+@mixin btn_color($color) {
     color: $color;
     border-color: $color;
 }

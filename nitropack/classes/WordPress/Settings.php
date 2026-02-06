@@ -1,8 +1,13 @@
 <?php
 
 namespace NitroPack\WordPress;
-
+use NitroPack\WordPress\Settings\Subscription;
+use NitroPack\WordPress\Settings\CacheWarmup;
+use NitroPack\WordPress\Settings\Optimizations;
+use NitroPack\WordPress\Settings\OptimizationLevel;
+use NitroPack\WordPress\Settings\GeneratePreview;
 use NitroPack\WordPress\Settings\TestMode;
+use NitroPack\WordPress\Settings\StockRefresh;
 use NitroPack\WordPress\Settings\Shortcodes;
 use NitroPack\WordPress\Settings\Logger;
 
@@ -25,11 +30,41 @@ class Settings {
 	 * - 'nitropack-distribution': (string) Distribution type, default is 'regular'.
 	 */
 	private $settings;
+
+    public $cache_warmup;
+    /**
+     * Grabs Subscription class
+     * @var Subscription
+     */
+    public $subscription;
+        /**
+     * Grabs Optimizations class
+     * @var Optimizations
+     */
+    public $optimizations;
+    /**
+     * Grabs OptimizationLevel class
+     * @var OptimizationLevel
+     */
+    public $optimization_level;
+
+    /**
+     * Grabs GeneratePreview class
+     * @var GeneratePreview
+     */
+    public $generate_preview;
+
 	/**
 	 * Grabs TestMode class
 	 * @var TestMode
 	 */
 	public $test_mode;
+
+	/**
+	 * Grabs StockRefresh class
+	 * @var StockRefresh
+	 */
+	public $stock_refresh;
 	/**
 	 * Grabs Shortcodes class
 	 * @var Shortcodes
@@ -41,10 +76,17 @@ class Settings {
 	 *
 	 * Initializes the default required settings for the NitroPack plugin.
 	 */
-	function __construct($config = null) {
-		$this->default_required_settings();
+	function __construct($config = null) {        
+        add_action( 'admin_init', [ $this, 'move_existing_options' ] );        
+		$this->default_required_settings(); 
 		//initialize each setting
-		$this->test_mode = new TestMode();
+        $this->subscription = Subscription::getInstance();
+        $this->optimizations = Optimizations::getInstance();
+        $this->optimization_level = OptimizationLevel::getInstance();
+        $this->cache_warmup = CacheWarmup::getInstance(); 
+        $this->test_mode = TestMode::getInstance();
+        $this->stock_refresh = StockRefresh::getInstance();
+        $this->generate_preview = GeneratePreview::getInstance();
         $this->shortcodes = new Shortcodes();
         $this->logger = new Logger($config);
 	}
@@ -121,6 +163,7 @@ class Settings {
             $this->settings['nitropack-webhookToken'] = null;
         }
     }
+
     /**
      * Get NitroPack configuration for ajaxShortcodes
      *
@@ -268,5 +311,21 @@ class Settings {
         </div>
 
     <?php
+    }
+
+    /**
+     * Move wrongly formatted nitropack options to correct ones and delete old ones.
+     * @return void
+     */
+    public function move_existing_options() {       
+        if (! empty( $_GET['page'] ) && $_GET['page'] === 'nitropack') {
+            $existing_options = [ 'np_warmup_sitemap' => 'nitropack-warmup-sitemap', 'nitropack_minimumLogLevel' => 'nitropack-minimumLogLevel' ];
+            foreach ( $existing_options as $option => $new_option ) {
+                if ( $old_option = get_option( $option ) ) {                  
+                    update_option( $new_option, $old_option );				
+                    delete_option( $option );  
+                }
+            }
+        }
     }
 }

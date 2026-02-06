@@ -7,7 +7,7 @@ namespace Composer\Autoload;
 class ComposerStaticInit7870f61d673f8dea0c9a0129345e2acb
 {
     public static $prefixLengthsPsr4 = array (
-        'N' => 
+        'N' =>
         array (
             'NitroPack\\Url\\' => 14,
             'NitroPack\\SDK\\' => 14,
@@ -16,15 +16,15 @@ class ComposerStaticInit7870f61d673f8dea0c9a0129345e2acb
     );
 
     public static $prefixDirsPsr4 = array (
-        'NitroPack\\Url\\' => 
+        'NitroPack\\Url\\' =>
         array (
             0 => __DIR__ . '/..' . '/nitropack/url/src',
         ),
-        'NitroPack\\SDK\\' => 
+        'NitroPack\\SDK\\' =>
         array (
             0 => __DIR__ . '/../..' . '/NitroPack/SDK',
         ),
-        'NitroPack\\HttpClient\\' => 
+        'NitroPack\\HttpClient\\' =>
         array (
             0 => __DIR__ . '/..' . '/nitropack/httpclient/src',
         ),

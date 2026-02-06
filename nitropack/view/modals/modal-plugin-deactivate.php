@@ -1,6 +1,5 @@
 <div id="modal-plugin-deactivate" data-modal-backdrop="" tabindex="-1" class="hidden modal-wrapper popup-modal"
-	data-plugin-path=""
-	data-plugin-name="">
+	data-plugin-path="" data-plugin-name="">
 	<div class="popup-container">
 		<div class="popup-inner">
 			<!-- Modal header -->
@@ -15,11 +14,12 @@
 				</button>
 				<img src="<?php echo plugin_dir_url( __FILE__ ) . '../images/info.svg'; ?>" width="46" height="46"
 					class="icon rotate-180">
-				<h3 class="text-center"><?php esc_html_e( 'Deactivate', 'nitropack'); ?> <span class="plugin-name"></span>?</h3>
+				<h3 class="text-center"><?php esc_html_e( 'Deactivate', 'nitropack' ); ?> <span
+						class="plugin-name"></span>?</h3>
 			</div>
 			<!-- Modal body -->
 			<div class="popup-body text-center">
-				<p><?php  esc_html_e( 'This will turn it off to help avoid conflicts with NitroPack. You can turn it back on anytime from the Plugins page.', 'nitropack' ); ?>
+				<p><?php esc_html_e( 'This will turn it off to help avoid conflicts with NitroPack. You can turn it back on anytime from the Plugins page.', 'nitropack' ); ?>
 				</p>
 			</div>
 
@@ -32,14 +32,15 @@
 		</div>
 	</div>
 </div>
+
 <script>
 	jQuery(document).ready(function ($) {
 		const modalId = 'modal-plugin-deactivate';
 		const $targetEl = document.getElementById(modalId),
 			modal_options = {
-				closable: true,				
+				closable: true,
 				onShow: () => {
-					
+
 				},
 			},
 			instanceOptions = {
@@ -53,11 +54,11 @@
 			modal_icon = modal_wrapper.find('.icon'),
 			modal_footer = modal_wrapper.find('.popup-footer'),
 			close_btn = modal_footer.find('.popup-close'),
-			action_btn = modal_footer.find('.popup-action');			
+			action_btn = modal_footer.find('.popup-action');
 
 		$('.modal-plugin-deactivate').click(function (e) {
 			e.preventDefault();
-			
+
 			const deactivate_plugins_button = $(this);
 			modal_wrapper.attr('data-plugin-name', deactivate_plugins_button.data('plugin-name'));
 			modal_wrapper.attr('data-plugin-path', deactivate_plugins_button.data('plugin-path'));
@@ -66,7 +67,7 @@
 		});
 		action_btn.click(function (e) {
 			const plugin = modal_wrapper.data('plugin-path'),
-			plugin_name = modal_wrapper.data('plugin-name');
+				plugin_name = modal_wrapper.data('plugin-name');
 			$.ajax({
 				url: ajaxurl,
 				type: "POST",
@@ -78,7 +79,7 @@
 				},
 				beforeSend: function () {
 					modal_icon.attr('src', '<?php echo plugin_dir_url( __FILE__ ) . '../images/loading.svg'; ?>');
-					modal_title.html('<?php esc_html_e( 'Deactivating ' . $clashingPlugin['name'] . '...', 'nitropack' ); ?>');
+					modal_title.html('<?php esc_html_e( 'Deactivating ', 'nitropack' ); ?>' + plugin_name + '...');
 					modal_footer.addClass('hidden');
 					modal_text.text('');
 				},

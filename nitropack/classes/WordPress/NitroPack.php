@@ -342,7 +342,7 @@ class NitroPack {
 			$ajaxShortcodes_settings = $staticConfig[ $configKey ]['options_cache']['ajaxShortcodes'];
 		}
 		//default value is null, stored is int       
-		$minimumLogLevel = (int) get_option( 'nitropack_minimumLogLevel', null );
+		$minimumLogLevel = (int) get_option( 'nitropack-minimumLogLevel', null );
 		if ( ! $minimumLogLevel ) {
 			$minimumLogLevel = null;
 		}

@@ -49,11 +49,11 @@ class Notifications {
 			$components->render_notification( NITROPACK_PLUGIN_DATA_DIR_WARNING, 'warning', 'Unable to initialize plugin data dir' );
 		}
 
-		if ( ! empty( $_COOKIE["nitropack_after_activate_notice"] ) ) {
-			$components->render_notification( "<script>document.cookie = 'nitropack_after_activate_notice=1; expires=Thu, 01 Jan 1970 00:00:01 GMT;';</script>  Go to its' settings to connect it in order to start optimizing your site.",
-				'info',
-				esc_html__( 'NitroPack activated but not connected', 'nitropack' ),
-				'<a href="' . admin_url( 'admin.php?page=nitropack' ) . '">' . esc_html__( 'NitroPack Settings', 'nitropack' ) . '</a>' );
+		if ( ! empty( $_COOKIE["nitropack_after_activate_notice"] ) && !get_nitropack()->isConnected() ) {
+			$components->render_notification( "Please complete the setup process to activate optimizations.",
+				'promo',
+				esc_html__( 'Connect your website to enable NitroPack\'s optimizations', 'nitropack' ),
+				'<a href="' . admin_url( 'admin.php?page=nitropack' ) . '" class="btn btn-primary">' . esc_html__( 'Connect your website', 'nitropack' ) . '</a>' );
 		}
 
 		$this->render_app_notifications();

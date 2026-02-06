@@ -73,6 +73,6 @@ class Cloudflare {
 
 	private static function canUseCloudflareHelper()
 	{
-		return defined('CLOUDFLARE_PLUGIN_DIR') && class_exists('\CF\WordPress\Hooks');
+		return defined('CLOUDFLARE_PLUGIN_DIR') && class_exists('\Cloudflare\APO\WordPress\Hooks');
 	}
 }
