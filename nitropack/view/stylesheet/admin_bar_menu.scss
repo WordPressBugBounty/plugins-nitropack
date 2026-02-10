@@ -12,10 +12,10 @@
   }
   .icon {
     margin-left: 0.5rem;
-    width: 1rem;
+    min-width: 1rem;
   }
   .loading.icon {
-    width: 0.875rem;
+    min-width: 0.875rem;
   }
   .nitro-status-ok {
     background-color: #28a745;

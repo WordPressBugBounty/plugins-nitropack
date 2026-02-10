@@ -83,7 +83,7 @@ class Components {
 		}
 
 		if ( $dismissibleId ) {
-			
+
 			$classes[] = 'is-dismissible';
 
 			if ( $dismissBy === 'option' ) {
@@ -102,7 +102,7 @@ class Components {
 					return;
 				}
 			}
-	
+
 		}
 
 		if ( $classes && is_array( $classes ) ) {
@@ -155,9 +155,11 @@ class Components {
 	 * @param string $id The ID attribute for the checkbox input.
 	 * @param int $value The value to determine if the checkbox should be checked. If the value is greater than 0, the checkbox will be checked.
 	 */
-	public function render_toggle( $id, $value ) { ?>
+	public function render_toggle( $id, $value, $attr = [] ) {
+		$disabled = ! empty( $attr['disabled'] ) ? 'disabled' : '';
+		?>
 		<label class="inline-flex items-center cursor-pointer ml-auto">
-			<input type="checkbox" id="<?php echo $id; ?>" class="sr-only peer" <?php echo (int) $value > 0 ? "checked" : ""; ?>>
+			<input type="checkbox" id="<?php echo esc_attr( $id ); ?>" name="<?php echo esc_attr( $id ); ?>" <?php echo $disabled; ?> class="sr-only peer" <?php echo (int) $value > 0 ? "checked" : ""; ?>>
 			<div class="toggle"></div>
 		</label>
 		<?php
@@ -177,7 +179,7 @@ class Components {
 	 * }
 	 */
 	public function render_button( $args ) {
-		$defaults = [ 
+		$defaults = [
 			'text' => '',
 			'type' => 'button',
 			'classes' => 'btn btn-secondary',
@@ -198,7 +200,7 @@ class Components {
 				<img src="<?php echo esc_url( $this->plugin_dir_url . 'view/images/' . $options['icon'] ); ?>"
 					class="inline-block mr-2" alt="">
 			<?php endif; ?>
-			<span class="btn-text"><?php echo esc_html( $options['text'] ); ?></span>
+			<span class="btn-text"><?php echo esc_html( $options['text'], 'nitropack' ); ?></span>
 			<?php if ( $options['type'] === 'button' ) : ?>
 			</button>
 		<?php else : ?>

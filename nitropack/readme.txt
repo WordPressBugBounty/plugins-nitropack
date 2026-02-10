@@ -1,20 +1,17 @@
-=== NitroPack – Caching & Speed Optimization for Core Web Vitals, Defer CSS & JS, Lazy load Images and CDN ===
+=== NitroPack – Performance, Page Speed & Cache Plugin for Core Web Vitals, CDN & Image Optimization ===
 Contributors: nitropack
-Tags: speed, cache, performance, optimize pagespeed, lazy load, cdn, cache, critical css
+Tags: cache, performance, page speed, website speed, core web vitals
 Requires at least: 4.7
-Tested up to: 6.9
+Tested up to: 6.9.1
 Requires PHP: 7.4
-Stable tag: 1.18.9
+Stable tag: 1.19.0
 License: GNU General Public License, version 2
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-
-Boost site speed scores and pass Core Web Vitals with caching, CDN, image optimization, critical CSS, minification, and more - all in one tool.
-
+Boost site speed, performance, and page experience with an all-in-one cache and speed optimization plugin. Pass Core Web Vitals with CDN, image optimization, critical CSS, lazy loading, CSS & JS minification.
 
 == Description ==
 Speed up your WordPress site, achieve a 90+ Performance score on PageSpeed Insights, and pass your Core Web Vitals with NitroPack.
-
 
 Boost your website’s speed effortlessly with NitroPack, the ultimate solution trusted by hundreds of thousands worldwide to climb Google rankings, boost conversions, and expand businesses. NitroPack stands above traditional caching with its cloud-based infrastructure and advanced optimizations, delivering [top scores on Core Web Vitals](https://lookerstudio.google.com/s/p0XCJZ_3A5o) and Lighthouse tests. This ensures a seamless, fast experience for your visitors.
 
@@ -24,34 +21,33 @@ https://youtu.be/jLzYUKSo5Jo
 
 
 ## Why choose NitroPack?
-  
+
 - **Instant Performance Boost Without Coding**:
-NitroPack delivers a significant speed boost to your website instantly, eliminating the need for complex coding or technical expertise. Enjoy faster load times and improved PageSpeed scores effortlessly.
+NitroPack delivers a significant website speed and performance boost instantly, eliminating the need for complex coding or technical expertise. Enjoy faster page load speed, improved page speed scores, and better user experience effortlessly.
 
 - **Automated Optimization for Core Web Vitals**:
-NitroPack automates the optimization of Core Web Vitals, ensuring your website consistently meets and exceeds the performance metrics that impact user experience and search engine rankings. Learn more about how we can help you [boost your Core Web Vitals scores](https://youtu.be/h9V4oL5DQ9M?list=PLxSs9-caejlWX3fbP5iJ0S0-juOhSJgzO) with our latest webinars with Google.  
+NitroPack automates the optimization of [Core Web Vitals](https://youtu.be/h9V4oL5DQ9M?list=PLxSs9-caejlWX3fbP5iJ0S0-juOhSJgzO), ensuring your website consistently meets and exceeds the page experience metrics that impact user experience, SEO, and search engine rankings. Learn more about how we can help you boost your Core Web Vitals scores with our latest webinars with Google.  
 
 - **Optimizations with Zero Impact on Your Hosting’s CPU and RAM**:
-NitroPack handles all resource-intensive optimizations, including caching and image and file optimizations, on its servers. This preserves your hosting resources, allowing your website’s speed to improve seamlessly without imposing any strain on your server’s CPU or RAM. This guarantees efficient and uninterrupted performance enhancement.
+NitroPack handles all resource-intensive performance optimization tasks, including caching, image optimization, and file minification, on its own servers. This preserves your hosting resources while improving website speed and page performance without putting strain on your server’s CPU or RAM.
 
-An additional customer-centric approach safeguards your site’s performance by working on copies of your files, meaning your original content stays unchanged. With NitroPack, you can innovate confidently, knowing your website’s integrity is protected while you optimize for speed and efficiency.
-
+An additional customer-centric approach safeguards your site’s performance and stability by working on copies of your files, meaning your original content stays unchanged. With NitroPack, you can optimize page speed and user experience confidently, knowing your website’s integrity is protected.
 
 [Speed up your site with NitroPack](https://nitropack.io/?utm_source=wp-repo&utm_medium=link&utm_term=description&utm_campaign=WP-plugin&utm_content=speed-up-your-site-with-nitropack)
 
 
 ## ✅ What’s included in the Free plan?
 
-NitroPack’s Free plan* is recommended for small websites and testing purposes. Install it on up to 1 website (no CC required) and experience the powerful optimizations we offer firsthand before committing to our [paid subscriptions](https://nitropack.io/pricing?utm_source=wp-repo&utm_medium=link&utm_campaign=WP-plugin&utm_id=wp-repo&utm_term=description&utm_content=paid-subscriptions), starting at $7/mo.
+NitroPack’s Free plan* is recommended for small websites and testing website speed optimization. Install it on up to 1 website (no CC required) and experience the powerful performance and cache optimizations we offer firsthand before committing to our [paid subscriptions](https://nitropack.io/pricing?utm_source=wp-repo&utm_medium=link&utm_campaign=WP-plugin&utm_id=wp-repo&utm_term=description&utm_content=paid-subscriptions), starting at $7/mo.
 
-With up to 1,000 pageviews and 1GB of Cloudflare CDN included monthly, you can leverage over 35 of NitroPack’s optimizations across Caching, Image and Media, JavaScript, HTML and CSS, and Fonts.
+With up to 1,000 pageviews and 1GB of CDN bandwidth included monthly, you can leverage over 35 of NitroPack’s speed optimization features across Caching, Image and Media, JavaScript, HTML and CSS, and Fonts.
 
-Within seconds of installation, NitroPack applies the following features automatically to boost your loading speed and fix common WordPress site speed issues:
+Within seconds of installation, NitroPack applies the following features automatically to boost page speed, improve site speed, and fix common WordPress performance issues:
 
-- **Caching**: Minify Resources, Ignored parameters, Cache Reset, Excluded resources, Excluded URLs, Dynamic content cookies, Advanced caching, Smart cache invalidation, Light Purge, Device-aware Caching, Integration with 3rd-party cache, Cache Warmup
-- **Image and Media**: Lazy load images, Lazy load iframes, Video facades, Lossless and Lossy Image Optimization, WebP Conversion, Preemptive Image Sizing, Lazy Loading of Background Images
+- **Caching**: Minify Resources, Ignored parameters, Cache Reset, Excluded resources, Excluded URLs, Dynamic content cookies, Advanced caching, Smart cache invalidation, Light Purge, Device-aware caching, Integration with 3rd-party cache, Cache Warmup
+- **Image and Media**: Lazy load images, Lazy load iframes, Video facades, Lossless and Lossy Image Optimization, WebP Conversion, Preemptive Image Sizing, Lazy loading of background images
 - **JavaScript**: Remove render-blocking resources, JS Minification, Third-party Scripts Optimization
-- **HTML and CSS**: Keep HTML comments, HTML normalization, Generate critical CSS, Custom CSS, Combine CSS, CSS Minification, Advanced CSS Management, Advanced Resource Loader, HTML Minification, Page Prefetching, and Prerendering
+- **HTML and CSS**: Keep HTML comments, HTML normalization, Generate critical CSS, Custom CSS, Combine CSS, CSS Minification, Advanced CSS Management, Advanced Resource Loader, HTML Minification, Page prefetching and prerendering
 - **Fonts**: Override Font Rendering Behavior
 - **CDN**: Static Content Caching, GZIP and Brotli Compression, HTTP/3 Compatibility.
 
@@ -59,62 +55,54 @@ For questions and technical assistance, customers on the free plan can rely on o
 
 ## What makes NitroPack the ultimate speed optimizer?
 ## 💾 ADVANCED CACHING:
-Thanks to its advanced features and smart caching system, NitroPack guarantees that your website stays fast and stable, even when lots of people visit at the same time.
+Thanks to its advanced features and smart caching system, NitroPack ensures fast and stable website performance, even during traffic spikes.
 
-
-- **Automatic Cache Warmup**: NitroPack proactively caches the pages of your website before your users interact with it, ensuring that every visitor is served with a fast version of your site.
-- **Smart Invalidation**: This process ensures that the cached content remains up-to-date without unnecessarily clearing and rebuilding the entire cache by tracking the changes made on the site and then invalidating the cache related to these changes.
-- **Device and Cookie-Aware Caching**: Customize cache strategies based on user devices and cookies, ensuring a tailored and efficient user experience.
-- **Browser Cache**: Leverage the built-in browser cache for lightning-fast content delivery, reducing load times for returning visitors.
+- **Automatic Cache Warmup:** Preloads cached pages to ensure fast delivery from the first visit
+- **Smart Cache Invalidation:** Keeps cached content fresh without unnecessary cache resets
+- **Device- and Cookie-Aware Caching:** Delivers optimized cache versions for different devices and users for a tailored and fast user experience.
+- **Browser Cache:** Improves load speed for returning visitors by leveraging the built-in browser cache
 
 ## 🖼️ IMAGE OPTIMIZATION:
-Say goodbye to the frustration of manual adjustments and handling multiple tools to optimize your images. With NitroPack, your image file sizes shrink by up to 7x while preserving their quality, allowing your content to be served at lightning speed.
+NitroPack eliminates manual image optimization by automatically reducing image size by up to 7x while preserving quality, dramatically improving page speed and user experience.
 
-- **Automatic Image Optimization**: Dynamically resizes images, converts them to the efficient WebP format, and applies the best compression technique—either lossy or lossless—to reduce file sizes without sacrificing quality, ensuring your images load quickly and efficiently.
-- **[Adaptive Image Sizing](https://nitropack.io/blog/post/new-adaptive-image-sizing?utm_source=wp-repo&utm_medium=link&utm_campaign=WP-plugin&utm_content=adaptive-image-sizing)**: Optimizes images to perfectly fit their display containers across devices, ensuring they load quickly while still maintaining crisp, high resolution for an enhanced user experience.
-- **Advanced Lazy loading**: Improve page loading time by loading offscreen images and videos only when they are required. NitroPack can lazy load images, GIFs, locally hosted videos and videos on YouTube, Vimeo and Wistia.
+- **Automatic Image Optimization:** Dynamically resizes images, converts them to WebP format, and applies the best compression technique to reduce file sizes without sacrificing quality
+- **Adaptive Image Sizing:** Optimizes images to perfectly fit their display containers across devices for an enhanced user experience
+- **Advanced Lazy Loading:** Improves page load speed by loading offscreen images and videos (including GIFs, YouTube, Vimeo, and Wistia) only when needed
 
 ## 🌐 BUILT-IN GLOBAL CDN: 
-NitroPack offers a built-in Cloudflare CDN as part of its offering. With hundreds of servers distributed across 120+ countries, your site and resources are delivered quickly to all visitors, no matter their location.
+NitroPack includes a global Content Delivery Network (CDN) powered by Cloudflare, delivering content from hundreds of servers across 120+ countries.
 
-- **Ultra-Fast Content Delivery (CDN)**: Benefit from a top-tier global CDN, ensuring both static and dynamic content are delivered at lightning speed, regardless of your user’s location. With hundreds of servers stationed across 100+ countries, your site and resources are delivered quickly to all visitors, no matter their location.
-- **Compression Excellence**: GZIP and Brotli Compression ensure optimal data transfer efficiency, making sure your content reaches your audience fast.
-- **Cutting-Edge Technology**: Stay ahead with HTTP/3 Compatibility, embracing the latest advancements in web protocols for unparalleled performance.
+- **Ultra-fast CDN delivery** for static and dynamic content, regardless of your users' location
+- **GZIP & Brotli compression** for faster data transfer
+- **HTTP/3 support** for modern, high-performance connections
 
 ## 🛠️ CODE OPTIMIZATION:
-The powerful optimization set of NitroPack allows you to concatenate your code structure: you can minify, compress, and merge your HTML, CSS, and JS files – all with just a click of a button.
+NitroPack’s code optimization engine improves page speed and performance by optimizing HTML, CSS, and JavaScript automatically.
 
-
-- **Advanced Resource Loader**: Significantly speeds up your website by intelligently managing how resources are loaded, ensuring a faster, more responsive user experience without the need for technical intervention.
-- **[Critical CSS Optimization](https://nitropack.io/blog/post/critical-css?utm_source=wp-repo&utm_medium=link&utm_campaign=WP-plugin&utm_content=critical-css)**: Prioritize above-the-fold CSS for rapid page rendering, making your site appear faster to users.
-- **Deferred Loading**: Optimize JavaScript loading for improved page responsiveness, ensuring a smooth and interactive user experience.
-- **CSS and JavaScript Combining**: Combine CSS and JavaScript files for improved loading efficiency, reducing HTTP requests and enhancing overall site speed.
-- **JS Minification and Compression**: Minify and compress JS files for enhanced performance, ensuring your scripts run efficiently.
-- **HTML Compression**: Compress HTML files for faster loading times, ensuring a swift and smooth user journey.
-- **[DNS Preconnects](https://nitropack.io/blog/post/resource-hints-performance-optimization?utm_source=wp-repo&utm_medium=link&utm_campaign=WP-plugin&utm_content=DNC-prefetching-preloarding)**: Accelerate resource fetching with DNS preconnects, reducing the time it takes to fetch external resources.
+- **Advanced Resource Loader** for intelligent management of resource loading without the need for technical intervention
+- **[Critical CSS optimization](https://nitropack.io/blog/post/critical-css?utm_source=wp-repo&utm_medium=link&utm_campaign=WP-plugin&utm_content=critical-css)** that prioritizes above-the-fold CSS for rapid page rendering, making your site appear faster to users
+- **Deferred JavaScript loading** for improved page responsiveness
+- **CSS & JS combining and minification** for improved loading efficiency, reduced HTTP requests, and faster overall site speed.
+- **HTML compression** and [DNS preconnects](https://nitropack.io/blog/post/resource-hints-performance-optimization?utm_source=wp-repo&utm_medium=link&utm_campaign=WP-plugin&utm_content=DNC-prefetching-preloarding) reduce the time it takes to fetch external resources
 
 ## ✏️ FONT OPTIMIZATION:
-Improve your site’s speed by optimizing all your fonts. No matter the web font you’re using, NitroPack allows you to defer the font loading and reduce the file size by over 60% by removing unused font symbols (glyphs). Keep your site looking unique without compromising speed and performance.
+Improve website speed by optimizing web fonts by over 60%, including Google Fonts, without sacrificing design.
 
+- **[Font subsetting](https://nitropack.io/blog/post/font-subsetting-nitropack?utm_source=wp-repo&utm_medium=link&utm_campaign=WP-plugin&utm_content=font-subsetting)** to remove unused glyphs on the page
+- **Deferred font loading** for better page experience
+- **Font compression (WOFF2)** to reduce font file size by up to 50%
+- **Google Fonts optimization** via hosting them on our CDN
 
-- **[Font Subsetting](https://nitropack.io/blog/post/font-subsetting-nitropack?utm_source=wp-repo&utm_medium=link&utm_campaign=WP-plugin&utm_content=font-subsetting)**: Subset fonts to use only necessary characters, reducing page load times without sacrificing typography.
-- **Font Loading Control**: Deferred loading of fonts and CSS compression for enhanced performance, ensuring fonts load precisely when needed.
-- **Font Compression**: Reduce font size by up to 50% by converting your fonts to modern formats like WOFF2.
-- **Optimization of Google-hosted fonts**: Benefit from all font optimizations and pagespeed improvements by hosting your Google fonts on our CDN.
-
-To view a complete list of NitroPack’s features, visit the [feature page](https://nitropack.io/page/features?utm_source=wp-repo&utm_medium=link&utm_term=description&utm_campaign=WP-plugin&utm_content=feature-page).
+To view a complete list of NitroPack’s features, [visit the feature page](https://nitropack.io/page/features?utm_source=wp-repo&utm_medium=link&utm_term=description&utm_campaign=WP-plugin&utm_content=feature-page).
 
 ## ☎️ 24/7 SUPPORT:
-All NitroPack customers get access to expert support and an extensive [knowledge base](https://support.nitropack.io/hc/en-us) for help with general and technical site speed issues. Our support is available round the clock.
-
+All NitroPack customers receive expert live chat support and access to an extensive knowledge base for site speed, performance, and cache-related issues.
 
 ## 🔒 SECURITY AND COMPLIANCE:
-Your safety is our priority. NitroPack is [SOC2 Type 2](https://www.aicpa-cima.com/topic/audit-assurance/audit-and-assurance-greater-than-soc-2) compliant and [ISO 27001](https://www.iso.org/standard/27001) certified, internationally recognized standards for managing information security. We have a devoted team of security specialists working round-the-clock to uphold the highest level of security and compliance. By implementing industry-leading practices, we ensure your data remains secure and your peace of mind intact, 24/7.
-
+Your safety is our priority. NitroPack is SOC2 Type 2 compliant and ISO 27001 certified, internationally recognized standards for managing information security. We have a devoted team of security specialists working around the clock to uphold the highest level of security and compliance. By implementing industry-leading practices, we ensure your data remains secure and your peace of mind intact, while optimizing website performance.
 
 ## 🔌 COMPATIBILITIES:
 NitroPack integrates seamlessly with the most popular WordPress plugins and themes to provide a smooth user experience:
-
 
 ### Plugins:
  - WooCommerce
@@ -173,7 +161,7 @@ Learn from our tutorials on [YouTube Channel](https://www.youtube.com/@nitropack
 Contribute to [NitroPack’s translations](https://translate.wordpress.org/projects/wp-plugins/nitropack/)
 Or rate us on [WordPress](https://wordpress.org/support/plugin/nitropack/reviews/) 🙂
 
-*The Free plan includes a small NitroPack badge in the footer to show visitors the website runs on top-tier performance tech.
+*The Free plan includes a small NitroPack badge in the footer to show visitors the website runs on top-tier performance optimization tech.
 
 == Installation ==
 
@@ -281,6 +269,12 @@ Yes, the plugin uses the [Intercom Chat Widget](https://widget.intercom.io), whi
 5. The only solution you will ever need
 
 == Changelog ==
+= 1.19.0 =
+2026-02-10
+* Improvement: Added Purge & Invalidation buttons on hover in wp-admin post listing
+* Improvement: Better WC Product invalidations
+* Improvement: Code refactoring
+
 = 1.18.9 =
 2026-01-20
 
@@ -317,6 +311,7 @@ Yes, the plugin uses the [Intercom Chat Widget](https://widget.intercom.io), whi
 
 = 1.18.4 =
 2025-08-01
+
 * Bugfixes: Minor fixes
 
 = 1.18.3 =

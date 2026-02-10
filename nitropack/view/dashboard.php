@@ -1,7 +1,7 @@
 <?php
 $settings = new \NitroPack\WordPress\Settings();
+$components = new \NitroPack\WordPress\Settings\Components();
 $notifications = new \NitroPack\WordPress\Notifications\Notifications();
-
 $conflictingPlugins = \NitroPack\WordPress\ConflictingPlugins::getInstance();
 $conflictingPlugins_list = $conflictingPlugins->nitropack_get_conflicting_plugins();
 if ( $conflictingPlugins_list ) {
@@ -62,9 +62,9 @@ if ( empty( $dismissed_notices['skip_cache_warmup'] ) && ! $cache_warmup_enabled
 
 						return $dashboardUrl;
 					}
+					echo $components->render_button( [ 'text' => 'Go to app', 'type' => null, 'classes' => 'btn btn-primary ml-2 flex-shrink-0', 'href' => esc_url( getNitropackDashboardUrl() ), 'attributes' => [ 'target' => '_blank' ] ] );
 					?>
-					<a href="<?php echo esc_url( getNitropackDashboardUrl() ); ?>" target="_blank"
-						class="btn btn-primary ml-2 flex-shrink-0"><?php esc_html_e( 'Go to app', 'nitropack' ); ?></a>
+
 				</div>
 			</div>
 		</div>
@@ -82,34 +82,8 @@ if ( empty( $dismissed_notices['skip_cache_warmup'] ) && ! $cache_warmup_enabled
 			</div>
 			<div class="card-body">
 				<div class="options-container">
-					<div class="nitro-option" id="purge-cache-widget">
-						<div class="nitro-option-main">
-							<div class="text-box">
-								<h6><?php esc_html_e( 'Purge cache', 'nitropack' ); ?></h6>
-								<p><?php esc_html_e( 'Purge affected cache when content is updated or published', 'nitropack' ); ?>
-								</p>
-							</div>
-							<label class="inline-flex items-center cursor-pointer ml-auto">
-								<input type="checkbox" value="" class="sr-only peer" name="purge_cache"
-									id="auto-purge-status" <?php if ( $autoCachePurge )
-										echo "checked"; ?>>
-								<div class="toggle"></div>
-							</label>
-						</div>
-					</div>
-					<div class="nitro-option" id="page-optimization-widget">
-						<div class="nitro-option-main">
-							<div class="text-box">
-								<h6><?php esc_html_e( 'Page optimization', 'nitropack' ); ?></h6>
-								<p><?php esc_html_e( 'Select what post/page types get optimized', 'nitropack' ); ?></p>
-							</div>
-							<a data-modal-target="modal-posttypes" data-modal-toggle="modal-posttypes"
-								class="btn btn-secondary btn-icon">
-								<img src="<?php echo plugin_dir_url( __FILE__ ); ?>images/setting-icon.svg">
-							</a>
-						</div>
-						<?php require_once NITROPACK_PLUGIN_DIR . 'view/modals/modal-posttypes.php'; ?>
-					</div>
+					<?php $settings->auto_purge->render();
+					$settings->cpt_optimization->render(); ?>
 				</div>
 			</div>
 		</div>
@@ -121,9 +95,7 @@ if ( empty( $dismissed_notices['skip_cache_warmup'] ) && ! $cache_warmup_enabled
 			</div>
 			<div class="card-body">
 				<div class="options-container">
-					<div class="nitro-option" id="ajax-shortcodes-widget">
-						<?php $settings->shortcodes->render(); ?>
-					</div>
+					<?php $settings->shortcodes->render(); ?>
 				</div>
 			</div>
 		</div>
@@ -141,115 +113,16 @@ if ( empty( $dismissed_notices['skip_cache_warmup'] ) && ! $cache_warmup_enabled
 			</div>
 			<div class="card-body">
 				<div class="options-container">
-
-					<?php $settings->cache_warmup->render();
-					$settings->test_mode->render(); ?>
-
-					<div class="nitro-option" id="compression-widget">
-						<div class="nitro-option-main">
-							<div class="text-box">
-								<h6><span
-										id="detected-compression"><?php esc_html_e( 'HTML Compression', 'nitropack' ); ?>
-									</span></h6>
-								<p>
-									<?php esc_html_e( 'Compressing the structure of your HTML, ensures faster page rendering and an optimized browsing experience for your users.', 'nitropack' ); ?>
-									<a href="https://support.nitropack.io/en/articles/8390333-nitropack-plugin-settings-in-wordpress#h_29b7ab4836"
-										class="text-blue"
-										target="_blank"><?php esc_html_e( 'Learn more', 'nitropack' ); ?></a>
-								</p>
-							</div>
-							<label class="inline-flex items-center cursor-pointer ml-auto">
-								<input type="checkbox" id="compression-status" class="sr-only peer" <?php echo (int) $enableCompression === 1 ? "checked" : ""; ?>>
-								<div class="toggle"></div>
-							</label>
-						</div>
-						<div class="mt-4 text-primary">
-							<a href="javascript:void(0);" id="compression-test-btn"
-								class="text-primary"><?php esc_html_e( 'Run compression test', 'nitropack' ); ?></a>
-							<div class="flex items-start msg-container hidden">
-								<span class="msg"></span>
-							</div>
-						</div>
-					</div>
-					<?php if ( \NitroPack\Integration\Plugin\BeaverBuilder::isActive() ) { ?>
-						<div class="nitro-option" id="beaver-builder-widget">
-							<div class="nitro-option-main">
-								<div class="text-box">
-									<h6><span
-											id="detected-compression"><?php esc_html_e( 'Sync NitroPack Purge with Beaver Builder', 'nitropack' ); ?>
-										</span></h6>
-									<p>
-										<?php esc_html_e( 'When Beaver Builder cache is purged, NitroPack will perform a full cache purge keeping your site\'s content up-to-date.', 'nitropack' ); ?>
-									</p>
-								</div>
-								<label class="inline-flex items-center cursor-pointer ml-auto">
-									<input type="checkbox" class="sr-only peer" id="bb-purge-status" <?php if ( $bbCacheSyncPurge )
-										echo "checked"; ?>>
-									<div class="toggle"></div>
-								</label>
-							</div>
-						</div>
-					<?php } ?>
-					<div class="nitro-option" id="can-editor-clear-cache-widget">
-						<div class="nitro-option-main">
-							<div class="text-box">
-								<h6><?php esc_html_e( 'Allow Editors to purge cache', 'nitropack' ); ?></h6>
-								<p><?php esc_html_e( 'Give Editors the right to purge cache when content is updated.', 'nitropack' ); ?>
-								</p>
-							</div>
-							<label class="inline-flex items-center cursor-pointer ml-auto">
-								<input type="checkbox" id="can-editor-clear-cache" class="sr-only peer" <?php echo (int) $canEditorClearCache === 1 ? "checked" : ""; ?>>
-								<div class="toggle"></div>
-							</label>
-						</div>
-					</div>
-					<?php if ( nitropack_render_woocommerce_cart_cache_option() ) { ?>
-						<div class="nitro-option" id="cart-cache-widget">
-							<div class="nitro-option-main">
-								<div class="text-box">
-									<h6><?php esc_html_e( 'Cart cache', 'nitropack' ); ?></h6>
-									<p>
-										<?php esc_html_e( 'Your visitors will enjoy full site speed while browsing with items in cart. Fully optimized page cache will be served.', 'nitropack' ); ?>
-									</p>
-
-								</div>
-								<label class="inline-flex items-center cursor-pointer ml-auto">
-									<input type="checkbox" id="cart-cache-status" class="sr-only peer" <?php if ( nitropack_is_cart_cache_active() )
-										echo "checked"; ?> 	<?php if ( ! nitropack_is_cart_cache_available() )
-												   echo "disabled"; ?>>
-									<div class="toggle"></div>
-								</label>
-							</div>
-							<?php if ( ! nitropack_is_cart_cache_available() ) : ?>
-								<div class="msg-container bg-success paid-msg">
-									<p><svg width="20" height="20" viewBox="0 0 20 20" fill="none"
-											xmlns="http://www.w3.org/2000/svg" class="text-success">
-											<g clip-path="url(#clip0_1244_36215)">
-												<path
-													d="M10.0001 18.3333C14.6025 18.3333 18.3334 14.6023 18.3334 9.99996C18.3334 5.39759 14.6025 1.66663 10.0001 1.66663C5.39771 1.66663 1.66675 5.39759 1.66675 9.99996C1.66675 14.6023 5.39771 18.3333 10.0001 18.3333Z"
-													stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
-													stroke-linejoin="round"></path>
-												<path d="M13.3334 9.99996L10.0001 6.66663L6.66675 9.99996" stroke="currentColor"
-													stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-												<path d="M10 13.3333V6.66663" stroke="currentColor" stroke-width="1.5"
-													stroke-linecap="round" stroke-linejoin="round"></path>
-											</g>
-											<defs>
-												<clipPath id="clip0_1244_36215">
-													<rect width="20" height="20" fill="white"></rect>
-												</clipPath>
-											</defs>
-										</svg>
-										<?php esc_html_e( 'This feature is available on Plus plan and above.', 'nitropack' ); ?>
-										<a href="https://app.nitropack.io/subscription/buy" class="text-primary"
-											target="_blank"><b><?php esc_html_e( 'Upgrade here', 'nitropack' ); ?></b></a>
-									</p>
-								</div>
-							<?php endif; ?>
-						</div>
-						<?php $settings->stock_refresh->render(); ?>
-					<?php } ?>
-
+					<?php
+					$settings->cache_warmup->render();
+					$settings->test_mode->render();
+					$settings->html_compression->render();
+					$settings->beaver_builder->render();
+					$settings->editor_clear_cache->render();
+					if ( class_exists( 'WooCommerce' ) ) { ?>
+						<?php $settings->cart_cache->render(); ?>
+						<?php $settings->stock_refresh->render(); 
+					} ?>
 				</div>
 			</div>
 			<div class="card-footer disconnect-container">
@@ -261,7 +134,8 @@ if ( empty( $dismissed_notices['skip_cache_warmup'] ) && ! $cache_warmup_enabled
 		<!-- Basic Settings Card End -->
 
 	</div>
-	<?php $notOptimizedCPTs = nitropack_filter_non_optimized();
+	<?php $CPTOptimization = NitroPack\WordPress\Settings\CPTOptimization::getInstance();
+	$notOptimizedCPTs = $CPTOptimization->nitropack_filter_non_optimized();
 	$notices = get_option( 'nitropack-dismissed-notices', [] );
 	$optimizedCPT_notice = in_array( 'OptimizeCPT', $notices, true ) ? true : false;
 	if ( ! $optimizedCPT_notice && ! empty( $notOptimizedCPTs ) )

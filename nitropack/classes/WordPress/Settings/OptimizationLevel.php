@@ -227,7 +227,7 @@ class OptimizationLevel {
 						<div class="tab-content <?php echo esc_attr( $css ); ?>" role="tabpanel"
 							data-tab="<?php echo $mode_id; ?>-tab">
 							<p class="text-secondary mt-2">
-								<?php esc_html_e( $mode['description'], 'nitropack' ); ?>
+							<?php echo esc_html( $mode['description'] ); ?>
 							</p>
 						</div>
 					<?php endforeach; ?>
@@ -290,14 +290,14 @@ class OptimizationLevel {
 										<?php endfor;
 									endif; ?>
 								</div>
-								<h3><?php esc_html_e( $mode['human_readable_name'], 'nitropack' ); ?></h3>
+								<h3><?php echo esc_html( $mode['human_readable_name'] ); ?></h3>
 								<?php if ( ! $mode['is_available'] && $mode['human_readable_name'] === 'Ludicrous' ) : ?>
 									<div class="ml-auto">
 										<?php echo '<span class="badge badge-success">' . esc_html__( 'Available on Starter', 'nitropack' ) . '</span>' ?>
 									</div>
 								<?php endif; ?>
 							</div>
-							<p><?php esc_html_e( $mode['description_onboarding'], 'nitropack' ); ?></p>
+							<p><?php echo esc_html( $mode['description_onboarding'] ); ?></p>
 						</div>
 						<?php if ( $active ) : ?>
 

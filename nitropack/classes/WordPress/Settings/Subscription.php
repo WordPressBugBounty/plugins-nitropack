@@ -51,32 +51,38 @@ class Subscription {
 			</div>
 			<div class="card-body">
 				<div class="flex flex-row items-center">
-					<div class="plan-name"><?php echo esc_html( $plan_title, 'nitropack' ); ?></div>
-					<a type="button" target="_blank" href="https://app.nitropack.io/account/billing"
-						class="btn btn-secondary ml-auto"
-						id="btn-manage-subscription"><?php esc_html_e( 'Manage subscription', 'nitropack' ); ?></a>
+				<div class="plan-name"><?php echo esc_html( $plan_title ); ?></div>
+					<?php $components = new Components();
+					echo $components->render_button( [ 'text' => 'Manage subscription', 'type' => null, 'classes' => 'btn btn-secondary ml-auto', 'href' => 'https://app.nitropack.io/account/billing', 'attributes' => [ 'id' => 'btn-manage-subscription', 'target' => '_blank' ] ] );
+					?>
 				</div>
 				<div class="table-wrapper">
 					<table class="w-full">
 						<tbody>
 							<tr>
 								<td class="key"><?php esc_html_e( 'Next reset', 'nitropack' ); ?></td>
-								<td class="value" data-next-reset><?php esc_html_e( $next_reset, 'nitropack' ); ?></td>
+							<td class="value" data-next-reset><?php echo esc_html( $next_reset ); ?></td>
 							</tr>
 							<tr>
 								<td class="key"><?php esc_html_e( 'Next billing', 'nitropack' ); ?></td>
-								<td class="value" data-next-billing><?php esc_html_e( $next_billing, 'nitropack' ); ?></td>
+							<td class="value" data-next-billing><?php echo esc_html( $next_billing ); ?></td>
 							</tr>
 							<tr>
 								<td class="key"><?php esc_html_e( 'Page views', 'nitropack' ); ?></td>
 								<td class="value" data-page-views>
-									<?php printf( esc_html__( '%1$s out of %2$s', 'nitropack' ), $page_views, $max_page_views ); ?>
+									<?php
+									/* translators: %1$s: current page views, %2$s: maximum page views */
+									printf( esc_html__( '%1$s out of %2$s', 'nitropack' ), $page_views, $max_page_views );
+									?>
 								</td>
 							</tr>
 							<tr>
 								<td class="key"><?php esc_html_e( 'CDN bandwidth', 'nitropack' ); ?></td>
 								<td class="value" data-cdn-bandwidth>
-									<?php printf( esc_html__( '%1$s out of %2$s', 'nitropack' ), $cdn_bandwidth_used, $max_cdn_bandwidth ); ?>
+									<?php
+									/* translators: %1$s: used CDN bandwidth, %2$s: maximum CDN bandwidth */
+									printf( esc_html__( '%1$s out of %2$s', 'nitropack' ), $cdn_bandwidth_used, $max_cdn_bandwidth );
+									?>
 								</td>
 							</tr>
 						</tbody>

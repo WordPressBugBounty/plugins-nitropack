@@ -1,7 +1,7 @@
 <?php
 
 namespace NitroPack\Integration\Plugin;
-
+use NitroPack\WordPress\Settings\CPTOptimization;
 class ACF {
     const STAGE = "late";
 
@@ -23,7 +23,7 @@ class ACF {
         $allowed_cpts = get_option('nitropack-cacheableObjectTypes');
 
         //refresh option if not set when activating already connected NitroPack
-        if (!is_array($allowed_cpts)) update_option("nitropack-cacheableObjectTypes", nitropack_get_default_cacheable_object_types());
+        if (!is_array($allowed_cpts)) update_option("nitropack-cacheableObjectTypes", CPTOptimization::getInstance()->nitropack_get_default_cacheable_object_types());
 
         if (!in_array(get_post_type($post_id), $allowed_cpts)) return;
 

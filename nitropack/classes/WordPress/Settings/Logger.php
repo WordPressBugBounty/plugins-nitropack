@@ -65,8 +65,7 @@ class Logger {
 						<tr>
 							<th><?php esc_html_e( 'Log Name', 'nitropack' ); ?></th>
 							<th><?php esc_html_e( 'File size', 'nitropack' ); ?></th>
-							<th><?php esc_html_e( 'Date added', 'nitropack' ); ?></th>
-							<th class="hidden"><?php esc_html_e( 'Action', 'nitropack' ); ?></th>
+							<th><?php esc_html_e( 'Date added', 'nitropack' ); ?></th>						
 						</tr>
 					</thead>
 					<tbody>
@@ -97,22 +96,14 @@ class Logger {
 										<td class="file"><a href="<?php echo esc_url( $fileURL ); ?>"
 												target="_blank"><?php echo esc_html( $file ); ?></a></td>
 										<td class="file-size"><?php echo esc_html( size_format( $fileSize ) ); ?></td>
-										<td class="file-date"><?php echo "{$datePart} <div class='time'>{$timePart}</div>"; ?></td>
-										<td class="action hidden"><?php $components->render_button( [ 
-											'text' => 'Download',
-											'type' => 'a',
-											'href' => esc_url( $fileURL ),
-											'icon' => 'download.svg',
-											'classes' => 'btn btn-secondary download-log',
-											'attributes' => [ 'download' => '' ]
-										] ); ?></td>
+										<td class="file-date"><?php echo "{$datePart} <div class='time'>{$timePart}</div>"; ?></td>										
 									</tr>
 								<?php endforeach;
 							else :
-								echo '<tr class="no-logs"><td colspan="4">' . esc_html__( 'No error logs yet.', 'nitropack' ) . '</td></tr>';
+								echo '<tr class="no-logs"><td colspan="3">' . esc_html__( 'No error logs yet.', 'nitropack' ) . '</td></tr>';
 							endif;
 						else :
-							echo '<tr class="no-logs"><td colspan="4">' . esc_html__( 'No error logs yet.', 'nitropack' ) . '</td></tr>';
+							echo '<tr class="no-logs"><td colspan="3">' . esc_html__( 'No error logs yet.', 'nitropack' ) . '</td></tr>';
 						endif; ?>
 					</tbody>
 				</table>

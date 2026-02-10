@@ -68,7 +68,7 @@ class StockRefresh {
 	 * @return void
 	 */
 	public function render() {
-		$stockReduceStatus = get_option( 'nitropack-stockReduceStatus' );
+		$stockReduceStatus = get_option( $this->option_name );
 		?>
 		<div class="nitro-option" id="real-time-stock-refresh-widget">
 			<div class="nitro-option-main">
@@ -79,10 +79,9 @@ class StockRefresh {
 					</p>
 
 				</div>
-				<label class="inline-flex items-center cursor-pointer ml-auto">
-					<input type="checkbox" id="woo-stock-reduce-status" class="sr-only peer" <?php echo (int) $stockReduceStatus === 1 ? "checked" : ""; ?>>
-					<div class="toggle"></div>
-				</label>
+				<?php $components = new Components();
+				$components->render_toggle( 'woo-stock-reduce-status', $stockReduceStatus );
+				?>
 			</div>
 		</div>
 		<?php

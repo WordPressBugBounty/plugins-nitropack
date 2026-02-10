@@ -78,9 +78,10 @@ class Optimizations {
 						<div class="reason"><?php esc_html_e( 'Reason', 'nitropack' ); ?>: <span
 								data-purge-reason><?php echo esc_html( $purge_reason ); ?></span></div>
 					</div>
-					<button id="optimizations-purge-cache" type="button" class="btn btn-secondary"
-						data-modal-target="modal-purge-cache"
-						data-modal-toggle="modal-purge-cache"><?php esc_html_e( 'Purge cache', 'nitropack' ); ?></button>
+					<?php $components = new Components();
+					echo $components->render_button( ['text' => 'Purge cache', 'classes' => 'btn btn-secondary', 'type' => 'button', 'attributes' => ['id' => 'optimizations-purge-cache', 'data-modal-target' => 'modal-purge-cache', 'data-modal-toggle' => 'modal-purge-cache' ] ] );					
+					?>
+				
 				</div>
 			</div>
 			<?php require_once NITROPACK_PLUGIN_DIR . 'view/modals/modal-purge-cache.php'; ?>

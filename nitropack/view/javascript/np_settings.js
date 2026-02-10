@@ -16,13 +16,13 @@ jQuery(document).ready(function ($) {
 					enabled: 0,
 				},
 				canEditorClearCache: {
-					enabled: 0
+					enabled: 0,
 				},
-				cartCache:{
-					enabled: 0
+				cartCache: {
+					enabled: 0,
 				},
 				stockReduce: {
-					enabled:0,
+					enabled: 0,
 				},
 				optimizationLevel: {
 					int: 0,
@@ -48,10 +48,6 @@ jQuery(document).ready(function ($) {
 			this.restoreConnection();
 			this.windowNotification();
 			this.clearResidualCache();
-			//logger
-			this.loggerToggle();
-			this.setLoggerLevel();
-			this.archiveLogs();
 			//unsaved changes
 			this.onPageLeave();
 			//must be last so we get updated copy of inital settings after all other settings init
@@ -76,7 +72,7 @@ jQuery(document).ready(function ($) {
 									"nitropack_apwarning=1; expires=Thu, 01 Jan 1970 00:00:01 GMT; path=" + resp.cookie_path + ";";
 								window.location.reload();
 							}, 1500);
-						}
+						},
 					);
 				});
 			} else {
@@ -98,11 +94,11 @@ jQuery(document).ready(function ($) {
 					() => {
 						this.setupCacheEventListeners(nitroSelf);
 					},
-					{ once: true }
+					{ once: true },
 				);
 			}
 		}
-		/* AJAX purge/invalidate cache */
+		/* AJAX purge/invalidate cache, used in nitropack/classes/WordPress/PurgeCache.php */
 		clearCacheHandler = (clearCacheAction) => {
 			return function (success, error) {
 				$.ajax({
@@ -168,7 +164,7 @@ jQuery(document).ready(function ($) {
 						$("#pending-optimizations-section").hide();
 					}
 					$("[data-optimized-pages-total]").text(resp.data.optimized_pages.total);
-				}
+				},
 			);
 		}
 		optimizations() {
@@ -188,15 +184,15 @@ jQuery(document).ready(function ($) {
 				function (response) {
 					var resp = JSON.parse(response);
 					if (resp.type == "success") {
-						nitroSelf.applyOptimizationCosmetics(mode_name);						
+						nitroSelf.applyOptimizationCosmetics(mode_name);
 						NitropackUI.triggerToast(
 							"info",
-							'Optimization mode changed to <strong class="capitalized">' + mode_name + "</strong>."
+							'Optimization mode changed to <strong class="capitalized">' + mode_name + "</strong>.",
 						);
 					} else {
 						NitropackUI.triggerToast("error", resp.message);
 					}
-				}
+				},
 			);
 		};
 		applyOptimizationCosmetics(mode) {
@@ -247,7 +243,7 @@ jQuery(document).ready(function ($) {
 					function (response) {
 						var resp = JSON.parse(response);
 						NitropackUI.triggerToast(resp.type, resp.message);
-					}
+					},
 				);
 			});
 		}
@@ -281,7 +277,7 @@ jQuery(document).ready(function ($) {
 						} else {
 							NitropackUI.triggerToast("error", np_settings.error_msg);
 						}
-					}
+					},
 				);
 			};
 
@@ -304,7 +300,7 @@ jQuery(document).ready(function ($) {
 									(function (id) {
 										estimateWarmup(id);
 									})(resp.res),
-									1000
+									1000,
 								);
 							} else {
 								$(setting_id).prop("checked", true);
@@ -315,7 +311,7 @@ jQuery(document).ready(function ($) {
 									msg_wrapper.addClass("hidden");
 								}, 3000);
 							}
-						}
+						},
 					);
 				} else {
 					$.post(
@@ -343,7 +339,7 @@ jQuery(document).ready(function ($) {
 											(function (id, retry) {
 												estimateWarmup(id, retry);
 											})(id, retry + 1),
-											1000
+											1000,
 										);
 									}
 								} else {
@@ -364,7 +360,7 @@ jQuery(document).ready(function ($) {
 									msg_wrapper.addClass("hidden");
 								}, 3000);
 							}
-						}
+						},
 					);
 				}
 			};
@@ -385,7 +381,7 @@ jQuery(document).ready(function ($) {
 						} else {
 							setTimeout(enableWarmup, 1000);
 						}
-					}
+					},
 				);
 			};
 
@@ -413,7 +409,7 @@ jQuery(document).ready(function ($) {
 					} else {
 						NitropackUI.triggerToast("error", np_settings.error_msg);
 					}
-				}
+				},
 			);
 		}
 		enableCacheWarmup() {
@@ -457,6 +453,10 @@ jQuery(document).ready(function ($) {
 					templateSelection: shortcodeTagTemplate,
 				}),
 				shortcodes_val = select2.val();
+
+			/* Show the container when select2 is initialized to avoid flickering! */
+			if (nitroSelf.initial_settings.ajaxShortcodes.enabled) $(".ajax-shortcodes").removeClass("hidden");
+
 			if (shortcodes_val && shortcodes_val.length > 0) {
 				nitroSelf.initial_settings.ajaxShortcodes.shortcodes = select2.val();
 			} else {
@@ -482,7 +482,7 @@ jQuery(document).ready(function ($) {
 					'<span class="select2-selection__choice-inner">' +
 						item.text +
 						'<span class="np-select2-remove"></span>' +
-						"</span>"
+						"</span>",
 				);
 				return $item;
 			}
@@ -630,7 +630,7 @@ jQuery(document).ready(function ($) {
 			$(action_btn).one("click", function () {
 				const ajaxRequest = nitroSelf.ajaxShortcodes.ajaxShortcodeRequest(
 					nitroSelf.modified_settings.ajaxShortcodes.shortcodes,
-					null
+					null,
 				);
 				ajaxRequest.done(function (response) {
 					if (response.type === "success") onConfirm();
@@ -659,7 +659,7 @@ jQuery(document).ready(function ($) {
 				'<img src="' +
 					np_settings.nitro_plugin_url +
 					'/view/images/loading.svg" alt="loading" class="icon"> ' +
-					np_settings.testing_compression
+					np_settings.testing_compression,
 			);
 			compression_btn.addClass("hidden");
 			msg_container.removeClass("hidden");
@@ -672,17 +672,18 @@ jQuery(document).ready(function ($) {
 				function (response) {
 					var resp = JSON.parse(response);
 
-					if (resp.status == "success") {
+					if (resp.type == "success") {
 						if (resp.hasCompression) {
 							// compression already enabled
 							compression_setting.attr("checked", false);
-
+							compression_setting.attr("disabled", true);
 							msg_box.text(np_settings.compression_already_enabled);
 						} else {
 							compression_setting.attr("checked", true);
+							compression_setting.attr("disabled", false);
 							msg_box.text(np_settings.compression_not_detected);
+							NitropackUI.triggerToast(resp.type, resp.message);
 						}
-						NitropackUI.triggerToast(resp.type, resp.message);
 					} else {
 						msg_box.text(np_settings.compression_not_determined);
 					}
@@ -690,7 +691,7 @@ jQuery(document).ready(function ($) {
 						msg_container.addClass("hidden");
 						compression_btn.removeClass("hidden");
 					}, 5000);
-				}
+				},
 			);
 		}
 		setHTMLCompression() {
@@ -699,9 +700,7 @@ jQuery(document).ready(function ($) {
 			nitroSelf.initial_settings.htmlCompression.enabled = enabled;
 			//on load check status
 			$(window).on("load", function () {
-				if (enabled != 1) {
-					nitroSelf.autoDetectCompression();
-				}
+				nitroSelf.autoDetectCompression();
 			});
 			$(document).on("click", "#compression-test-btn", (e) => {
 				e.preventDefault();
@@ -722,7 +721,7 @@ jQuery(document).ready(function ($) {
 					function (response) {
 						var resp = JSON.parse(response);
 						NitropackUI.triggerToast(resp.type, resp.message);
-					}
+					},
 				);
 			});
 		}
@@ -741,7 +740,7 @@ jQuery(document).ready(function ($) {
 					function (response) {
 						var resp = JSON.parse(response);
 						NitropackUI.triggerToast(resp.type, resp.message);
-					}
+					},
 				);
 			});
 		}
@@ -761,7 +760,7 @@ jQuery(document).ready(function ($) {
 					function (response) {
 						var resp = JSON.parse(response);
 						NitropackUI.triggerToast(resp.type, resp.message);
-					}
+					},
 				);
 			});
 		}
@@ -779,7 +778,7 @@ jQuery(document).ready(function ($) {
 					function (response) {
 						var resp = JSON.parse(response);
 						NitropackUI.triggerToast(resp.type, resp.message);
-					}
+					},
 				);
 			});
 		}
@@ -800,118 +799,11 @@ jQuery(document).ready(function ($) {
 					function (response) {
 						var resp = JSON.parse(response);
 						NitropackUI.triggerToast(resp.type, resp.message);
-					}
-				);
-			});
-		}
-		loggerToggle() {
-			const radio = $("#minimum-log-level-status"),
-				widget = $("#minimum-log-level-widget"),
-				fancy_radios = widget.find(".fancy-radio"),
-				fancy_radios_container = widget.find(".fancy-radio-container");
-			let minimum_log_level;
-
-			radio.on("change", function () {
-				const self = $(this);
-				if (self.is(":checked")) {
-					minimum_log_level = 3;
-				} else {
-					minimum_log_level = null;
-				}
-				$.post(
-					ajaxurl,
-					{
-						action: "nitropack_set_log_level_ajax",
-						minimum_log_level: minimum_log_level,
-						nonce: np_settings.nitroNonce,
 					},
-					function (response) {
-						var resp = JSON.parse(response);
-						if (resp.type == "success") {
-							if (self.is(":checked")) {
-								$(".logging").removeClass("hidden");
-								fancy_radios_container.removeClass("selected");
-								fancy_radios.removeClass("selected");
-								widget.find('.fancy-radio-container[data-value="' + minimum_log_level + '"').addClass("selected");
-								widget
-									.find('.fancy-radio-container[data-value="' + minimum_log_level + '"')
-									.find(".fancy-radio")
-									.addClass("selected");
-							} else {
-								fancy_radios.removeClass("selected");
-								$(".logging").addClass("hidden");
-							}
-
-							NitropackUI.triggerToast("success", np_settings.success_msg);
-						} else {
-							NitropackUI.triggerToast("error", np_settings.success_msg);
-							$(this).prop("checked", false);
-						}
-					}
 				);
 			});
 		}
-		/* Set logger level */
-		setLoggerLevel() {
-			const widget = $("#minimum-log-level-widget"),
-				fancy_radios_container = widget.find(".fancy-radio-container"),
-				fancy_radios = widget.find(".fancy-radio");
-			let initial_minimum_log_level = widget.find(".fancy-radio-container.selected").data("value");
 
-			fancy_radios_container.click(function () {
-				let fancy_radio_container = $(this),
-					fancy_radio = $(this).find(".fancy-radio"),
-					minimum_log_level = fancy_radio_container.data("value");
-				if (minimum_log_level === initial_minimum_log_level) return;
-
-				$.post(
-					ajaxurl,
-					{
-						action: "nitropack_set_log_level_ajax",
-						minimum_log_level: minimum_log_level,
-						nonce: np_settings.nitroNonce,
-					},
-					function (response) {
-						var resp = JSON.parse(response);
-						if (resp.type == "success") {
-							//container
-							fancy_radios_container.removeClass("selected");
-							fancy_radio_container.addClass("selected");
-							//custom radios
-							fancy_radios.removeClass("selected");
-							fancy_radio.addClass("selected");
-							initial_minimum_log_level = minimum_log_level;
-							NitropackUI.triggerToast("success", np_settings.success_msg);
-						} else {
-							NitropackUI.triggerToast("error", np_settings.success_msg);
-							$(this).prop("checked", false);
-						}
-					}
-				);
-			});
-		}
-		/* Zips all logs and downloads them */
-		archiveLogs() {
-			$(".archive-logs").click(function (e) {
-				e.preventDefault();
-				$.post(
-					ajaxurl,
-					{
-						action: "nitropack_archive_logs_ajax",
-						nonce: np_settings.nitroNonce,
-					},
-					function (response) {
-						var resp = JSON.parse(response);
-						if (resp.type == "success") {
-							window.location.href = resp.url;
-							NitropackUI.triggerToast("success", np_settings.success_msg);
-						} else {
-							NitropackUI.triggerToast("error", np_settings.success_msg);
-						}
-					}
-				);
-			});
-		}
 		restoreConnection() {
 			const loading_icon =
 					'<img src="' + np_settings.nitro_plugin_url + '/view/images/loading.svg" width="14" class="icon loading"/>',
@@ -936,7 +828,7 @@ jQuery(document).ready(function ($) {
 								alert(data.message);
 							} else {
 								alert(
-									"We were unable to restore the connection. Please contact our support team to get this resolved."
+									"We were unable to restore the connection. Please contact our support team to get this resolved.",
 								);
 							}
 						} else {
@@ -957,15 +849,15 @@ jQuery(document).ready(function ($) {
 			$(".nitro-notification.is-dismissible").each(function () {
 				var b = $(this),
 					c = $('<button type="button" class="notice-dismiss"><span class="screen-reader-text"></span></button>');
-				c.on("click.wp-dismiss-notice", function ($) {
-					$.preventDefault(),
+				(c.on("click.wp-dismiss-notice", function ($) {
+					($.preventDefault(),
 						b.fadeTo(100, 0, function () {
 							b.slideUp(100, function () {
 								b.remove();
 							});
-						});
+						}));
 				}),
-					b.append(c);
+					b.append(c));
 			});
 		}
 
@@ -978,7 +870,7 @@ jQuery(document).ready(function ($) {
 					$(".nitro-notification").remove();
 					//tbd
 					$('[name="form"]').prepend(
-						'<div class="nitro-notification notification-' + type + '" is-dismissible"><p>' + msg + "</p></div>"
+						'<div class="nitro-notification notification-' + type + '" is-dismissible"><p>' + msg + "</p></div>",
 					);
 
 					timeout = setTimeout((_) => {

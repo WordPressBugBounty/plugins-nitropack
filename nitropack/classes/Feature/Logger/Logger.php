@@ -116,7 +116,7 @@ class Logger {
 	public function error( $message ) {
 		$this->log( self::ERROR, $message );
 	}
-	public function notice( $message ) {
+	public function notice( $message ) {		
 		$this->log( self::NOTICE, $message );
 	}
 	public function info( $message ) {

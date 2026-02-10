@@ -2,14 +2,22 @@
 
 namespace NitroPack\WordPress;
 use NitroPack\WordPress\Settings\Subscription;
+use NitroPack\WordPress\Settings\PurgeCache;
 use NitroPack\WordPress\Settings\CacheWarmup;
 use NitroPack\WordPress\Settings\Optimizations;
 use NitroPack\WordPress\Settings\OptimizationLevel;
+use NitroPack\WordPress\Settings\AutoPurge;
+use NitroPack\WordPress\Settings\CPTOptimization;
 use NitroPack\WordPress\Settings\GeneratePreview;
 use NitroPack\WordPress\Settings\TestMode;
+use NitroPack\WordPress\Settings\HTMLCompression;
+use NitroPack\WordPress\Settings\BeaverBuilder;
+use NitroPack\WordPress\Settings\CartCache;
 use NitroPack\WordPress\Settings\StockRefresh;
+use NitroPack\WordPress\Settings\EditorClearCache;
 use NitroPack\WordPress\Settings\Shortcodes;
 use NitroPack\WordPress\Settings\Logger;
+use NitroPack\WordPress\Settings\SystemReport;
 
 /**
  * Class Settings
@@ -31,34 +39,60 @@ class Settings {
 	 */
 	private $settings;
 
-    public $cache_warmup;
-    /**
-     * Grabs Subscription class
-     * @var Subscription
-     */
-    public $subscription;
-        /**
-     * Grabs Optimizations class
-     * @var Optimizations
-     */
-    public $optimizations;
-    /**
-     * Grabs OptimizationLevel class
-     * @var OptimizationLevel
-     */
-    public $optimization_level;
+	public $cache_warmup;
+	/**
+	 * Grabs Subscription class
+	 * @var Subscription
+	 */
+	public $subscription;
+	/**
+	 * Grabs PurgeCache class
+	 * @var PurgeCache
+	 */
+	public $purge_cache;
+	/**
+	 * Grabs Optimizations class
+	 * @var Optimizations
+	 */
+	public $optimizations;
+	/**
+	 * Grabs OptimizationLevel class
+	 * @var OptimizationLevel
+	 */
+	public $optimization_level;
+	/**
+	 * Grabs AutoPurge class
+	 * @var AutoPurge
+	 */
+	public $auto_purge;
 
-    /**
-     * Grabs GeneratePreview class
-     * @var GeneratePreview
-     */
-    public $generate_preview;
+	public $cpt_optimization;
+	/**
+	 * Grabs GeneratePreview class
+	 * @var GeneratePreview
+	 */
+	public $generate_preview;
 
 	/**
 	 * Grabs TestMode class
 	 * @var TestMode
 	 */
 	public $test_mode;
+	/**
+	 * Grabs HTMLCompression class
+	 * @var HTMLCompression
+	 */
+	public $html_compression;
+	/**
+	 * Grabs BeaverBuilder class
+	 * @var BeaverBuilder
+	 */
+	public $beaver_builder;
+	/**
+	 * Grabs CartCache class
+	 * @var CartCache
+	 */
+	public $cart_cache;
 
 	/**
 	 * Grabs StockRefresh class
@@ -66,29 +100,43 @@ class Settings {
 	 */
 	public $stock_refresh;
 	/**
+	 * Grabs EditorClearCache class
+	 * @var EditorClearCache
+	 */
+	public $editor_clear_cache;
+	/**
 	 * Grabs Shortcodes class
 	 * @var Shortcodes
 	 */
 	public $shortcodes;
-    public $logger;
+	public $logger;
+	public $system_report;
 	/**
 	 * Settings constructor.
 	 *
 	 * Initializes the default required settings for the NitroPack plugin.
 	 */
-	function __construct($config = null) {        
-        add_action( 'admin_init', [ $this, 'move_existing_options' ] );        
-		$this->default_required_settings(); 
+	function __construct( $config = null ) {
+		add_action( 'admin_init', [ $this, 'move_existing_options' ] );
+		$this->default_required_settings();
 		//initialize each setting
-        $this->subscription = Subscription::getInstance();
-        $this->optimizations = Optimizations::getInstance();
-        $this->optimization_level = OptimizationLevel::getInstance();
-        $this->cache_warmup = CacheWarmup::getInstance(); 
-        $this->test_mode = TestMode::getInstance();
-        $this->stock_refresh = StockRefresh::getInstance();
-        $this->generate_preview = GeneratePreview::getInstance();
-        $this->shortcodes = new Shortcodes();
-        $this->logger = new Logger($config);
+		$this->generate_preview = GeneratePreview::getInstance();
+		$this->purge_cache = new PurgeCache();
+		$this->subscription = Subscription::getInstance();
+		$this->optimizations = Optimizations::getInstance();
+		$this->optimization_level = OptimizationLevel::getInstance();
+		$this->auto_purge = new AutoPurge();
+		$this->cpt_optimization = CPTOptimization::getInstance();
+		$this->shortcodes = new Shortcodes();
+		$this->cache_warmup = CacheWarmup::getInstance();
+		$this->test_mode = TestMode::getInstance();
+		$this->html_compression = HTMLCompression::getInstance();
+		$this->beaver_builder = new BeaverBuilder();
+		$this->cart_cache = new CartCache();
+		$this->stock_refresh = StockRefresh::getInstance();
+		$this->editor_clear_cache = new EditorClearCache();
+		$this->system_report = SystemReport::getInstance();
+		$this->logger = new Logger( $config );
 	}
 
 	/**
@@ -97,7 +145,7 @@ class Settings {
 	 * @return void
 	 */
 	private function default_required_settings() {
-		$this->settings = [ 
+		$this->settings = [
 			'nitropack-webhookToken' => null,
 			'nitropack-enableCompression' => -1,
 			'nitropack-autoCachePurge' => 1,
@@ -118,214 +166,65 @@ class Settings {
 	 * @return void
 	 */
 	public function set_required_settings( $token = null ) {
-        
-        if ($token !== null) {
-            $this->settings['nitropack-webhookToken'] = $token;
-        } else {
-            // Generate a new webhook token if it is not passed
-            $this->generate_webhook_token();
-        }
 
-        foreach ($this->settings as $option => $value) {
-            if (get_option($option) === false && $value !== null) {
-                if ($option === 'nitropack-cacheableObjectTypes') {
-                    $value = nitropack_get_default_cacheable_object_types();
-                }
-                update_option($option, $value);
-            }
-        }
-    }
-    /**
-     * Generates a webhook token for the NitroPack settings.
-     *
-     * This function retrieves the site configuration and checks if a webhook token
-     * is already set. If a token is provided, it generates a new webhook token using
-     * the site ID from the POST request. If no site ID is provided in the POST request,
-     * it sets the webhook token to null.
-     *
-     * @param string|null $token Optional. The token to be used for generating the webhook token.
-     *                           If not provided, a new token will be generated.
-     */
-    public function generate_webhook_token() {
-        $siteConfig = nitropack_get_site_config();
-        //grab existing from config
-        if (isset($siteConfig['webhookToken'])) {
-            $this->settings['nitropack-webhookToken'] = $siteConfig['webhookToken'];
-        } elseif (isset($siteConfig['siteId'])) {
-            //generate from existing siteId
-            $siteId = $siteConfig['siteId'];
-            $this->settings['nitropack-webhookToken'] = nitropack_generate_webhook_token($siteId);
-        } elseif (!empty($_POST["siteId"])) {
-            //try to generate from POST
-            $siteId = $_POST["siteId"];
-            $this->settings['nitropack-webhookToken'] = nitropack_generate_webhook_token($siteId);
-        } else {
-            $this->settings['nitropack-webhookToken'] = null;
-        }
-    }
+		if ( $token !== null ) {
+			$this->settings['nitropack-webhookToken'] = $token;
+		} else {
+			// Generate a new webhook token if it is not passed
+			$this->generate_webhook_token();
+		}
 
-    /**
-     * Get NitroPack configuration for ajaxShortcodes
-     *
-     * @return array|null
-     */
-    private function get_nitropack_config_for_ajaxShortcodes() {
-        try {
-            $nitropack = get_nitropack();
-            if (!$nitropack) {
-                throw new \Exception('NitroPack instance not found');
-            }
+		foreach ( $this->settings as $option => $value ) {
+			if ( get_option( $option ) === false && $value !== null ) {
+				if ( $option === 'nitropack-cacheableObjectTypes' ) {
+					$value = $this->cpt_optimization->nitropack_get_default_cacheable_object_types();
+				}
+				update_option( $option, $value );
+			}
+		}
+	}
+	/**
+	 * Generates a webhook token for the NitroPack settings.
+	 *
+	 * This function retrieves the site configuration and checks if a webhook token
+	 * is already set. If a token is provided, it generates a new webhook token using
+	 * the site ID from the POST request. If no site ID is provided in the POST request,
+	 * it sets the webhook token to null.
+	 *
+	 * @param string|null $token Optional. The token to be used for generating the webhook token.
+	 *                           If not provided, a new token will be generated.
+	 */
+	public function generate_webhook_token() {
+		$siteConfig = nitropack_get_site_config();
+		//grab existing from config
+		if ( isset( $siteConfig['webhookToken'] ) ) {
+			$this->settings['nitropack-webhookToken'] = $siteConfig['webhookToken'];
+		} elseif ( isset( $siteConfig['siteId'] ) ) {
+			//generate from existing siteId
+			$siteId = $siteConfig['siteId'];
+			$this->settings['nitropack-webhookToken'] = nitropack_generate_webhook_token( $siteId );
+		} elseif ( ! empty( $_POST["siteId"] ) ) {
+			//try to generate from POST
+			$siteId = $_POST["siteId"];
+			$this->settings['nitropack-webhookToken'] = nitropack_generate_webhook_token( $siteId );
+		} else {
+			$this->settings['nitropack-webhookToken'] = null;
+		}
+	}
 
-            $siteConfig = $nitropack->Config->get();
-            $configKey = \NitroPack\WordPress\NitroPack::getConfigKey();
-
-            return isset($siteConfig[$configKey]['options_cache']['ajaxShortcodes']) ? $siteConfig[$configKey]['options_cache']['ajaxShortcodes'] : null;
-        } catch (\Exception $e) {
-            error_log('NitroPack Config Error: ' . $e->getMessage());
-            return null;
-        }
-    }
-    /**
-     * Predefined WooCommerce shortcodes to restrict
-     *
-     * @return array
-     */
-    private function get_restricted_shortcodes() {
-        return [
-            'woocommerce_cart',
-            'woocommerce_my_account',
-            'woocommerce_order_tracking',
-            'woocommerce_checkout',
-            // Add more shortcodes to restrict as needed
-        ];
-    }
-    /**
-     * Generate shortcode options HTML
-     *
-     * @param array $shortcode_tags
-     * @param array $ajax_shortcodes_list
-     * @return string
-     */
-    private function generate_shortcode_options($shortcode_tags, $ajax_shortcodes_list) {
-        $restricted_shortcodes = $this->get_restricted_shortcodes();
-        $html = '';
-
-        foreach ($shortcode_tags as $shortcode => $_) {
-            if (in_array($shortcode, $restricted_shortcodes)) {
-                continue;
-            }
-
-            $selected = in_array($shortcode, $ajax_shortcodes_list) ? 'selected="selected"' : '';
-            $html .= sprintf(
-                '<option value="%s" %s>%s</option>',
-                esc_attr($shortcode),
-                $selected,
-                esc_html($shortcode)
-            );
-        }
-
-        return $html;
-    }
-
-    /**
-     * Generate options for manually added shortcodes
-     *
-     * @param array $freely_added_shortcodes
-     * @return string
-     */
-    private function generate_manual_shortcode_options($freely_added_shortcodes) {
-        return implode('', array_map(function ($shortcode) {
-            return sprintf(
-                '<option value="%s" selected="selected">%s</option>',
-                esc_attr($shortcode),
-                esc_html($shortcode)
-            );
-        }, $freely_added_shortcodes));
-    }
-
-    /**
-     * List all available AJAX shortcodes
-     *
-     * @return string
-     */
-    private function list_ajax_shortcodes() {
-        global $shortcode_tags;
-
-        $config = $this->get_nitropack_config_for_ajaxShortcodes();
-        if (!$config) {
-            return '<option value="" disabled>Configuration not available</option>';
-        }
-
-        $ajax_shortcodes_list = isset($config['shortcodes']) ? $config['shortcodes'] : [];
-        $freely_added_shortcodes = array_diff($ajax_shortcodes_list, array_keys($shortcode_tags));
-
-        $html = $this->generate_shortcode_options($shortcode_tags, $ajax_shortcodes_list);
-
-        if (!empty($freely_added_shortcodes)) {
-            $html .= $this->generate_manual_shortcode_options($freely_added_shortcodes);
-        }
-
-        return $html;
-    }
-
-    /**
-     * Render AJAX shortcodes settings in the admin panel (dashboard.php and dashboard-oneclick.php)
-     */
-    public function render_ajax_shortcodes_setting() {
-        $config = $this->get_nitropack_config_for_ajaxShortcodes();
-        if (!$config) {
-            echo '<div class="error">Unable to load NitroPack Ajax Shortcodes configuration</div>';
-            return;
-        }
-
-        $ajax_shortcodes_enabled = isset($config['enabled']) ? $config['enabled'] : false;
-        $shortcode_container_shown = $ajax_shortcodes_enabled ? '' : 'hidden';
-?>
-        <div class="nitro-option-main">
-            <div class="text-box">
-                <h6><?php esc_html_e('Shortcodes exclusions', 'nitropack'); ?></h6>
-                <p><?php esc_html_e('Load widgets, feeds, and any shortcode with AJAX to bypass the cache and always show the latest content.', 'nitropack'); ?></p>
-            </div>
-            <label class="inline-flex items-center cursor-pointer ml-auto">
-                <input type="checkbox"
-                    value=""
-                    class="sr-only peer"
-                    name="ajax_shortcodes"
-                    id="ajax-shortcodes"
-                    <?php echo $ajax_shortcodes_enabled ? 'checked' : ''; ?>>
-                <div class="toggle"></div>
-            </label>
-        </div>
-        <div class="ajax-shortcodes <?php echo esc_attr($shortcode_container_shown); ?>">
-            <div class="select-wrapper">
-                <select class="shortcode-select"
-                    name="nitropack-ajaxShortcodes"
-                    id="ajax-shortcodes-dropdown"
-                    multiple>
-                    <?php echo $this->list_ajax_shortcodes(); ?>
-                </select>
-                <button class="btn btn-primary" id="save-shortcodes">
-                    <?php esc_html_e('Save', 'nitropack'); ?>
-                </button>
-            </div>
-        </div>
-
-    <?php
-    }
-
-    /**
-     * Move wrongly formatted nitropack options to correct ones and delete old ones.
-     * @return void
-     */
-    public function move_existing_options() {       
-        if (! empty( $_GET['page'] ) && $_GET['page'] === 'nitropack') {
-            $existing_options = [ 'np_warmup_sitemap' => 'nitropack-warmup-sitemap', 'nitropack_minimumLogLevel' => 'nitropack-minimumLogLevel' ];
-            foreach ( $existing_options as $option => $new_option ) {
-                if ( $old_option = get_option( $option ) ) {                  
-                    update_option( $new_option, $old_option );				
-                    delete_option( $option );  
-                }
-            }
-        }
-    }
+	/**
+	 * Move wrongly formatted nitropack options to correct ones and delete old ones.
+	 * @return void
+	 */
+	public function move_existing_options() {
+		if ( ! empty( $_GET['page'] ) && $_GET['page'] === 'nitropack' ) {
+			$existing_options = [ 'np_warmup_sitemap' => 'nitropack-warmup-sitemap', 'nitropack_minimumLogLevel' => 'nitropack-minimumLogLevel' ];
+			foreach ( $existing_options as $option => $new_option ) {
+				if ( $old_option = get_option( $option ) ) {
+					update_option( $new_option, $old_option );
+					delete_option( $option );
+				}
+			}
+		}
+	}
 }

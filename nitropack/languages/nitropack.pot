@@ -1,15 +1,15 @@
-# Copyright (C) 2025 NitroPack Inc.
+# Copyright (C) 2026 NitroPack Inc.
 # This file is distributed under the GPL2.
 msgid ""
 msgstr ""
-"Project-Id-Version: NitroPack 1.18.6\n"
+"Project-Id-Version: NitroPack 1.19.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/nitropack\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2025-11-05T10:11:24+00:00\n"
+"POT-Creation-Date: 2026-02-06T16:43:47+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: nitropack\n"
@@ -48,6 +48,109 @@ msgstr ""
 msgid "Invalid request."
 msgstr ""
 
+#: classes/WordPress/Admin.php:48
+msgid "You do not have sufficient permissions to access this page."
+msgstr ""
+
+#: classes/WordPress/Admin.php:146
+#: functions.php:1747
+msgid "Something went wrong."
+msgstr ""
+
+#: classes/WordPress/Admin.php:147
+#: functions.php:1745
+msgid "Settings updated."
+msgstr ""
+
+#: classes/WordPress/Admin.php:183
+#: classes/WordPress/Settings/OptimizationLevel.php:319
+msgid "Select Mode"
+msgstr ""
+
+#: classes/WordPress/Admin.php:184
+#: classes/WordPress/Settings/OptimizationLevel.php:217
+#: classes/WordPress/Settings/OptimizationLevel.php:309
+msgid "Active Mode"
+msgstr ""
+
+#: classes/WordPress/Admin.php:185
+msgid "Switching Optimization Mode."
+msgstr ""
+
+#: classes/WordPress/Admin.php:186
+#: classes/WordPress/Admin.php:199
+msgid "Estimating optimizations usage"
+msgstr ""
+
+#: classes/WordPress/Admin.php:201
+msgid "Testing current compression status"
+msgstr ""
+
+#: classes/WordPress/Admin.php:202
+msgid "Compression is already enabled on your server! There is no need to enable it in NitroPack."
+msgstr ""
+
+#: classes/WordPress/Admin.php:203
+msgid "No compression was detected! We will now enable it in NitroPack."
+msgstr ""
+
+#: classes/WordPress/Admin.php:204
+msgid "Could not determine compression status automatically. Please configure it manually."
+msgstr ""
+
+#: classes/WordPress/Admin.php:221
+msgid "Please select at least one of the report options."
+msgstr ""
+
+#: classes/WordPress/Admin.php:222
+msgid "Report generated successfully."
+msgstr ""
+
+#: classes/WordPress/Admin.php:223
+msgid "Response is empty. Report generation failed."
+msgstr ""
+
+#: classes/WordPress/Admin.php:224
+msgid "There was an error while generating the report."
+msgstr ""
+
+#: classes/WordPress/Admin.php:255
+msgid "Working..."
+msgstr ""
+
+#: classes/WordPress/Admin.php:256
+msgid "Success."
+msgstr ""
+
+#: classes/WordPress/Admin.php:257
+msgid "Error."
+msgstr ""
+
+#: classes/WordPress/Admin.php:309
+msgid "Connect NitroPack&nbsp;&nbsp;"
+msgstr ""
+
+#: classes/WordPress/Admin.php:339
+#: classes/WordPress/Notifications/Notifications.php:524
+msgid "Settings"
+msgstr ""
+
+#: classes/WordPress/Admin.php:351
+msgid "Purge Entire Cache"
+msgstr ""
+
+#: classes/WordPress/Admin.php:362
+msgid "Invalidate Entire Cache"
+msgstr ""
+
+#: classes/WordPress/Admin.php:376
+msgid "Purge Current Page"
+msgstr ""
+
+#: classes/WordPress/Admin.php:388
+msgid "Invalidate Current Page"
+msgstr ""
+
 #: classes/WordPress/Notifications/Notifications.php:55
 msgid "Connect your website to enable NitroPack's optimizations"
 msgstr ""
@@ -64,225 +167,353 @@ msgstr ""
 msgid "Residual cache files"
 msgstr ""
 
-#: classes/WordPress/Notifications/Notifications.php:105
+#. translators: %s: Name of the plugin that left residual cache files
+#: classes/WordPress/Notifications/Notifications.php:106
 #, php-format
 msgid "We found residual cache files from %s. These files can interfere with the caching process and must be deleted."
 msgstr ""
 
-#: classes/WordPress/Notifications/Notifications.php:106
+#: classes/WordPress/Notifications/Notifications.php:107
 msgid "Delete now"
 msgstr ""
 
-#: classes/WordPress/Notifications/Notifications.php:113
+#: classes/WordPress/Notifications/Notifications.php:114
 msgid "Plugins activity"
 msgstr ""
 
-#: classes/WordPress/Notifications/Notifications.php:114
+#: classes/WordPress/Notifications/Notifications.php:115
 msgid "It seems plugins have been activated, deactivated or updated. It is recommended that you purge the cache to reflect the latest changes."
 msgstr ""
 
-#: classes/WordPress/Notifications/Notifications.php:115
+#: classes/WordPress/Notifications/Notifications.php:116
 #: classes/WordPress/Settings/Components.php:142
 #: classes/WordPress/Settings/Components.php:144
 msgid "Dismiss"
 msgstr ""
 
-#: classes/WordPress/Notifications/Notifications.php:122
+#: classes/WordPress/Notifications/Notifications.php:123
 msgid "Visitors are accessing your unoptimized pages. Make sure to disable it once you are done testing."
 msgstr ""
 
-#: classes/WordPress/Notifications/Notifications.php:128
+#: classes/WordPress/Notifications/Notifications.php:129
 msgid "Test Mode Enabled"
 msgstr ""
 
-#: classes/WordPress/Notifications/Notifications.php:138
+#: classes/WordPress/Notifications/Notifications.php:139
 msgid "File advanced-cache.php cannot be created"
 msgstr ""
 
-#: classes/WordPress/Notifications/Notifications.php:151
+#: classes/WordPress/Notifications/Notifications.php:152
 msgid "File advanced-cache.php re-installed"
 msgstr ""
 
-#: classes/WordPress/Notifications/Notifications.php:152
+#: classes/WordPress/Notifications/Notifications.php:153
 msgid "The file /wp-content/advanced-cache.php was either missing or not the one generated by NitroPack. NitroPack re-installed its version of the file, so it can function properly. Possibly, there is another active page caching plugin in your system. For correct operation, please deactivate any other page caching plugins."
 msgstr ""
 
-#: classes/WordPress/Notifications/Notifications.php:164
-#: classes/WordPress/Notifications/Notifications.php:227
-#: classes/WordPress/Notifications/Notifications.php:240
+#: classes/WordPress/Notifications/Notifications.php:154
+msgid "Plugins page"
+msgstr ""
+
+#: classes/WordPress/Notifications/Notifications.php:165
+#: classes/WordPress/Notifications/Notifications.php:228
+#: classes/WordPress/Notifications/Notifications.php:241
 msgid "Please make sure that the /wp-content/ directory is writable and refresh this page."
 msgstr ""
 
-#: classes/WordPress/Notifications/Notifications.php:176
+#: classes/WordPress/Notifications/Notifications.php:177
 msgid "The file /wp-content/advanced-cache.php cannot be created because a conflicting plugin is active. Please make sure to disable all conflicting plugins."
 msgstr ""
 
-#: classes/WordPress/Notifications/Notifications.php:183
+#: classes/WordPress/Notifications/Notifications.php:184
 msgid "The file /wp-content/advanced-cache.php cannot be created. Please make sure that the /wp-content/ directory is writable and refresh this page."
 msgstr ""
 
-#: classes/WordPress/Notifications/Notifications.php:200
+#: classes/WordPress/Notifications/Notifications.php:201
 msgid "WP_CACHE not enabled"
 msgstr ""
 
-#: classes/WordPress/Notifications/Notifications.php:201
+#: classes/WordPress/Notifications/Notifications.php:202
 msgid "Please go to your FlyWheel control panel and enable this setting."
 msgstr ""
 
-#: classes/WordPress/Notifications/Notifications.php:207
+#: classes/WordPress/Notifications/Notifications.php:208
 msgid "Constant WP_CACHE cannot be set"
 msgstr ""
 
-#: classes/WordPress/Notifications/Notifications.php:208
+#: classes/WordPress/Notifications/Notifications.php:209
 msgid "This can lead to slower cache delivery. Please make sure that the /wp-config.php file is writable and refresh this page."
 msgstr ""
 
-#: classes/WordPress/Notifications/Notifications.php:217
+#: classes/WordPress/Notifications/Notifications.php:218
 msgid "File .htaccess is not writable"
 msgstr ""
 
-#: classes/WordPress/Notifications/Notifications.php:218
+#: classes/WordPress/Notifications/Notifications.php:219
 msgid "Unable to configure LiteSpeed specific rules for maximum performance. Please make sure your .htaccess file is writable or contact support."
 msgstr ""
 
-#: classes/WordPress/Notifications/Notifications.php:226
+#: classes/WordPress/Notifications/Notifications.php:227
 msgid "NitroPack data directory cannot be created"
 msgstr ""
 
-#: classes/WordPress/Notifications/Notifications.php:239
+#: classes/WordPress/Notifications/Notifications.php:240
 msgid "NitroPack plugin data directory cannot be created"
 msgstr ""
 
-#: classes/WordPress/Notifications/Notifications.php:259
+#: classes/WordPress/Notifications/Notifications.php:260
 msgid "NitroPack static config file cannot be created"
 msgstr ""
 
-#: classes/WordPress/Notifications/Notifications.php:260
-#: classes/WordPress/Notifications/Notifications.php:266
-#: classes/WordPress/Notifications/Notifications.php:351
+#: classes/WordPress/Notifications/Notifications.php:261
+#: classes/WordPress/Notifications/Notifications.php:267
+#: classes/WordPress/Notifications/Notifications.php:352
 msgid "Please make sure that the /wp-content/config-nitropack/ directory is writable and refresh this page."
 msgstr ""
 
-#: classes/WordPress/Notifications/Notifications.php:265
-#: classes/WordPress/Notifications/Notifications.php:350
+#: classes/WordPress/Notifications/Notifications.php:266
+#: classes/WordPress/Notifications/Notifications.php:351
 msgid "NitroPack static config file cannot be updated"
 msgstr ""
 
-#: classes/WordPress/Notifications/Notifications.php:285
+#: classes/WordPress/Notifications/Notifications.php:286
 msgid "Unable to configure webhooks"
 msgstr ""
 
-#: classes/WordPress/Notifications/Notifications.php:286
+#: classes/WordPress/Notifications/Notifications.php:287
 msgid "This can impact the stability of the plugin. Please disconnect and connect again in order to retry configuring the webhooks."
 msgstr ""
 
-#: classes/WordPress/Notifications/Notifications.php:369
+#: classes/WordPress/Notifications/Notifications.php:370
 msgid "Connection problems detected"
 msgstr ""
 
-#: classes/WordPress/Notifications/Notifications.php:385
-msgid "The .htaccess file cannot be modified"
+#: classes/WordPress/Notifications/Notifications.php:371
+msgid "Most likely you have used the same API credentials to connect another website (e.g. dev or staging). Click to restore the connection to this site."
 msgstr ""
 
 #: classes/WordPress/Notifications/Notifications.php:386
+msgid "The .htaccess file cannot be modified"
+msgstr ""
+
+#: classes/WordPress/Notifications/Notifications.php:387
 msgid "Please make sure that it is writable and refresh this page."
 msgstr ""
 
-#: classes/WordPress/Notifications/Notifications.php:393
+#: classes/WordPress/Notifications/Notifications.php:394
 msgid "NitroPack upgraded to 1.3"
 msgstr ""
 
-#: classes/WordPress/Notifications/Notifications.php:394
+#: classes/WordPress/Notifications/Notifications.php:395
 msgid "Your new version of NitroPack has a new better way of recaching updated content. However, it is incompatible with the page relationships built by your previous version. Please invalidate your cache manually one-time so that content updates start working with the updated logic."
 msgstr ""
 
-#: classes/WordPress/Notifications/Notifications.php:402
+#: classes/WordPress/Notifications/Notifications.php:403
 msgid "Cache By Device Type is not activate"
 msgstr ""
 
-#: classes/WordPress/Notifications/Notifications.php:403
+#: classes/WordPress/Notifications/Notifications.php:404
 msgid "It seems Cache By Device Type is not activate with the Cloudflare APO. It is recommended that you enable it for a more optimized experience."
 msgstr ""
 
-#: classes/WordPress/Notifications/Notifications.php:500
+#: classes/WordPress/Notifications/Notifications.php:501
 msgid "Please follow the instructions in order to make sure that everything works correctly."
 msgstr ""
 
-#: classes/WordPress/Notifications/Notifications.php:501
+#. translators: %s: Name of the hosting provider
+#: classes/WordPress/Notifications/Notifications.php:503
 #, php-format
 msgid "It looks like you are hosted on %s"
 msgstr ""
 
-#: classes/WordPress/Notifications/Notifications.php:502
+#: classes/WordPress/Notifications/Notifications.php:504
 msgid "Read Instructions"
 msgstr ""
 
-#: classes/WordPress/Notifications/Notifications.php:519
+#: classes/WordPress/Notifications/Notifications.php:521
 msgid "Your <strong>account</strong>, <strong>cart</strong>, and <strong>checkout</strong> pages are automatically excluded from optimization."
 msgstr ""
 
-#: classes/WordPress/Notifications/Notifications.php:521
+#: classes/WordPress/Notifications/Notifications.php:523
 msgid "WooCommerce detected"
 msgstr ""
 
-#: classes/WordPress/Notifications/Notifications.php:522
-#: functions.php:3776
-msgid "Settings"
+#: classes/WordPress/Notifications/Notifications.php:630
+#: classes/WordPress/Notifications/Notifications.php:658
+#: classes/WordPress/Notifications/Notifications.php:711
+msgid "You do not have sufficient permissions."
 msgstr ""
 
-#: classes/WordPress/Notifications/Notifications.php:741
+#: classes/WordPress/Notifications/Notifications.php:634
+#: classes/WordPress/Notifications/Notifications.php:662
+msgid "Missing notification ID."
+msgstr ""
+
+#: classes/WordPress/Notifications/Notifications.php:715
+msgid "Missing plugin."
+msgstr ""
+
+#: classes/WordPress/Notifications/Notifications.php:720
+msgid "Missing plugin name."
+msgstr ""
+
+#: classes/WordPress/Notifications/Notifications.php:737
+msgid "Plugin not found in the list of conflicting plugins."
+msgstr ""
+
+#. translators: %s: Name of the plugin that was deactivated
+#: classes/WordPress/Notifications/Notifications.php:744
 #, php-format
 msgid "%s deactivated successfully."
 msgstr ""
 
 #: classes/WordPress/Notifications/Notifications.php:746
+msgid "Failed to deactivate the plugin."
+msgstr ""
+
+#. translators: %s: Name of the plugin
+#: classes/WordPress/Notifications/Notifications.php:750
 #, php-format
 msgid "%s is not active."
 msgstr ""
 
-#: classes/WordPress/Settings.php:264
-#: classes/WordPress/Settings/Shortcodes.php:135
-msgid "Shortcodes exclusions"
+#: classes/WordPress/Settings/AutoPurge.php:46
+msgid "Purge cache"
 msgstr ""
 
-#: classes/WordPress/Settings.php:265
-#: classes/WordPress/Settings/Shortcodes.php:136
-msgid "Load widgets, feeds, and any shortcode with AJAX to bypass the cache and always show the latest content."
+#: classes/WordPress/Settings/AutoPurge.php:47
+msgid "Purge affected cache when content is updated or published"
 msgstr ""
 
-#: classes/WordPress/Settings.php:286
-#: classes/WordPress/Settings/Shortcodes.php:150
-#: view/modals/modal-unsaved-changes.php:21
-msgid "Save"
+#: classes/WordPress/Settings/BeaverBuilder.php:50
+msgid "Sync NitroPack Purge with Beaver Builder"
 msgstr ""
 
-#: classes/WordPress/Settings/CacheWarmup.php:28
+#: classes/WordPress/Settings/BeaverBuilder.php:53
+msgid "When Beaver Builder cache is purged, NitroPack will perform a full cache purge keeping your site's content up-to-date."
+msgstr ""
+
+#: classes/WordPress/Settings/CacheWarmup.php:33
 msgid "Cache warmup skipped."
 msgstr ""
 
-#: classes/WordPress/Settings/CacheWarmup.php:44
+#: classes/WordPress/Settings/CacheWarmup.php:56
+msgid "Cache warmup has been enabled successfully!"
+msgstr ""
+
+#: classes/WordPress/Settings/CacheWarmup.php:62
+msgid "There was an error while enabling the cache warmup!"
+msgstr ""
+
+#: classes/WordPress/Settings/CacheWarmup.php:84
+msgid "Cache warmup has been disabled successfully!"
+msgstr ""
+
+#: classes/WordPress/Settings/CacheWarmup.php:89
+msgid "There was an error while disabling the cache warmup!"
+msgstr ""
+
+#: classes/WordPress/Settings/CacheWarmup.php:108
+msgid "Success! Cache warmup has been started successfully!"
+msgstr ""
+
+#: classes/WordPress/Settings/CacheWarmup.php:117
+msgid "Error! There was an error while starting the cache warmup!"
+msgstr ""
+
+#: classes/WordPress/Settings/CacheWarmup.php:136
+msgid "Invalid estimation ID!"
+msgstr ""
+
+#: classes/WordPress/Settings/CacheWarmup.php:178
+#: classes/WordPress/Settings/CacheWarmup.php:192
+msgid "Warmup estimation failed."
+msgstr ""
+
+#: classes/WordPress/Settings/CacheWarmup.php:181
+msgid "Cache warmup has been estimated successfully."
+msgstr ""
+
+#: classes/WordPress/Settings/CacheWarmup.php:183
+msgid "We could not find any links for warming up on your home page."
+msgstr ""
+
+#: classes/WordPress/Settings/CacheWarmup.php:185
+msgid "Warmup estimation failed. Please try again or contact support if the issue persists"
+msgstr ""
+
+#: classes/WordPress/Settings/CacheWarmup.php:207
+#: classes/WordPress/Settings/CacheWarmup.php:220
+msgid "Error! There was an error while fetching warmup stats!"
+msgstr ""
+
+#: classes/WordPress/Settings/CacheWarmup.php:235
 #: view/modals/modal-cache-warmup.php:18
 msgid "Cache warmup"
 msgstr ""
 
-#: classes/WordPress/Settings/CacheWarmup.php:45
+#: classes/WordPress/Settings/CacheWarmup.php:236
 msgid "Recommended"
 msgstr ""
 
-#: classes/WordPress/Settings/CacheWarmup.php:54
+#: classes/WordPress/Settings/CacheWarmup.php:245
 msgid "Automatically pre-caches your website's page content"
 msgstr ""
 
-#: classes/WordPress/Settings/CacheWarmup.php:56
+#: classes/WordPress/Settings/CacheWarmup.php:247
+#: classes/WordPress/Settings/HTMLCompression.php:102
 #: classes/WordPress/Settings/Logger.php:43
 #: classes/WordPress/Settings/TestMode.php:149
-#: view/dashboard-oneclick.php:133
-#: view/dashboard.php:231
 msgid "Learn more"
 msgstr ""
 
-#: classes/WordPress/Settings/CacheWarmup.php:66
+#: classes/WordPress/Settings/CacheWarmup.php:257
 msgid "Loading cache warmup status"
+msgstr ""
+
+#: classes/WordPress/Settings/CartCache.php:100
+msgid "Cart cache"
+msgstr ""
+
+#: classes/WordPress/Settings/CartCache.php:102
+msgid "Your visitors will enjoy full site speed while browsing with items in cart. Fully optimized page cache will be served."
+msgstr ""
+
+#: classes/WordPress/Settings/CartCache.php:127
+msgid "This feature is available on Plus plan and above."
+msgstr ""
+
+#: classes/WordPress/Settings/CartCache.php:129
+#: classes/WordPress/Settings/OptimizationLevel.php:212
+msgid "Upgrade here"
+msgstr ""
+
+#: classes/WordPress/Settings/CPTOptimization.php:249
+msgid "Page optimization"
+msgstr ""
+
+#: classes/WordPress/Settings/CPTOptimization.php:250
+msgid "Select what post/page types get optimized"
+msgstr ""
+
+#: classes/WordPress/Settings/EditorClearCache.php:49
+msgid "Allow Editors to purge cache"
+msgstr ""
+
+#: classes/WordPress/Settings/EditorClearCache.php:52
+msgid "Give Editors the right to purge cache when content is updated."
+msgstr ""
+
+#: classes/WordPress/Settings/HTMLCompression.php:97
+msgid "HTML Compression"
+msgstr ""
+
+#: classes/WordPress/Settings/HTMLCompression.php:100
+msgid "Compressing the structure of your HTML, ensures faster page rendering and an optimized browsing experience for your users."
+msgstr ""
+
+#: classes/WordPress/Settings/HTMLCompression.php:111
+msgid "Run compression test"
 msgstr ""
 
 #: classes/WordPress/Settings/Logger.php:40
@@ -333,79 +564,329 @@ msgstr ""
 msgid "Date added"
 msgstr ""
 
-#: classes/WordPress/Settings/Logger.php:69
-msgid "Action"
-msgstr ""
-
-#: classes/WordPress/Settings/Logger.php:112
-#: classes/WordPress/Settings/Logger.php:115
+#: classes/WordPress/Settings/Logger.php:103
+#: classes/WordPress/Settings/Logger.php:106
 msgid "No error logs yet."
 msgstr ""
 
-#: classes/WordPress/Settings/Logger.php:128
+#: classes/WordPress/Settings/Logger.php:119
 msgid "Download all logs"
 msgstr ""
 
-#: classes/WordPress/Settings/Logger.php:129
+#: classes/WordPress/Settings/Logger.php:120
 #, php-format
 msgid "Download usage for %1$s - %2$s"
 msgstr ""
 
-#: classes/WordPress/Settings/Logger.php:154
+#: classes/WordPress/Settings/Logger.php:145
 msgid "Bulk log downloads aren't available because the PHP ext-zip isn't enabled. Contact your hosting provider or download files individually."
 msgstr ""
 
-#: classes/WordPress/Settings/OptimizationLevel.php:106
+#: classes/WordPress/Settings/OptimizationLevel.php:151
 msgid "Optimization mode"
 msgstr ""
 
-#: classes/WordPress/Settings/OptimizationLevel.php:111
+#: classes/WordPress/Settings/OptimizationLevel.php:156
 msgid "Select from our range of predefined optimization modes to boost your site's performance."
 msgstr ""
 
-#: classes/WordPress/Settings/OptimizationLevel.php:165
+#: classes/WordPress/Settings/OptimizationLevel.php:210
 msgid "Ludicrous mode available on <b>Starter</b> Plan."
 msgstr ""
 
-#: classes/WordPress/Settings/OptimizationLevel.php:167
-#: view/dashboard.php:318
-msgid "Upgrade here"
-msgstr ""
-
-#: classes/WordPress/Settings/OptimizationLevel.php:172
-#: classes/WordPress/Settings/OptimizationLevel.php:264
-#: functions.php:1386
-msgid "Active Mode"
-msgstr ""
-
-#: classes/WordPress/Settings/OptimizationLevel.php:192
+#: classes/WordPress/Settings/OptimizationLevel.php:237
 msgid "Activated when manual setups are made. Ideal for advanced NitroPack optimizations."
 msgstr ""
 
-#: classes/WordPress/Settings/OptimizationLevel.php:199
+#: classes/WordPress/Settings/OptimizationLevel.php:244
 msgid "Which optimization mode to choose?"
 msgstr ""
 
-#: classes/WordPress/Settings/OptimizationLevel.php:201
-#: classes/WordPress/Settings/OptimizationLevel.php:216
+#: classes/WordPress/Settings/OptimizationLevel.php:246
+#: classes/WordPress/Settings/OptimizationLevel.php:261
 msgid "See modes comparison"
 msgstr ""
 
-#: classes/WordPress/Settings/OptimizationLevel.php:214
+#: classes/WordPress/Settings/OptimizationLevel.php:259
 msgid "Optimization modes"
 msgstr ""
 
-#: classes/WordPress/Settings/OptimizationLevel.php:251
+#: classes/WordPress/Settings/OptimizationLevel.php:296
 msgid "Available on Starter"
 msgstr ""
 
-#: classes/WordPress/Settings/OptimizationLevel.php:271
+#: classes/WordPress/Settings/OptimizationLevel.php:316
 msgid "Upgrade plan"
 msgstr ""
 
-#: classes/WordPress/Settings/OptimizationLevel.php:274
-#: functions.php:1385
-msgid "Select Mode"
+#: classes/WordPress/Settings/Optimizations.php:61
+msgid "Optimized pages"
+msgstr ""
+
+#: classes/WordPress/Settings/Optimizations.php:66
+msgid "Processing"
+msgstr ""
+
+#: classes/WordPress/Settings/Optimizations.php:68
+msgid "page(s) in the background"
+msgstr ""
+
+#: classes/WordPress/Settings/Optimizations.php:76
+msgid "Last cache purge"
+msgstr ""
+
+#: classes/WordPress/Settings/Optimizations.php:78
+msgid "Reason"
+msgstr ""
+
+#: classes/WordPress/Settings/PurgeCache.php:42
+#: classes/WordPress/Settings/PurgeCache.php:148
+msgid "Success! Cache has been purged successfully!"
+msgstr ""
+
+#: classes/WordPress/Settings/PurgeCache.php:51
+#: classes/WordPress/Settings/PurgeCache.php:100
+#: classes/WordPress/Settings/PurgeCache.php:158
+msgid "Error! There was an error and the cache was not purged!"
+msgstr ""
+
+#: classes/WordPress/Settings/PurgeCache.php:67
+msgid "Cache has been invalidated successfully!"
+msgstr ""
+
+#: classes/WordPress/Settings/PurgeCache.php:77
+msgid "There was an error and the cache was not invalidated!"
+msgstr ""
+
+#: classes/WordPress/Settings/PurgeCache.php:92
+msgid "Cache has been purged successfully!"
+msgstr ""
+
+#: classes/WordPress/Settings/PurgeCache.php:194
+msgid "Success! Cache has been invalidated successfully!"
+msgstr ""
+
+#: classes/WordPress/Settings/PurgeCache.php:204
+msgid "Error! There was an error and the cache was not invalidated!"
+msgstr ""
+
+#: classes/WordPress/Settings/PurgeCache.php:222
+msgid "Success! The residual cache has been cleared successfully!"
+msgstr ""
+
+#: classes/WordPress/Settings/PurgeCache.php:228
+msgid "Error! There was an error clearing the residual cache!"
+msgstr ""
+
+#: classes/WordPress/Settings/PurgeCache.php:283
+msgid "Purge Cache"
+msgstr ""
+
+#: classes/WordPress/Settings/PurgeCache.php:284
+msgid "Invalidate Cache"
+msgstr ""
+
+#: classes/WordPress/Settings/Shortcodes.php:134
+msgid "Shortcodes exclusions"
+msgstr ""
+
+#: classes/WordPress/Settings/Shortcodes.php:135
+msgid "Load widgets, feeds, and any shortcode with AJAX to bypass the cache and always show the latest content."
+msgstr ""
+
+#: classes/WordPress/Settings/Shortcodes.php:148
+#: view/modals/modal-unsaved-changes.php:21
+msgid "Save"
+msgstr ""
+
+#: classes/WordPress/Settings/StockRefresh.php:76
+msgid "Real-time Stock Refresh"
+msgstr ""
+
+#: classes/WordPress/Settings/StockRefresh.php:78
+msgid "Keeps product availability accurate by refreshing the cache whenever stock levels change. Best for stores that show stock quantities."
+msgstr ""
+
+#: classes/WordPress/Settings/Subscription.php:50
+msgid "Subscription"
+msgstr ""
+
+#: classes/WordPress/Settings/Subscription.php:63
+msgid "Next reset"
+msgstr ""
+
+#: classes/WordPress/Settings/Subscription.php:67
+msgid "Next billing"
+msgstr ""
+
+#: classes/WordPress/Settings/Subscription.php:71
+msgid "Page views"
+msgstr ""
+
+#. translators: %1$s: current page views, %2$s: maximum page views
+#. translators: %1$s: used CDN bandwidth, %2$s: maximum CDN bandwidth
+#: classes/WordPress/Settings/Subscription.php:75
+#: classes/WordPress/Settings/Subscription.php:84
+#, php-format
+msgid "%1$s out of %2$s"
+msgstr ""
+
+#: classes/WordPress/Settings/Subscription.php:80
+msgid "CDN bandwidth"
+msgstr ""
+
+#: classes/WordPress/Settings/Subscription.php:94
+msgid "You will be notified by email when your website reaches the subscription resource limits."
+msgstr ""
+
+#: classes/WordPress/Settings/SystemReport.php:58
+msgid "Error generating report: "
+msgstr ""
+
+#: classes/WordPress/Settings/SystemReport.php:78
+#: classes/WordPress/Settings/SystemReport.php:98
+#: classes/WordPress/Settings/SystemReport.php:99
+#: classes/WordPress/Settings/SystemReport.php:158
+msgid "OK"
+msgstr ""
+
+#: classes/WordPress/Settings/SystemReport.php:78
+msgid "Warning: Webhooks do not match this site"
+msgstr ""
+
+#: classes/WordPress/Settings/SystemReport.php:83
+msgid "Site config cannot be found, because "
+msgstr ""
+
+#: classes/WordPress/Settings/SystemReport.php:100
+msgid "Bad request."
+msgstr ""
+
+#: classes/WordPress/Settings/SystemReport.php:101
+msgid "Payment required. Please, contact NP support for details."
+msgstr ""
+
+#: classes/WordPress/Settings/SystemReport.php:102
+msgid "Site disabled. Please, contact NP support for details."
+msgstr ""
+
+#: classes/WordPress/Settings/SystemReport.php:103
+msgid "URL used for the API poll request returned 404. Please ignore this."
+msgstr ""
+
+#: classes/WordPress/Settings/SystemReport.php:104
+msgid "Conflict. There is another operation, which prevents accepting optimization requests at the moment. Please, contact NP support for details."
+msgstr ""
+
+#: classes/WordPress/Settings/SystemReport.php:105
+msgid "Runtime error."
+msgstr ""
+
+#: classes/WordPress/Settings/SystemReport.php:106
+msgid "Service unavailable."
+msgstr ""
+
+#: classes/WordPress/Settings/SystemReport.php:107
+msgid "Unknown."
+msgstr ""
+
+#: classes/WordPress/Settings/SystemReport.php:112
+msgid "NitroPack Diagnostic Agent"
+msgstr ""
+
+#: classes/WordPress/Settings/SystemReport.php:135
+msgid "Error: "
+msgstr ""
+
+#: classes/WordPress/Settings/SystemReport.php:138
+#: classes/WordPress/Settings/SystemReport.php:147
+#: classes/WordPress/Settings/SystemReport.php:156
+#: classes/WordPress/Settings/SystemReport.php:157
+msgid "Error: Cannot get an SDK instance"
+msgstr ""
+
+#: classes/WordPress/Settings/SystemReport.php:145
+#: classes/WordPress/Settings/SystemReport.php:148
+#: classes/WordPress/Settings/SystemReport.php:149
+#: classes/WordPress/Settings/SystemReport.php:150
+#: classes/WordPress/Settings/SystemReport.php:151
+#: classes/WordPress/Settings/SystemReport.php:153
+#: classes/WordPress/Settings/SystemReport.php:154
+#: classes/WordPress/Settings/SystemReport.php:155
+#: classes/WordPress/Settings/SystemReport.php:223
+msgid "Undefined"
+msgstr ""
+
+#: classes/WordPress/Settings/SystemReport.php:149
+msgid "OK for drop-in"
+msgstr ""
+
+#: classes/WordPress/Settings/SystemReport.php:149
+msgid "Turned off"
+msgstr ""
+
+#: classes/WordPress/Settings/SystemReport.php:158
+msgid "Warning: \"stream_socket_client\" function is disabled."
+msgstr ""
+
+#: classes/WordPress/Settings/SystemReport.php:201
+msgid "Config found, but unable to get contents."
+msgstr ""
+
+#: classes/WordPress/Settings/SystemReport.php:204
+msgid "Config file not found."
+msgstr ""
+
+#: classes/WordPress/Settings/SystemReport.php:207
+msgid "Config file constant is not defined."
+msgstr ""
+
+#: classes/WordPress/Settings/SystemReport.php:235
+msgid " is a file not a directory"
+msgstr ""
+
+#: classes/WordPress/Settings/SystemReport.php:237
+msgid "Directory not found"
+msgstr ""
+
+#: classes/WordPress/Settings/SystemReport.php:254
+msgid "None detected"
+msgstr ""
+
+#: classes/WordPress/Settings/SystemReport.php:268
+msgid "Not found"
+msgstr ""
+
+#: classes/WordPress/Settings/SystemReport.php:279
+msgid "Include NitroPack info (version, methods, environment)"
+msgstr ""
+
+#: classes/WordPress/Settings/SystemReport.php:286
+msgid "Include active plugins list"
+msgstr ""
+
+#: classes/WordPress/Settings/SystemReport.php:293
+msgid "Include conflicting plugins list"
+msgstr ""
+
+#: classes/WordPress/Settings/SystemReport.php:300
+msgid "Include plugin config"
+msgstr ""
+
+#: classes/WordPress/Settings/SystemReport.php:307
+msgid "Include directory status"
+msgstr ""
+
+#: classes/WordPress/Settings/SystemReport.php:324
+msgid "System Info Report"
+msgstr ""
+
+#: classes/WordPress/Settings/SystemReport.php:325
+msgid "This report gives a clear picture of how NitroPack is set up on your site. It checks for anything that might cause problems, like plugins that don’t work well with NitroPack or server issues. If something isn’t working as expected, share this report with support to help them fix it quickly."
+msgstr ""
+
+#: classes/WordPress/Settings/SystemReport.php:343
+msgid "Customize Report"
 msgstr ""
 
 #: classes/WordPress/Settings/TestMode.php:64
@@ -420,295 +901,57 @@ msgstr ""
 msgid "Test NitroPack's features without affecting your visitors' experience"
 msgstr ""
 
-#: classes/WordPress/Settings/TestMode.php:162
+#: classes/WordPress/Settings/TestMode.php:159
 msgid "Loading test mode status"
 msgstr ""
 
-#: diagnostics.php:32
-#: diagnostics.php:47
-#: diagnostics.php:48
-#: diagnostics.php:103
-msgid "OK"
-msgstr ""
-
-#: diagnostics.php:32
-msgid "Warning: Webhooks do not match this site"
-msgstr ""
-
-#: diagnostics.php:37
-msgid "Site config cannot be found, because "
-msgstr ""
-
-#: diagnostics.php:49
-msgid "Bad request."
-msgstr ""
-
-#: diagnostics.php:50
-msgid "Payment required. Please, contact NP support for details."
-msgstr ""
-
-#: diagnostics.php:51
-msgid "Site disabled. Please, contact NP support for details."
-msgstr ""
-
-#: diagnostics.php:52
-msgid "URL used for the API poll request returned 404. Please ignore this."
-msgstr ""
-
-#: diagnostics.php:53
-msgid "Conflict. There is another operation, which prevents accepting optimization requests at the moment. Please, contact NP support for details."
-msgstr ""
-
-#: diagnostics.php:54
-msgid "Runtime error."
-msgstr ""
-
-#: diagnostics.php:55
-msgid "Service unavailable."
-msgstr ""
-
-#: diagnostics.php:56
-msgid "Unknown."
-msgstr ""
-
-#: diagnostics.php:61
-msgid "NitroPack Diagnostic Agent"
-msgstr ""
-
-#: diagnostics.php:80
-msgid "Error: "
-msgstr ""
-
-#: diagnostics.php:83
-#: diagnostics.php:92
-#: diagnostics.php:101
-#: diagnostics.php:102
-msgid "Error: Cannot get an SDK instance"
-msgstr ""
-
-#: diagnostics.php:90
-#: diagnostics.php:93
-#: diagnostics.php:94
-#: diagnostics.php:95
-#: diagnostics.php:96
-#: diagnostics.php:98
-#: diagnostics.php:99
-#: diagnostics.php:100
-#: diagnostics.php:155
-msgid "Undefined"
-msgstr ""
-
-#: diagnostics.php:94
-msgid "OK for drop-in"
-msgstr ""
-
-#: diagnostics.php:94
-msgid "Turned off"
-msgstr ""
-
-#: diagnostics.php:103
-msgid "Warning: \"stream_socket_client\" function is disabled."
-msgstr ""
-
-#: diagnostics.php:138
-msgid "Config found, but unable to get contents."
-msgstr ""
-
-#: diagnostics.php:141
-msgid "Config file not found."
-msgstr ""
-
-#: diagnostics.php:144
-msgid "Config file constant is not defined."
-msgstr ""
-
-#: diagnostics.php:167
-msgid " is a file not a directory"
-msgstr ""
-
-#: diagnostics.php:169
-msgid "Directory not found"
-msgstr ""
-
-#: diagnostics.php:182
-msgid "None detected"
-msgstr ""
-
-#: diagnostics.php:191
-msgid "Not found"
-msgstr ""
-
-#: functions.php:1387
-msgid "Switching Optimization Mode."
-msgstr ""
-
-#: functions.php:1388
-#: functions.php:1401
-msgid "Estimating optimizations usage"
-msgstr ""
-
-#: functions.php:1399
-#: functions.php:2102
-msgid "Something went wrong."
-msgstr ""
-
-#: functions.php:1400
-#: functions.php:2100
-msgid "Settings updated."
-msgstr ""
-
-#: functions.php:2026
-msgid "Cache has been purged successfully!"
-msgstr ""
-
-#: functions.php:2034
-#: functions.php:2189
-#: functions.php:2209
-msgid "Error! There was an error and the cache was not purged!"
-msgstr ""
-
-#: functions.php:2045
-msgid "Cache has been invalidated successfully!"
-msgstr ""
-
-#: functions.php:2055
-msgid "There was an error and the cache was not invalidated!"
-msgstr ""
-
-#: functions.php:2067
-msgid "Success! The residual cache has been cleared successfully!"
-msgstr ""
-
-#: functions.php:2073
-msgid "Error! There was an error clearing the residual cache!"
-msgstr ""
-
-#: functions.php:2179
-#: functions.php:2200
-msgid "Success! Cache has been purged successfully!"
-msgstr ""
-
-#: functions.php:2242
-msgid "Success! Cache has been invalidated successfully!"
-msgstr ""
-
-#: functions.php:2252
-msgid "Error! There was an error and the cache was not invalidated!"
-msgstr ""
-
-#: functions.php:2784
+#: functions.php:2249
 msgid "Connection reconfigured successfully"
 msgstr ""
 
-#: functions.php:2787
+#: functions.php:2252
 msgid "Webhook Error: "
 msgstr ""
 
-#: functions.php:2791
+#: functions.php:2256
 msgid "Unable to get SDK instance"
 msgstr ""
 
-#: functions.php:2795
+#: functions.php:2260
 msgid "Incomplete site config. Please reinstall the plugin!"
 msgstr ""
 
-#: functions.php:2856
-#: functions.php:2867
+#: functions.php:2321
+#: functions.php:2332
 msgid "Invalid API key or API secret key value"
 msgstr ""
 
-#: functions.php:2879
+#: functions.php:2344
 msgid "Error when trying to communicate with NitroPack's servers. Please try again in a few minutes. If the issue persists, please"
 msgstr ""
 
-#: functions.php:2940
+#: functions.php:2405
 msgid "Connected"
 msgstr ""
 
-#: functions.php:2952
+#: functions.php:2417
 msgid "Permission Error: "
 msgstr ""
 
-#: functions.php:2957
+#: functions.php:2422
 msgid "Error while fetching remote config: "
 msgstr ""
 
-#: functions.php:2962
+#: functions.php:2427
 msgid "Can't establish connection with NitroPack's servers"
 msgstr ""
 
-#: functions.php:2967
+#: functions.php:2432
 msgid "Incorrect API credentials. Please make sure that you copied them correctly and try again."
 msgstr ""
 
-#: functions.php:3022
+#: functions.php:2487
 msgid "Disconnected"
-msgstr ""
-
-#: functions.php:3299
-msgid "Cache warmup has been enabled successfully!"
-msgstr ""
-
-#: functions.php:3305
-msgid "There was an error while enabling the cache warmup!"
-msgstr ""
-
-#: functions.php:3322
-msgid "Cache warmup has been disabled successfully!"
-msgstr ""
-
-#: functions.php:3327
-msgid "There was an error while disabling the cache warmup!"
-msgstr ""
-
-#: functions.php:3342
-msgid "Success! Cache warmup has been started successfully!"
-msgstr ""
-
-#: functions.php:3351
-msgid "Error! There was an error while starting the cache warmup!"
-msgstr ""
-
-#: functions.php:3366
-msgid "Invalid estimation ID!"
-msgstr ""
-
-#: functions.php:3408
-#: functions.php:3422
-msgid "Warmup estimation failed."
-msgstr ""
-
-#: functions.php:3411
-msgid "Cache warmup has been estimated successfully."
-msgstr ""
-
-#: functions.php:3413
-msgid "We could not find any links for warming up on your home page."
-msgstr ""
-
-#: functions.php:3415
-msgid "Warmup estimation failed. Please try again or contact support if the issue persists"
-msgstr ""
-
-#: functions.php:3434
-#: functions.php:3447
-msgid "Error! There was an error while fetching warmup stats!"
-msgstr ""
-
-#: functions.php:3746
-msgid "Connect NitroPack&nbsp;&nbsp;"
-msgstr ""
-
-#: functions.php:3788
-msgid "Purge Entire Cache"
-msgstr ""
-
-#: functions.php:3802
-msgid "Purge Current Page"
-msgstr ""
-
-#: functions.php:3814
-msgid "Invalidate Current Page"
 msgstr ""
 
 #: view/connect-oneclick.php:5
@@ -800,239 +1043,55 @@ msgstr ""
 msgid "connect automatically"
 msgstr ""
 
-#: view/connect.php:140
+#: view/connect.php:139
 msgid "Api details verification failed! Please check whether you entered correct details."
 msgstr ""
 
-#: view/dashboard-oneclick.php:27
-#: view/dashboard.php:80
-msgid "Optimized pages"
-msgstr ""
-
-#: view/dashboard-oneclick.php:31
-#: view/dashboard.php:84
-msgid "Processing"
-msgstr ""
-
-#: view/dashboard-oneclick.php:33
-#: view/dashboard.php:86
-msgid "page(s) in the background"
-msgstr ""
-
-#: view/dashboard-oneclick.php:40
-#: view/dashboard.php:93
-msgid "Last cache purge"
+#: view/dashboard-oneclick.php:28
+#: view/dashboard.php:81
+msgid "Automated Behavior"
 msgstr ""
 
 #: view/dashboard-oneclick.php:41
 #: view/dashboard.php:94
-msgid "Never"
-msgstr ""
-
-#: view/dashboard-oneclick.php:42
-#: view/dashboard.php:95
-msgid "Reason"
-msgstr ""
-
-#: view/dashboard-oneclick.php:43
-#: view/dashboard.php:96
-msgid "Unknown"
-msgstr ""
-
-#: view/dashboard-oneclick.php:47
-#: view/dashboard-oneclick.php:66
-#: view/dashboard.php:100
-#: view/dashboard.php:119
-msgid "Purge cache"
-msgstr ""
-
-#: view/dashboard-oneclick.php:59
-#: view/dashboard.php:112
-msgid "Automated Behavior"
-msgstr ""
-
-#: view/dashboard-oneclick.php:67
-#: view/dashboard.php:120
-msgid "Purge affected cache when content is updated or published"
-msgstr ""
-
-#: view/dashboard-oneclick.php:81
-#: view/dashboard.php:134
-msgid "Page optimization"
-msgstr ""
-
-#: view/dashboard-oneclick.php:82
-#: view/dashboard.php:135
-msgid "Select what post/page types get optimized"
-msgstr ""
-
-#: view/dashboard-oneclick.php:98
-#: view/dashboard.php:151
 msgid "Exclusions"
 msgstr ""
 
-#: view/dashboard-oneclick.php:115
-#: view/dashboard.php:213
+#: view/dashboard-oneclick.php:55
+#: view/dashboard.php:112
 msgid "Basic Settings"
 msgstr ""
 
-#: view/dashboard-oneclick.php:127
-#: view/dashboard.php:225
-msgid "HTML Compression"
-msgstr ""
-
-#: view/dashboard-oneclick.php:130
-#: view/dashboard.php:228
-msgid "Compressing the structure of your HTML, ensures faster page rendering and an optimized browsing experience for your users."
-msgstr ""
-
-#: view/dashboard-oneclick.php:143
-#: view/dashboard.php:241
-msgid "Run compression test"
-msgstr ""
-
-#: view/dashboard-oneclick.php:154
-#: view/dashboard.php:252
-msgid "Sync NitroPack Purge with Beaver Builder"
-msgstr ""
-
-#: view/dashboard-oneclick.php:157
-#: view/dashboard.php:255
-msgid "When Beaver Builder cache is purged, NitroPack will perform a full cache purge keeping your site's content up-to-date."
-msgstr ""
-
-#: view/dashboard-oneclick.php:171
-#: view/dashboard.php:269
-msgid "Allow Editors to purge cache"
-msgstr ""
-
-#: view/dashboard-oneclick.php:172
-#: view/dashboard.php:270
-msgid "Give Editors the right to purge cache when content is updated."
-msgstr ""
-
-#: view/dashboard-oneclick.php:310
-#: view/dashboard.php:477
-msgid "Error while fetching plan data"
-msgstr ""
-
-#: view/dashboard-oneclick.php:329
-#: view/dashboard.php:501
-msgid "Testing current compression status"
-msgstr ""
-
-#: view/dashboard-oneclick.php:342
-#: view/dashboard.php:514
-msgid "Compression is already enabled on your server! There is no need to enable it in NitroPack."
-msgstr ""
-
-#: view/dashboard-oneclick.php:345
-#: view/dashboard.php:517
-msgid "No compression was detected! We will now enable it in NitroPack."
-msgstr ""
-
-#: view/dashboard-oneclick.php:349
-#: view/dashboard.php:521
-msgid "Could not determine compression status automatically. Please configure it manually."
-msgstr ""
-
-#: view/dashboard.php:29
+#: view/dashboard.php:24
 #: view/preview-site.php:20
 msgid "Step"
 msgstr ""
 
-#: view/dashboard.php:32
+#: view/dashboard.php:27
 msgid "Enable proactive optimizations"
 msgstr ""
 
-#: view/dashboard.php:34
+#: view/dashboard.php:29
 msgid "Turn on Cache Warmup so NitroPack can start optimizing your pages immediately, without waiting for traffic. This guarantees a fast site for every visitor right from the start."
 msgstr ""
 
-#: view/dashboard.php:38
+#: view/dashboard.php:34
 msgid "Enable Cache Warmup"
 msgstr ""
 
-#: view/dashboard.php:40
+#: view/dashboard.php:35
 msgid "Skip"
 msgstr ""
 
-#: view/dashboard.php:49
+#: view/dashboard.php:44
 msgid "Customize NitroPack's Optimization Settings in Your Account"
 msgstr ""
 
-#: view/dashboard.php:56
+#: view/dashboard.php:51
 msgid "You can further configure how NitroPack's optimization behaves through your account."
 msgstr ""
 
-#: view/dashboard.php:72
-msgid "Go to app"
-msgstr ""
-
-#: view/dashboard.php:167
-msgid "Subscription"
-msgstr ""
-
-#: view/dashboard.php:171
-msgid "Free"
-msgstr ""
-
-#: view/dashboard.php:174
-msgid "Manage subscription"
-msgstr ""
-
-#: view/dashboard.php:180
-msgid "Next reset"
-msgstr ""
-
-#: view/dashboard.php:181
-#: view/dashboard.php:185
-msgid "No ETA"
-msgstr ""
-
-#: view/dashboard.php:184
-msgid "Next billing"
-msgstr ""
-
-#: view/dashboard.php:188
-msgid "Page views"
-msgstr ""
-
-#: view/dashboard.php:190
-#: view/dashboard.php:196
-#, php-format
-msgid "%1$s out of %2$s"
-msgstr ""
-
-#: view/dashboard.php:194
-msgid "CDN bandwidth"
-msgstr ""
-
-#: view/dashboard.php:205
-msgid "You will be notified by email when your website reaches the subscription resource limits."
-msgstr ""
-
-#: view/dashboard.php:283
-msgid "Cart cache"
-msgstr ""
-
-#: view/dashboard.php:285
-msgid "Your visitors will enjoy full site speed while browsing with items in cart. Fully optimized page cache will be served."
-msgstr ""
-
-#: view/dashboard.php:316
-msgid "This feature is available on Plus plan and above."
-msgstr ""
-
-#: view/dashboard.php:326
-msgid "Real-time Stock Refresh"
-msgstr ""
-
-#: view/dashboard.php:328
-msgid "Keep accurate product availability on your WooCommerce site. Turn on this feature if you display stock quantities, and enjoy automatic cache clearance when stock decreases."
-msgstr ""
-
-#: view/dashboard.php:344
+#: view/dashboard.php:130
 msgid "Disconnect NitroPack plugin"
 msgstr ""
 
@@ -1040,7 +1099,7 @@ msgstr ""
 #: view/modals/modal-disconnect.php:10
 #: view/modals/modal-modes.php:70
 #: view/modals/modal-optimization-mode.php:10
-#: view/modals/modal-plugin-deactivate.php:14
+#: view/modals/modal-plugin-deactivate.php:13
 #: view/modals/modal-purge-cache.php:10
 #: view/modals/modal-test-mode.php:14
 #: view/modals/modal-unsaved-changes.php:10
@@ -1098,7 +1157,7 @@ msgid "Switching to Test Mode..."
 msgstr ""
 
 #: view/modals/modal-disconnect.php:123
-#: view/modals/modal-test-mode.php:131
+#: view/modals/modal-test-mode.php:130
 msgid "Error!"
 msgstr ""
 
@@ -1210,7 +1269,7 @@ msgid "Modes comparison"
 msgstr ""
 
 #: view/modals/modal-modes.php:129
-#: view/modals/modal-posttypes.php:53
+#: view/modals/modal-posttypes.php:59
 msgid "Close"
 msgstr ""
 
@@ -1242,7 +1301,7 @@ msgstr ""
 msgid "Switch mode"
 msgstr ""
 
-#: view/modals/modal-plugin-deactivate.php:18
+#: view/modals/modal-plugin-deactivate.php:17
 #: view/modals/modal-plugin-deactivate.php:30
 msgid "Deactivate"
 msgstr ""
@@ -1251,19 +1310,19 @@ msgstr ""
 msgid "This will turn it off to help avoid conflicts with NitroPack. You can turn it back on anytime from the Plugins page."
 msgstr ""
 
-#: view/modals/modal-plugin-deactivate.php:81
+#: view/modals/modal-plugin-deactivate.php:82
 msgid "Deactivating "
 msgstr ""
 
-#: view/modals/modal-posttypes.php:8
+#: view/modals/modal-posttypes.php:12
 msgid "Configure post types"
 msgstr ""
 
-#: view/modals/modal-posttypes.php:9
+#: view/modals/modal-posttypes.php:13
 msgid "Configure post types that can be optimized"
 msgstr ""
 
-#: view/modals/modal-posttypes.php:54
+#: view/modals/modal-posttypes.php:60
 msgid "Save Changes"
 msgstr ""
 
@@ -1311,8 +1370,8 @@ msgstr ""
 msgid "Optimizing your home page"
 msgstr ""
 
-#: view/modals/modal-processing-html.php:32
-msgid "The setup may take up to 1 minute ..."
+#: view/modals/modal-processing-html.php:25
+msgid "This may take up to 1 minute ..."
 msgstr ""
 
 #: view/modals/modal-purge-cache.php:13
@@ -1324,12 +1383,12 @@ msgid "It will take us a few minutes to re-optimize all your pages and start ser
 msgstr ""
 
 #: view/modals/modal-purge-cache.php:20
-#: view/modals/modal-test-mode.php:91
+#: view/modals/modal-test-mode.php:90
 msgid "I will do it later"
 msgstr ""
 
 #: view/modals/modal-purge-cache.php:21
-#: view/modals/modal-test-mode.php:92
+#: view/modals/modal-test-mode.php:91
 msgid "Purge cache now"
 msgstr ""
 
@@ -1366,11 +1425,11 @@ msgstr ""
 msgid "This allows you to assess and fine-tune NitroPack’s performance before implementing optimizations site-wide."
 msgstr ""
 
-#: view/modals/modal-test-mode.php:89
+#: view/modals/modal-test-mode.php:88
 msgid "Purge cache after disabling Test Mode?"
 msgstr ""
 
-#: view/modals/modal-test-mode.php:90
+#: view/modals/modal-test-mode.php:89
 msgid "If you have made changes to NitroPack configuration or your website while you were using test mode, we recommend you to purge your cache. In this way we will update NitroPack cache with your recent changes."
 msgstr ""
 
@@ -1414,56 +1473,4 @@ msgstr ""
 #: view/preview-site.php:56
 #, php-format
 msgid "Need help? <a href=\"%s\" target=\"_blank\">Visit our Help Center</a> or contact our <a href=\"%s\">Support team</a>."
-msgstr ""
-
-#: view/system-report.php:5
-msgid "Include NitroPack info (version, methods, environment)"
-msgstr ""
-
-#: view/system-report.php:12
-msgid "Include active plugins list"
-msgstr ""
-
-#: view/system-report.php:19
-msgid "Include conflicting plugins list"
-msgstr ""
-
-#: view/system-report.php:26
-msgid "Include plugin config"
-msgstr ""
-
-#: view/system-report.php:33
-msgid "Include directory status"
-msgstr ""
-
-#: view/system-report.php:47
-msgid "System Info Report"
-msgstr ""
-
-#: view/system-report.php:48
-msgid "This report gives a clear picture of how NitroPack is set up on your site. It checks for anything that might cause problems, like plugins that don’t work well with NitroPack or server issues. If something isn’t working as expected, share this report with support to help them fix it quickly."
-msgstr ""
-
-#: view/system-report.php:51
-msgid "Download"
-msgstr ""
-
-#: view/system-report.php:59
-msgid "Customize Report"
-msgstr ""
-
-#: view/system-report.php:125
-msgid "Please select at least one of the report options"
-msgstr ""
-
-#: view/system-report.php:171
-msgid "Report generated successfully."
-msgstr ""
-
-#: view/system-report.php:173
-msgid "Response is empty. Report generation failed."
-msgstr ""
-
-#: view/system-report.php:177
-msgid "There was an error while generating the report."
 msgstr ""

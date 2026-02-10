@@ -263,7 +263,7 @@ p {
         }
     }
     &:disabled ~ .toggle {
-        background-color: $gray-300;
+        opacity: .5;
         cursor: not-allowed;
     }
 }
@@ -851,8 +851,10 @@ p {
         width: 100%;
         border-top: 0;
         border-radius: $border-radius * 2;
-        max-width: calc(100vw - 125px);
-        display: block;
+        @media screen and (max-width: 768px) {
+            max-width: calc(100vw - 125px);
+            display: block;
+        }
         td {
             border-top: 1px solid $divider-color;
             padding: 1rem 1.75rem;

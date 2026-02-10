@@ -149,12 +149,9 @@ class TestMode {
 							target="_blank"><?php esc_html_e( 'Learn more', 'nitropack' ); ?></a>
 					</p>
 				</div>
-
-				<label class="inline-flex items-center cursor-pointer ml-auto">
-					<input type="checkbox" class="sr-only peer" id="safemode-status" <?php echo $this->is_test_mode_enabled() ? "checked" : ""; ?>>
-
-					<div class="toggle"></div>
-				</label>
+				<?php $components = new Components();
+				$components->render_toggle( 'safemode-status', $this->is_test_mode_enabled() );
+				?>
 			</div>
 			<div class="msg-container hidden" id="loading-safemode-status">
 				<img src="<?php echo plugin_dir_url( NITROPACK_FILE ) . 'view/images/loading.svg'; ?>" alt="loading"

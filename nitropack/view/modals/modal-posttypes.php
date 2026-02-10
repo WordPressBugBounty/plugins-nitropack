@@ -1,3 +1,7 @@
+<?php
+use NitroPack\WordPress\Settings\CPTOptimization;
+?>
+
 <div id="modal-posttypes" tabindex="-1" aria-hidden="true" class="hidden modal-wrapper justify-center items-center">
     <!-- Modal container -->
     <div class="modal-container">
@@ -20,7 +24,9 @@
                 <div class="scrollbar-default overflow-auto">
                     <ul class="list-items">
                         <?php
-                        $nitropack_cpts = nitropack_get_CPTs_with_optimization_status();
+                        $cptOptimization = CPTOptimization::getInstance();
+                        $nitropack_cpts = $cptOptimization->nitropack_get_CPTs_with_optimization_status();
+                        
                         foreach ($nitropack_cpts as $slug => $npCPT) { ?>
                             <li class="list-item" id="type-<?php echo $slug; ?>">
                                 <div class="list-item-body">

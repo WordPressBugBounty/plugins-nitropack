@@ -7,8 +7,6 @@ class ModuleHandler {
     public static $criticalInitSemaphore = 0;
 
     private static $instance = NULL;
-    private static $purgeAllPending = false;
-    private static $purgeUrlPending = [];
     private static $isInitialized = false;
     private static $isInitializedStage = [];
     private static $shutdownCallbacks = [];

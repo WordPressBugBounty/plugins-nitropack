@@ -145,7 +145,8 @@ class LoggingEvents {
 	 * @return bool True if the post is marked for optimization, false otherwise.
 	 */
 	private function is_post_marked_for_optimization( $post ) {
-		$get_optimized_CPTs = nitropack_get_optimized_CPTs();
+		$CPTOptimization = \NitroPack\WordPress\Settings\CPTOptimization::getInstance();
+		$get_optimized_CPTs = $CPTOptimization->nitropack_get_optimized_CPTs();
 		if ( empty( $get_optimized_CPTs ) ) {
 			return false;
 		}

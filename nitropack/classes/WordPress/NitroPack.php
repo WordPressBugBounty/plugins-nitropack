@@ -21,7 +21,7 @@ class NitroPack {
 	public static $preUpdateMeta = array();
 	public static $ignoreUpdatePostIDs = array();
 	public static $np_loggedWarmups = array();
-	public static $optionsToCache = [ 
+	public static $optionsToCache = [
 		'cache_handler_cache_handler',
 		'woocommerce_default_customer_address',
 		[ 'ajaxShortcodes' => [ 'enabled' => false, 'shortcodes' => [] ] ],
@@ -45,7 +45,6 @@ class NitroPack {
 	 * @var null
 	 */
 	private $pageType;
-
 	/**
 	 * Logger instance.
 	 *
@@ -78,11 +77,21 @@ class NitroPack {
 	 * @var AppNotifications
 	 */
 	public $AppNotifications;
+
 	/**
-	 * Get instance.
-	 *
-	 * @return NitroPack|null
+	 * @var array $settings Configuration settings for NitroPack.
 	 */
+	public $settings;
+	public function __construct() {
+		$this->Config = new Config();
+		$this->Notifications = Notifications\Notifications::getInstance();
+		$this->settings = new Settings( $this->Config );
+		$this->logger = new Logger( $this );
+		$this->loggingEvents = new LoggingEvents( $this->logger );
+		$this->sdkObjects = array();
+		$this->disabledReason = NULL;
+		$this->pageType = NULL;
+	}
 
 	public static function getDataDir() {
 		$isRaidBoxes = \NitroPack\Integration\Hosting\Raidboxes::detect();
@@ -105,7 +114,7 @@ class NitroPack {
 			$wpContentDir = preg_replace( "@^/sites/@", "/nas/content/live/", $wpContentDir );
 		}
 
-		$oldNitroDirs = [ 
+		$oldNitroDirs = [
 			nitropack_trailingslashit( $wpContentDir ) . 'nitropack',
 			nitropack_trailingslashit( $wpContentDir ) . 'cache/' . substr( md5( $currentFilePath ), 0, 7 ) . "-nitropack",
 		];
@@ -204,21 +213,6 @@ class NitroPack {
 	public static function isWpCli() {
 		return defined( "WP_CLI" ) && WP_CLI;
 	}
-	/**
-	 * @var array $settings Configuration settings for NitroPack.
-	 */
-	public $settings;
-	public function __construct() {
-		$this->Config = new Config();
-		$this->Notifications = Notifications\Notifications::getInstance();
-		$this->settings = new Settings( $this->Config );
-		$this->logger = new Logger( $this );
-		$this->loggingEvents = new LoggingEvents( $this->logger );
-		$this->sdkObjects = array();
-		$this->disabledReason = NULL;
-		$this->pageType = NULL;
-	}
-
 	public function getDistribution() {
 		$dist = "regular";
 		$dbDist = NULL;
