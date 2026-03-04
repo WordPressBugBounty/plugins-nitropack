@@ -139,7 +139,8 @@ class Components {
 					}
 				}
 				if ( $app_notification && $app_notification['end_date'] && $app_notification['id'] ) {
-					echo '<a class="btn btn-secondary btn-dismiss" data-notification_end="' . $app_notification['end_date'] . '" data-notification_id="' . $app_notification['id'] . '">' . esc_html__( 'Dismiss', 'nitropack' ) . '</a>';
+					$dismiss_url = $app_notification['dismiss_url'] ?  $app_notification['dismiss_url'] : '';
+					echo '<a class="btn btn-secondary btn-dismiss" data-notification_end="' . $app_notification['end_date'] . '" data-notification_id="' . $app_notification['id'] . '" data-dismiss-url="' . $dismiss_url . '">' . esc_html__( 'Dismiss', 'nitropack' ) . '</a>';
 				} else if ( $dismissibleId && $dismissBy === 'option' ) {
 					echo '<a class="btn btn-secondary btn-dismiss" data-dismissible-id="' . $dismissibleId . '">' . esc_html__( 'Dismiss', 'nitropack' ) . '</a>';
 				}

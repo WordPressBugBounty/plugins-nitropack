@@ -2,6 +2,7 @@
 namespace NitroPack\WordPress\Notifications;
 
 use NitroPack\WordPress\Settings\TestMode;
+use NitroPack\HttpClient\HttpClient;
 /* 
  * Class Notifications
  *
@@ -49,7 +50,7 @@ class Notifications {
 			$components->render_notification( NITROPACK_PLUGIN_DATA_DIR_WARNING, 'warning', 'Unable to initialize plugin data dir' );
 		}
 
-		if ( ! empty( $_COOKIE["nitropack_after_activate_notice"] ) && !get_nitropack()->isConnected() ) {
+		if ( ! empty( $_COOKIE["nitropack_after_activate_notice"] ) && ! get_nitropack()->isConnected() ) {
 			$components->render_notification( "Please complete the setup process to activate optimizations.",
 				'promo',
 				esc_html__( 'Connect your website to enable NitroPack\'s optimizations', 'nitropack' ),
@@ -91,7 +92,7 @@ class Notifications {
 				$warnings[] = array(
 					'title' => sprintf( "%s is active and may conflict with NitroPack", $clashingPlugin['name'] ),
 					'msg' => esc_html__( "Some of its features overlap with NitroPack's optimizations which could lead to issues. We recommend disabling it to avoid potential conflicts.", 'nitropack' ),
-					'actions' => '<a class="btn btn-secondary modal-plugin-deactivate" data-plugin-path="'.$clashingPlugin['plugin'].'" data-plugin-name="'.$clashingPlugin['name'].'" title="Disable ' . $clashingPlugin['name'] . ' ">' . sprintf( "Deactivate %s", $clashingPlugin['name'] ) . '</a>',
+					'actions' => '<a class="btn btn-secondary modal-plugin-deactivate" data-plugin-path="' . $clashingPlugin['plugin'] . '" data-plugin-name="' . $clashingPlugin['name'] . '" title="Disable ' . $clashingPlugin['name'] . ' ">' . sprintf( "Deactivate %s", $clashingPlugin['name'] ) . '</a>',
 					'classes' => [ 'conflicting-plugins plugin-' . sanitize_title( $clashingPlugin['name'] ) ],
 				);
 			}
@@ -228,7 +229,7 @@ class Notifications {
 					'msg' => esc_html__( 'Please make sure that the /wp-content/ directory is writable and refresh this page.', 'nitropack' ),
 					'classes' => [ 'np-data-dir' ],
 				);
-				return [ 
+				return [
 					'error' => $errors,
 					'warning' => $warnings,
 					'info' => $infos
@@ -242,7 +243,7 @@ class Notifications {
 
 					'classes' => [ 'np-data-dir' ],
 				);
-				return [ 
+				return [
 					'error' => $errors,
 					'warning' => $warnings,
 					'info' => $infos
@@ -406,7 +407,7 @@ class Notifications {
 			}
 		}
 
-		$npPluginNotices = [ 
+		$npPluginNotices = [
 			'error' => $errors,
 			'warning' => $warnings,
 			'info' => $infos
@@ -434,6 +435,7 @@ class Notifications {
 				$components->render_notification( $notice['msg'], $type, $notice['title'], isset( $notice['actions'] ) ? $notice['actions'] : null, isset( $notice['classes'] ) ? $notice['classes'] : null, isset( $notice['dismissibleId'] ) ? $notice['dismissibleId'] : null, isset( $notice['dismissBy'] ) ? $notice['dismissBy'] : null );
 			}
 		}
+
 		//render app notifications
 		$this->render_app_notifications();
 	}
@@ -542,19 +544,19 @@ class Notifications {
 
 			foreach ( $notices[ $type ] as $notice ) {
 
-			
-					switch ( $type ) {
-						case "error":
-							$numberOfPluginErrors++;
-							break;
-						case "warning":
-							$numberOfPluginWarnings++;
-							break;
-						case "info":
-							$notificationCount++;
-							break;
-					}
-		
+
+				switch ( $type ) {
+					case "error":
+						$numberOfPluginErrors++;
+						break;
+					case "warning":
+						$numberOfPluginWarnings++;
+						break;
+					case "info":
+						$notificationCount++;
+						break;
+				}
+
 
 			}
 		}
@@ -624,7 +626,7 @@ class Notifications {
 		wp_die();
 	}
 
-	/* Dismiss notification by using set_transient -> temporary dismissal with auto-expiry */
+	/* Dismiss notification by using set_transient -> temporary dismissal with auto-expiry or by dismiss url if set by the app notification */
 	public function nitropack_dismiss_notification_by_transient() {
 		if ( ! $this->pass_notification_capabilities() ) {
 			wp_die( __( 'You do not have sufficient permissions.', 'nitropack' ) );
@@ -633,18 +635,39 @@ class Notifications {
 		if ( empty( $_POST['notification_id'] ) ) {
 			wp_send_json_error( [ 'message' => __( 'Missing notification ID.', 'nitropack' ) ] );
 		}
-
 		nitropack_verify_ajax_nonce( $_REQUEST );
 
 		$notification_id = $_POST['notification_id'];
 		$notification_end = $_POST['notification_end'];
 		$midpoint = get_date_midpoint( $notification_end );
 		$notification_end = strtotime( $notification_end ) - time();
-		$transient_status = set_transient( $notification_id, $midpoint, $notification_end );
 
-		nitropack_json_and_exit( array(
-			"transient_status" => $transient_status,
-		) );
+		//Use dimiss url from the app notification if set. It will remove it from notifications.json
+		if ( ! empty( $_POST["dismiss_url"] ) ) {
+			$dismiss_url = $_POST["dismiss_url"];
+			$http_client = new HttpClient( $dismiss_url );
+			$http_client->fetch( true, "GET" );
+			$resp = $http_client->getStatusCode() == 200 ? json_decode( $http_client->getBody(), true ) : false;
+			if ( $resp['status']) {				
+				$app_notifications = AppNotifications::getInstance();
+				$removed = $app_notifications->removeNotificationById( $notification_id );
+				if ( $removed ) {
+					nitropack_json_and_exit( array(
+						"status" => true,
+					) );
+				} else {
+					wp_send_json_error( [ 'message' => __( 'Failed to dismiss the notification.', 'nitropack' ) ] );
+				}
+			} else {
+				wp_send_json_error( [ 'message' => __( 'Failed to dismiss the notification.', 'nitropack' ) ] );
+			}
+		} else {
+			//if there is not dismiss url, use the transient dismissal method which will remove the notification from the screen and it will not show it again until the time set in notification_end
+			$transient_status = set_transient( $notification_id, $midpoint, $notification_end );
+			nitropack_json_and_exit( array(
+				"status" => $transient_status,
+			) );
+		}
 	}
 
 	/**

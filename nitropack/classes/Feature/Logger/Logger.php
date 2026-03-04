@@ -214,10 +214,10 @@ class Logger {
 		//chmod($log_file, $this->get_chmod());
 
 		if ( ! $file_exists ) {
-			fputcsv( $file_handle, array_keys( $content ), $this->separator );
+			fputcsv( $file_handle, array_keys( $content ), $this->separator, '"' , '\\' );
 		}
 
-		fputcsv( $file_handle, $content, $this->separator );
+		fputcsv( $file_handle, $content, $this->separator, '"' , '\\' );
 		fclose( $file_handle );
 	}
 }

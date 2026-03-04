@@ -9,7 +9,9 @@ jQuery(document).ready(function ($) {
 			};
 			this.modals = this.initModals();
 			this.getInitialModeName();
+
 			this.init();
+
 			this.modeSwitchClick();
 			this.previewHomeButton();
 			this.goLiveButton();
@@ -22,12 +24,20 @@ jQuery(document).ready(function ($) {
 				processing_html_error_modal: new Modal(document.getElementById("processing-html-error-modal")),
 				go_live_modal: new Modal(document.getElementById("go-live-modal")),
 			};
-
 			return modals;
 		}
 
 		init() {
 			this.startPreviewPolling(this.initial_settings.optimizationLevel.name);
+			this.closeModal();
+		}
+		closeModal() {
+			const nitroSelf = this;
+			$(".modal-wrapper .close-modal").click(function () {
+				let id = $(this).closest(".modal-wrapper").attr("id");
+				id = id.replace(/-/g, "_");
+				nitroSelf.hideModal(id);
+			});
 		}
 		getInitialModeName() {
 			const mode = $(".modes-container .mode.active").data("mode");
@@ -90,7 +100,7 @@ jQuery(document).ready(function ($) {
 								} else {
 									NitropackUI.triggerToast(
 										"success",
-										'Home page optimized with <strong class="capitalized">' + mode_name + "</strong> mode."
+										'Home page optimized with <strong class="capitalized">' + mode_name + "</strong> mode.",
 									);
 								}
 								nitroSelf.initial_settings.optimizationLevel.name = mode_name;
@@ -111,7 +121,7 @@ jQuery(document).ready(function ($) {
 								nitroSelf.showModal("processing_html_error_modal");
 							}
 						}
-					}
+					},
 				).fail(function (xhr, status, error) {
 					nitroSelf.showModal("processing_html_error_modal");
 					if (Date.now() - startTime < maxRetryTime) {
@@ -158,7 +168,7 @@ jQuery(document).ready(function ($) {
 					} else {
 						NitropackUI.triggerToast("error", resp.message);
 					}
-				}
+				},
 			);
 		};
 
@@ -207,7 +217,7 @@ jQuery(document).ready(function ($) {
 				.addClass("selected")
 				.text(np_onboarding.active_mode)
 				.prepend(
-					'<svg class="icon check" xmlns="http://www.w3.org/2000/svg" width="12" height="9" viewBox="0 0 12 9" fill="none"><path d="M11.4674 0.792969L4.13411 8.1263L0.800781 4.79297" stroke="#4600CC" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+					'<svg class="icon check" xmlns="http://www.w3.org/2000/svg" width="12" height="9" viewBox="0 0 12 9" fill="none"><path d="M11.4674 0.792969L4.13411 8.1263L0.800781 4.79297" stroke="#4600CC" stroke-linecap="round" stroke-linejoin="round"/></svg>',
 				);
 			$(".active-mode").text(mode);
 		}

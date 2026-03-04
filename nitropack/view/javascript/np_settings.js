@@ -685,7 +685,12 @@ jQuery(document).ready(function ($) {
 							NitropackUI.triggerToast(resp.type, resp.message);
 						}
 					} else {
-						msg_box.text(np_settings.compression_not_determined);
+						if (resp.status_code) {
+							let text = '[Error] HTTP Status Code: ' + resp.status_code;
+							msg_box.text(text);
+						} else {
+							msg_box.text(np_settings.compression_not_determined);
+						}
 					}
 					setTimeout(function () {
 						msg_container.addClass("hidden");

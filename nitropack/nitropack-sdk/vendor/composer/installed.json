@@ -7,12 +7,12 @@
             "source": {
                 "type": "git",
                 "url": "git@github.com:wpengine/np-httpclient.git",
-                "reference": "b54767f6881ff455a728b814a28aaaf1499acd54"
+                "reference": "9e46a9f49892f41e4bf39aeb2aa7edf9b5d84304"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/wpengine/np-httpclient/zipball/b54767f6881ff455a728b814a28aaaf1499acd54",
-                "reference": "b54767f6881ff455a728b814a28aaaf1499acd54",
+                "url": "https://api.github.com/repos/wpengine/np-httpclient/zipball/9e46a9f49892f41e4bf39aeb2aa7edf9b5d84304",
+                "reference": "9e46a9f49892f41e4bf39aeb2aa7edf9b5d84304",
                 "shasum": ""
             },
             "require": {
@@ -25,10 +25,10 @@
                 "ext-posix": "*",
                 "monolog/monolog": "^1.1|^2.0|^3.0"
             },
-            "time": "2025-07-18T11:57:12+00:00",
+            "time": "2026-02-18T15:16:23+00:00",
             "default-branch": true,
             "type": "library",
-            "installation-source": "dist",
+            "installation-source": "source",
             "autoload": {
                 "psr-4": {
                     "NitroPack\\HttpClient\\": "src/"
@@ -91,7 +91,7 @@
             "time": "2025-06-24T07:02:36+00:00",
             "default-branch": true,
             "type": "library",
-            "installation-source": "dist",
+            "installation-source": "source",
             "autoload": {
                 "psr-4": {
                     "NitroPack\\Url\\": "src/"
@@ -114,10 +114,6 @@
                 "php",
                 "url"
             ],
-            "support": {
-                "source": "https://github.com/wpengine/np-url/tree/master",
-                "issues": "https://github.com/wpengine/np-url/issues"
-            },
             "install-path": "../nitropack/url"
         }
     ],

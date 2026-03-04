@@ -190,11 +190,11 @@ class GravityForms {
 	 *
 	 * @param array    $attributes The block attrbutes.
 	 * @param string   $content    The block content.
-	 * @param WP_block $block   The block object.
+	 * @param WP_Block $block      The block object.
 	 *
 	 * @return mixed
 	 */
-	public function modify_gf_block($attributes, $content, WP_block $block = null) {
+	public function modify_gf_block($attributes, $content, $block = null) {
 
 		return '<div class="nitropack-gravityforms-block" data-block-name="'.esc_attr($block -> name).'" data-block-attributes="'.esc_attr(json_encode($attributes)).'"><img src="'.esc_url(NITROPACK_PLUGIN_DIR_URL . 'view/images/loading.gif').'" alt="loading" /></div>';
 	}

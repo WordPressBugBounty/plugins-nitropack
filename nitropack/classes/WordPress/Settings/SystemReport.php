@@ -42,7 +42,7 @@ class SystemReport {
 			if ( $options !== NULL ) {
 				$diag_data = array( 'report-time-stamp' => date( "Y-m-d H:i:s" ) );
 				foreach ( $options as $func_name => $func_allowed ) {
-					if ( (boolean) $func_allowed ) {
+					if ( $func_allowed ) {
 						$diag_data[ $func_name ] = $np_diag_functions[ $func_name ];
 					}
 				}

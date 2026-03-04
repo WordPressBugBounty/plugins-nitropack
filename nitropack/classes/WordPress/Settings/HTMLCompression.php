@@ -71,7 +71,10 @@ class HTMLCompression {
 				$http->timeout = 25;
 				$http->fetch();
 				$headers = $http->getHeaders();
-
+				if ( $http->status_code !== 200 ) {
+					NitroPack::getInstance()->getLogger()->error( 'Compression test failed with status code: ' . $http->status_code );
+					nitropack_json_and_exit( array( "type" => "error", "message" => nitropack_admin_toast_msgs( 'error' ), "status_code" => $http->status_code ) );
+				}
 				/* Check for content-encoding header - br, gzip, deflate, zstd, etc. Most servers support these and have it enabled. */
 				if ( ! empty( $headers["content-encoding"] ) ) {
 					$hasCompression = true;

@@ -17,9 +17,11 @@ class AppNotifications {
 	private $cacheTtl = 3600;
 	private $getSiteId;
 	private $notifications;
+	private $notificationsFile;
 
 	public function __construct() {
 		$this->getSiteId = get_nitropack()->getSiteId();
+		$this->notificationsFile = nitropack_trailingslashit( NITROPACK_DATA_DIR ) . 'notifications.json';
 		$this->notifications = NULL;
 	}
 	public static function getInstance() {
@@ -36,9 +38,10 @@ class AppNotifications {
 
 		if ( isset( $this->notifications[ $this->getSiteId ] ) ) {
 			$result = $this->notifications[ $this->getSiteId ];
-		
+
 			if ( $type ) {
 				$notifications = isset( $result['notifications'][ $type ] ) ? $result['notifications'][ $type ] : [];
+
 			} else {
 				$notifications = $result['notifications'];
 			}
@@ -46,15 +49,15 @@ class AppNotifications {
 			$notifications = [];
 		}
 
+
 		return apply_filters( 'get_nitropack_notifications', $notifications, $type );
 	}
 
 	private function load() {
 		$this->notifications = [];
 
-		$notificationsFile = nitropack_trailingslashit( NITROPACK_DATA_DIR ) . 'notifications.json';
-		if ( Filesystem::fileExists( $notificationsFile ) ) {
-			$this->notifications = json_decode( Filesystem::fileGetContents( $notificationsFile ), true );
+		if ( Filesystem::fileExists( $this->notificationsFile ) ) {
+			$this->notifications = json_decode( Filesystem::fileGetContents( $this->notificationsFile ), true );
 			if ( ! empty( $this->notifications ) && isset( $this->notifications[ $this->getSiteId ] ) ) {
 				$result = $this->notifications[ $this->getSiteId ];
 				if ( $result['last_modified'] + $this->cacheTtl > time() ) { // The cache is still fresh
@@ -67,20 +70,57 @@ class AppNotifications {
 		if ( get_nitropack()->isConnected() ) {
 			try {
 				$result = $this->fetch();
-				$this->notifications[ $this->getSiteId ] = [ 
+				$this->notifications[ $this->getSiteId ] = [
 					'last_modified' => time(),
 					'notifications' => $result
 				];
-				Filesystem::filePutContents( $notificationsFile, json_encode( $this->notifications ) );
+				Filesystem::filePutContents( $this->notificationsFile, json_encode( $this->notifications ) );
 			} catch (\Exception $e) {
 				$this->notifications[ $this->getSiteId ] = [ // We need this entry in order to make use of the cache logic
 					'last_modified' => time(),
 					'error' => $e->getMessage(),
 					'notifications' => []
 				];
-				Filesystem::filePutContents( $notificationsFile, json_encode( $this->notifications ) );
+				Filesystem::filePutContents( $this->notificationsFile, json_encode( $this->notifications ) );
 			}
 		}
+	}
+
+	public function removeNotificationById( $notificationId ) {
+		if ( $this->notifications === NULL ) {
+			$this->load();
+		}
+
+		if ( empty( $notificationId ) || ! isset( $this->notifications[ $this->getSiteId ]['notifications'] ) || ! \is_array( $this->notifications[ $this->getSiteId ]['notifications'] ) ) {
+			return false;
+		}
+
+		$removed = false;
+		foreach ( $this->notifications[ $this->getSiteId ]['notifications'] as $type => $items ) {
+			if ( ! \is_array( $items ) ) {
+				continue;
+			}
+
+			foreach ( $items as $key => $notification ) {
+				if ( isset( $notification['id'] ) && $notification['id'] === $notificationId ) {
+					unset( $this->notifications[ $this->getSiteId ]['notifications'][ $type ][ $key ] );
+					$this->notifications[ $this->getSiteId ]['notifications'][ $type ] = array_values( $this->notifications[ $this->getSiteId ]['notifications'][ $type ] );
+					$removed = true;
+					break;
+				}
+			}
+
+			if ( $removed ) {
+				break;
+			}
+		}
+
+		if ( $removed ) {
+			$this->notifications[ $this->getSiteId ]['last_modified'] = time();
+			Filesystem::filePutContents( $this->notificationsFile, json_encode( $this->notifications ) );
+		}
+
+		return $removed;
 	}
 
 	private function fetch() {

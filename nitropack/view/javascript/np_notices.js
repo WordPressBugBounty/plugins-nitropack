@@ -32,12 +32,13 @@
         data.append("nonce", nitropack_notices_vars.nonce);
         data.append("notification_id", e.target.dataset.notification_id);
         data.append("notification_end", e.target.dataset.notification_end);
+        data.append("dismiss_url", e.target.dataset.dismissUrl || "");
 
         xhr.onreadystatechange = function () {
           if (xhr.readyState === XMLHttpRequest.DONE) {
             if (xhr.status === 200) {
               let response = JSON.parse(xhr.responseText);
-              if (response.transient_status === true) {
+              if (response.status === true) {
                 let notificationElement = e.target.closest(
                   ".nitro-notification"
                 );
@@ -47,7 +48,7 @@
                 updateNotificationCount();
               }
             } else {
-              
+              console.error("Dismiss failed:", xhr.responseText);
             }
           }
         };

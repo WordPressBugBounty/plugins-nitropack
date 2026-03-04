@@ -8,7 +8,7 @@ Stable tag: 1.19.0
 License: GNU General Public License, version 2
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Boost site speed, performance, and page experience with an all-in-one cache and speed optimization plugin. Pass Core Web Vitals with CDN, image optimization, critical CSS, lazy loading, CSS & JS minification.
+Boost site speed and performance with an all-in-one cache and speed optimization plugin. Pass Core Web Vitals with CDN, image optimization, lazy loading and more.
 
 == Description ==
 Speed up your WordPress site, achieve a 90+ Performance score on PageSpeed Insights, and pass your Core Web Vitals with NitroPack.
@@ -269,10 +269,18 @@ Yes, the plugin uses the [Intercom Chat Widget](https://widget.intercom.io), whi
 5. The only solution you will ever need
 
 == Changelog ==
+= 1.19.1 =
+2026-03-04
+
+* Improvement: Added an option to dismiss an app notification if a dismiss url is present
+* Improvement: Better HTML Compression check
+
 = 1.19.0 =
 2026-02-10
+
 * Improvement: Added Purge & Invalidation buttons on hover in wp-admin post listing
 * Improvement: Better WC Product invalidations
+* Improvement: Better HTML Compression check
 * Improvement: Code refactoring
 
 = 1.18.9 =
