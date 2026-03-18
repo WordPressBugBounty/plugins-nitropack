@@ -1,3 +1,150 @@
+/**
+ * Simple Modal — drop-in replacement for Flowbite Modal.
+ * Supports: new Modal(el, options), .show(), .hide(), .toggle(),
+ * data-modal-hide, data-modal-show, data-modal-toggle attributes,
+ * ESC to close, .close-modal buttons, backdrop click to close.
+ */
+(function () {
+    'use strict';
+
+    var instances = {};
+
+    function Modal(el, options) {
+        if (typeof el === 'string') el = document.getElementById(el);
+        if (!el) return;
+
+        this._el = el;
+        this._options = Object.assign({ backdrop: 'dynamic' }, options);
+        this._backdrop = null;
+        this._isVisible = false;
+        this._onKeydown = this._handleKeydown.bind(this);
+
+        if (el.id) instances[el.id] = this;
+    }
+
+    Modal.prototype.show = function () {
+        if (this._isVisible) return;
+        this._isVisible = true;
+        this._createBackdrop();
+        this._el.classList.remove('hidden');
+        this._el.setAttribute('aria-hidden', 'false');
+        document.body.style.overflow = 'hidden';
+        document.addEventListener('keydown', this._onKeydown);
+    };
+
+    Modal.prototype.hide = function () {
+        if (!this._isVisible) return;
+        this._isVisible = false;
+        this._el.classList.add('hidden');
+        this._el.setAttribute('aria-hidden', 'true');
+        this._removeBackdrop();
+        document.body.style.overflow = '';
+        document.removeEventListener('keydown', this._onKeydown);
+    };
+
+    Modal.prototype.toggle = function () {
+        this._isVisible ? this.hide() : this.show();
+    };
+
+    Modal.prototype.isVisible = function () {
+        return this._isVisible;
+    };
+
+    Modal.prototype._handleKeydown = function (e) {
+        if (e.key === 'Escape' && this._options.backdrop !== 'static') {
+            this.hide();
+        }
+    };
+
+    Modal.prototype._createBackdrop = function () {
+        if (this._options.backdrop === false) return;
+        this._backdrop = document.createElement('div');
+        this._backdrop.setAttribute('modal-backdrop', '');
+        document.body.appendChild(this._backdrop);
+
+        if (this._options.backdrop !== 'static') {
+            var self = this;
+            this._el.addEventListener('click', this._onWrapperClick = function (e) {
+                if (e.target === self._el) self.hide();
+            });
+        }
+    };
+
+    Modal.prototype._removeBackdrop = function () {
+        if (this._backdrop && this._backdrop.parentNode) {
+            this._backdrop.parentNode.removeChild(this._backdrop);
+            this._backdrop = null;
+        }
+        if (this._onWrapperClick) {
+            this._el.removeEventListener('click', this._onWrapperClick);
+            this._onWrapperClick = null;
+        }
+    };
+
+    Modal.getInstance = function (id) {
+        return instances[id] || null;
+    };
+
+    // Auto-init modals from DOM & bind declarative attributes
+    function initModals() {
+        // Create instances for elements with data-modal-backdrop
+        document.querySelectorAll('.modal-wrapper').forEach(function (el) {
+            if (!el.id || instances[el.id]) return;
+            console.log(el.id);
+            var backdrop = el.getAttribute('data-modal-backdrop') || 'dynamic';
+            new Modal(el, { backdrop: backdrop });
+        });
+
+        // data-modal-show
+        document.querySelectorAll('[data-modal-show]').forEach(function (trigger) {
+            var id = trigger.getAttribute('data-modal-show');
+            trigger.addEventListener('click', function () {
+                var inst = instances[id];
+                if (inst) inst.show();
+            });
+        });
+
+        // data-modal-hide
+        document.querySelectorAll('[data-modal-hide]').forEach(function (trigger) {
+            var id = trigger.getAttribute('data-modal-hide');
+            trigger.addEventListener('click', function () {
+                var inst = instances[id];
+                if (inst) inst.hide();
+            });
+        });
+
+        // data-modal-toggle
+        document.querySelectorAll('[data-modal-toggle]').forEach(function (trigger) {
+            var id = trigger.getAttribute('data-modal-toggle');
+        
+            trigger.addEventListener('click', function () {
+                var inst = instances[id];
+                    console.log(instances);
+                if (inst) inst.toggle();
+            });
+        });
+
+        // .close-modal buttons — close the closest .modal-wrapper
+        document.querySelectorAll('.close-modal').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var wrapper = btn.closest('.modal-wrapper');
+                if (wrapper && wrapper.id && instances[wrapper.id]) {
+                    instances[wrapper.id].hide();
+                }
+            });
+        });
+    }
+
+    window.Modal = Modal;
+    window.initModals = initModals;
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initModals);
+    } else {
+        initModals();
+    }
+})();
+
 jQuery(document).ready(function ($) {
     class nitropackUI {
         constructor() {
@@ -154,6 +301,7 @@ jQuery(document).ready(function ($) {
         cosmetics() {
             $('.tooltip-container').removeClass('hidden');
         }
+
 
     }
     const NitropackUI = new nitropackUI();

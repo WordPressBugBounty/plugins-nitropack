@@ -2,9 +2,9 @@
 Contributors: nitropack
 Tags: cache, performance, page speed, website speed, core web vitals
 Requires at least: 4.7
-Tested up to: 6.9.1
+Tested up to: 6.9.4
 Requires PHP: 7.4
-Stable tag: 1.19.0
+Stable tag: 1.19.2
 License: GNU General Public License, version 2
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -269,6 +269,15 @@ Yes, the plugin uses the [Intercom Chat Widget](https://widget.intercom.io), whi
 5. The only solution you will ever need
 
 == Changelog ==
+= 1.19.2 =
+2026-03-18
+
+* Improvement: Removed Flowbite UI dependency - modals refactored
+* Rebranding: New logo & PSB filters
+* Bugfixes: Added connection error handling
+* Bugfixes: Fixed SiteGround integration problem caused by 304 HTTP header.
+
+
 = 1.19.1 =
 2026-03-04
 

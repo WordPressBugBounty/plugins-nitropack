@@ -2,7 +2,7 @@
 use NitroPack\WordPress\Settings\CPTOptimization;
 ?>
 
-<div id="modal-posttypes" tabindex="-1" aria-hidden="true" class="hidden modal-wrapper justify-center items-center">
+<div id="modal-posttypes" data-modal-backdrop="" tabindex="-1" aria-hidden="true" class="hidden modal-wrapper justify-center items-center">
     <!-- Modal container -->
     <div class="modal-container">
         <!-- Modal inner -->

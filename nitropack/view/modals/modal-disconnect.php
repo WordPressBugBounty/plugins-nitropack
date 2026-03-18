@@ -1,4 +1,4 @@
-<div id="disconnect-modal" data-modal-backdrop="" tabindex="-1" aria-hidden="true" class="hidden modal-wrapper popup-modal">
+<div id="modal-disconnect" data-modal-backdrop="" tabindex="-1" aria-hidden="true" class="hidden modal-wrapper popup-modal">
     <div class="popup-container">
         <div class="popup-inner">
             <!-- Modal header -->
@@ -24,9 +24,9 @@
 </div>
 <script>
     jQuery(document).ready(function($) {
-        const $targetEl = document.getElementById('disconnect-modal'),
+        const $targetEl = document.getElementById('modal-disconnect'),
             modal = new Modal($targetEl),
-            modal_wrapper = $('#disconnect-modal'),
+            modal_wrapper = $('#modal-disconnect'),
             modal_icon = modal_wrapper.find('.icon'),
             modal_title = modal_wrapper.find('.popup-header h3'),
             modal_footer = modal_wrapper.find('.popup-footer'),

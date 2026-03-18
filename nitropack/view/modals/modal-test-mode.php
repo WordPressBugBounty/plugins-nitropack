@@ -1,4 +1,4 @@
-<div id="modal-test-mode" data-modal-backdrop="static" tabindex="-1" aria-hidden="true"
+<div id="modal-test-mode" data-modal-backdrop="" tabindex="-1" aria-hidden="true"
 	class="hidden modal-wrapper popup-modal">
 	<!-- Modal container -->
 	<div class="modal-container">

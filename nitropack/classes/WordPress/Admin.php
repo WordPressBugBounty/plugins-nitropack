@@ -168,13 +168,11 @@ class Admin {
 			//json animations
 			wp_enqueue_script( 'lottie', 'https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js', array(), null, false );
 			//js
-			wp_enqueue_script( 'nitropack_flowbite_js', plugin_dir_url( NITROPACK_FILE ) . 'view/javascript/flowbite.min.js', array(), NITROPACK_VERSION, true );
 			wp_enqueue_script( 'nitropack_ui', plugin_dir_url( NITROPACK_FILE ) . 'view/javascript/nitropackUI.js', array(), NITROPACK_VERSION, true );
-
 			if ( get_nitropack()->isConnected() ) {
 				$passed_onboarding = get_option( 'nitropack-onboardingPassed' );
 				if ( ! $passed_onboarding ) {
-					wp_enqueue_script( 'nitropack_preview_site', plugin_dir_url( NITROPACK_FILE ) . 'view/javascript/preview_site.js', array( 'nitropack_flowbite_js' ), NITROPACK_VERSION, true );
+					wp_enqueue_script( 'nitropack_preview_site', plugin_dir_url( NITROPACK_FILE ) . 'view/javascript/preview_site.js', array( 'nitropack_ui' ), NITROPACK_VERSION, true );
 					wp_localize_script(
 						'nitropack_preview_site',
 						'np_onboarding',

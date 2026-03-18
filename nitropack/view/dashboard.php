@@ -12,7 +12,11 @@ $notifications->nitropack_display_admin_notices();
 $dismissed_notices = get_option( 'nitropack-dismissed-notices' );
 
 $nitro = get_nitropack_sdk();
-$cache_warmup_stats = $nitro->getApi()->getWarmupStats();
+try {
+	$cache_warmup_stats = $nitro->getApi()->getWarmupStats();
+} catch ( \Exception $e ) {
+	$cache_warmup_stats = [ 'status' => 0 ];
+}
 $cache_warmup_enabled = ! empty( $cache_warmup_stats['status'] ) && $cache_warmup_stats['status'] === 1 ? true : false;
 
 if ( empty( $dismissed_notices['skip_cache_warmup'] ) && ! $cache_warmup_enabled ) : ?>

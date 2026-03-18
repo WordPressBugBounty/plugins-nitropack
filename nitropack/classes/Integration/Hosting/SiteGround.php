@@ -80,6 +80,10 @@ class SiteGround extends Hosting {
     }
 
     public function allowProxyCache() {
+        if (!empty($_SERVER['HTTP_IF_MODIFIED_SINCE'])) {
+            nitropack_header('X-Cache-Enabled: False');
+            return;
+        }
         $this->setCacheControl();
         nitropack_header('X-Cache-Enabled: True');
         nitropack_header('Vary: User-Agent');

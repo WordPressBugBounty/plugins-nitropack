@@ -57,7 +57,7 @@ $table_cells = array(
     ),
 ); ?>
 
-<div id="modes-modal" data-modal-backdrop="" tabindex="-1" aria-hidden="true" class="hidden modal-wrapper">
+<div id="modal-modes" data-modal-backdrop="" tabindex="-1" aria-hidden="true" class="hidden modal-wrapper">
     <div class="modal-container" style="max-width: 720px;">
         <div class="modal-inner">
             <!-- Modal header -->

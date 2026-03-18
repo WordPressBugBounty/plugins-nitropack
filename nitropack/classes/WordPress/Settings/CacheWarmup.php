@@ -224,7 +224,11 @@ class CacheWarmup {
 	/* Render cache warmup setting widget */
 	public function render() {
 		$nitro = get_nitropack_sdk();
-		$cache_warmup_stats = $nitro->getApi()->getWarmupStats();
+		try {
+			$cache_warmup_stats = $nitro->getApi()->getWarmupStats();
+		} catch ( \Exception $e ) {
+			$cache_warmup_stats = [ 'status' => 0 ];
+		}
 		?>
 		<div class="nitro-option" id="cache-warmup-widget">
 			<div class="nitro-option-main">

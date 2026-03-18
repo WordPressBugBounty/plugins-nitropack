@@ -4,8 +4,7 @@
 <div id="nitropack-container">
 	<nav class="nitro-navigation">
 		<div class="nitro-navigation-inner">
-			<img src="<?php echo plugin_dir_url( __FILE__ ) . 'images/nitropack_logo.svg'; ?>" height="25"
-				alt="NitroPack" />
+			<img src="<?php echo plugin_dir_url( __FILE__ ) . 'images/nitropack_wp_logo.svg'; ?>" alt="NitroPack" />
 		</div>
 	</nav>
 

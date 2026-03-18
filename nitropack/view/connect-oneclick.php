@@ -15,8 +15,8 @@
         </div>
         <div class="connect">
             <div class="headline-container">
-                <h1><?php esc_html_e('Welcome to NitroPack OneClick for WordPress', 'nitropack'); ?></h1>
-                <p><?php esc_html_e( 'Your license is managed by your hosting provider.', 'nitropack'); ?></p>                
+                <h1><?php esc_html_e('Welcome to NitroPack by WP Engine', 'nitropack'); ?></h1>
+                <p><?php esc_html_e( 'Powered by NitroPack by WP Engine', 'nitropack'); ?></p>                
             </div>
             <div class="cta-container">
                 <form class="w-full" action="options.php" method="post" id="api-details-form">
@@ -25,10 +25,10 @@
                     <?php if ($oneClickConnectUrl) : ?>
                     <a class="btn btn-primary btn-xl w-100" href="<?php esc_attr_e($oneClickConnectUrl); ?>">
                         <img src="<?php echo plugin_dir_url(__FILE__) . 'images/loading.svg'; ?>" alt="loading" class="icon-left hidden">
-                        <?php esc_html_e('Connect to NitroPack OneClick', 'nitropack'); ?>
+                        <?php esc_html_e('Connect to NitroPack', 'nitropack'); ?>
                     </a>
                     <?php endif; ?>
-                    <p class="text-center mt-2"><?php esc_html_e('Visit your hosting provider page to connect NitroPack with your WordPress site.', 'nitropack'); ?></p>
+                    <p class="text-center mt-2"><?php esc_html_e('In order to connect NitroPack with WordPress, you need to visit the NitroPack add-on page in the WP Engine Portal.', 'nitropack'); ?></p>
                 </form>
             </div>
         </div>

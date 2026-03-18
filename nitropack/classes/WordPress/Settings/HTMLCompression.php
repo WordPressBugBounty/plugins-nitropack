@@ -57,7 +57,8 @@ class HTMLCompression {
 		nitropack_verify_ajax_nonce( $_REQUEST );
 		$hasCompression = true;
 		try {
-			if ( \NitroPack\Integration\Hosting\Flywheel::detect() ) { // Flywheel: Compression is enabled by default
+			$hostingsWithCompression = [ \NitroPack\Integration\Hosting\Flywheel::detect(), \NitroPack\Integration\Hosting\WPEngine::detect() ];
+			if ( $hostingsWithCompression ) {
 				$hasCompression = true;
 				update_option( $this->option_name, 0 );
 				nitropack_json_and_exit( array( "type" => "success", "hasCompression" => $hasCompression ) );

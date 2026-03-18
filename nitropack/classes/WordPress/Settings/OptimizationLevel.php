@@ -242,8 +242,8 @@ class OptimizationLevel {
 			<div class="card-footer">
 				<div class="flex flex-row">
 					<p class=""><?php esc_html_e( 'Which optimization mode to choose?', 'nitropack' ); ?></p>
-					<a class="text-primary btn-link ml-auto see-modes" data-modal-target="modes-modal"
-						data-modal-toggle="modes-modal"><?php esc_html_e( 'See modes comparison', 'nitropack' ); ?></a>
+					<a class="text-primary btn-link ml-auto see-modes" data-modal-target="modal-modes"
+						data-modal-toggle="modal-modes"><?php esc_html_e( 'See modes comparison', 'nitropack' ); ?></a>
 					<?php require_once NITROPACK_PLUGIN_DIR . 'view/modals/modal-modes.php'; ?>
 				</div>
 			</div>
@@ -257,8 +257,8 @@ class OptimizationLevel {
 		<div class="optimization-modes">
 			<div class="flex flex-row">
 				<h2><?php esc_html_e( 'Optimization modes', 'nitropack' ); ?></h2>
-				<a class="text-primary btn-link ml-auto see-modes" data-modal-target="modes-modal"
-					data-modal-toggle="modes-modal"><?php esc_html_e( 'See modes comparison', 'nitropack' ); ?></a>
+				<a class="text-primary btn-link ml-auto see-modes" data-modal-target="modal-modes"
+					data-modal-toggle="modal-modes"><?php esc_html_e( 'See modes comparison', 'nitropack' ); ?></a>
 				<?php require_once NITROPACK_PLUGIN_DIR . 'view/modals/modal-modes.php'; ?>
 			</div>
 			<div class="modes-container">
