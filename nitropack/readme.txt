@@ -4,7 +4,7 @@ Tags: cache, performance, page speed, website speed, core web vitals
 Requires at least: 4.7
 Tested up to: 6.9.4
 Requires PHP: 7.4
-Stable tag: 1.19.2
+Stable tag: 1.19.3
 License: GNU General Public License, version 2
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -269,6 +269,11 @@ Yes, the plugin uses the [Intercom Chat Widget](https://widget.intercom.io), whi
 5. The only solution you will ever need
 
 == Changelog ==
+= 1.19.3 =
+2026-03-18
+
+* Bugfix: PSB error in Settings
+
 = 1.19.2 =
 2026-03-18
 

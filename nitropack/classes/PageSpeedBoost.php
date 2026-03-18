@@ -47,10 +47,6 @@ class PageSpeedBoost {
 			add_filter( 'plugin_row_meta', array( $this, 'add_plugin_metadata' ), 10, 4 );
 			add_filter( 'plugin_action_links', array( $this, 'plugin_action_links' ), 10, 4 );
 			add_filter( 'network_admin_plugin_action_links', array( $this, 'plugin_action_links' ), 10, 4 );
-			// Only necessary on the updates page.
-			if ( 'update-core.php' === $pagenow || 'options-general.php' === $pagenow ) {
-				add_filter( 'gettext', array( $this, 'set_plugin_name' ), 10, 3 );
-			}
 		}
 
 		if ( $is_wp_cli ) {
