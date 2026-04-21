@@ -20,6 +20,8 @@ class TheEventsCalendar {
 
 	const WIDGET_ID = 'tribe-widget-events-list';
 
+	const WIDGET_AJAX_NONCE_ACTION = 'nitropack_widget_output_ajax';
+
 	/**
 	 * Check if plugin "The Events Calendar" is active
 	 *
@@ -111,14 +113,27 @@ class TheEventsCalendar {
 
 			wp_enqueue_script( 'nitropack-widget-ajax-script', NITROPACK_PLUGIN_DIR_URL . 'view/javascript/widgets_ajax.js?np_v=' . NITROPACK_VERSION, array('jquery'), NITROPACK_VERSION, true );
 			wp_localize_script( 'nitropack-widget-ajax-script', 'nitropack_widget_ajax', array( 'ajax_url' => admin_url( 'admin-ajax.php' ) ) );
+			$widget_nonce = wp_create_nonce( $this->get_widget_nonce_action( $widget_id, $sidebar_id ) );
 
 			ob_start();
 			?>
-			<div class="nitropack-widget-ajax" data-widget-id="<?php echo esc_attr($widget_id); ?>" data-sidebar-id="<?php echo esc_attr($sidebar_id); ?>"><img src="<?php echo esc_url(NITROPACK_PLUGIN_DIR_URL . 'view/images/loading.gif'); ?>" alt="loading" /></div>
+			<div class="nitropack-widget-ajax" data-widget-id="<?php echo esc_attr($widget_id); ?>" data-sidebar-id="<?php echo esc_attr($sidebar_id); ?>" data-widget-nonce="<?php echo esc_attr( $widget_nonce ); ?>"><img src="<?php echo esc_url(NITROPACK_PLUGIN_DIR_URL . 'view/images/loading.gif'); ?>" alt="loading" /></div>
 			<?php
 			$widget_output = ob_get_clean();
 
 		    return $widget_output;
+	}
+
+	/**
+	 * Build widget output nonce action.
+	 *
+	 * @param string $widget_id  The widget's full ID.
+	 * @param string $sidebar_id The current sidebar ID.
+	 *
+	 * @return string
+	 */
+	private function get_widget_nonce_action( $widget_id, $sidebar_id ) {
+		return self::WIDGET_AJAX_NONCE_ACTION . '|' . $widget_id . '|' . $sidebar_id;
 	}
 
     /**
@@ -130,10 +145,21 @@ class TheEventsCalendar {
 
 		global $wp_registered_sidebars, $wp_registered_widgets;
 
-        $widget_id = isset($_GET['widget_id']) ? sanitize_text_field(wp_unslash($_GET['widget_id'])) : ''; //phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		$sidebar_id = isset($_GET['sidebar_id']) ? sanitize_text_field(wp_unslash($_GET['sidebar_id'])) : ''; //phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$widget_id = isset( $_GET['widget_id'] ) ? sanitize_text_field( wp_unslash( $_GET['widget_id'] ) ) : '';
+		$sidebar_id = isset( $_GET['sidebar_id'] ) ? sanitize_text_field( wp_unslash( $_GET['sidebar_id'] ) ) : '';
+		$widget_nonce = isset( $_GET['widget_nonce'] ) ? sanitize_text_field( wp_unslash( $_GET['widget_nonce'] ) ) : '';
 
-	    if( !empty($widget_id) && isset($wp_registered_widgets[$widget_id]) && isset($wp_registered_sidebars[$sidebar_id]) && isset($wp_registered_widgets[$widget_id]["callback"])) {
+		if (
+			empty( $widget_id ) ||
+			empty( $sidebar_id ) ||
+			empty( $widget_nonce ) ||
+			0 !== strpos( $widget_id, self::WIDGET_ID ) ||
+			! wp_verify_nonce( $widget_nonce, $this->get_widget_nonce_action( $widget_id, $sidebar_id ) )
+		) {
+			wp_die();
+		}
+
+	    if( isset($wp_registered_widgets[$widget_id]) && isset($wp_registered_sidebars[$sidebar_id]) && isset($wp_registered_widgets[$widget_id]["callback"])) {
 
 	        $original_callback = $wp_registered_widgets[$widget_id]['callback'];
 

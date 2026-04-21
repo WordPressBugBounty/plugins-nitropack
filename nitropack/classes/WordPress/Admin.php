@@ -187,7 +187,9 @@ class Admin {
 				}
 				//dashboard page
 				if ( ! isset( $_GET['subpage'] ) ) {
-					wp_enqueue_script( 'nitropack_settings', plugin_dir_url( NITROPACK_FILE ) . 'view/javascript/np_settings.js', array(), NITROPACK_VERSION, true );
+					wp_enqueue_style( 'np-select', plugin_dir_url( NITROPACK_FILE ) . 'view/stylesheet/np_select2.min.css', array( 'nitropack' ), NITROPACK_VERSION );
+					wp_enqueue_script( 'np-select', plugin_dir_url( NITROPACK_FILE ) . 'view/javascript/np_select2.min.js', array( 'jquery' ), NITROPACK_VERSION, true );
+					wp_enqueue_script( 'nitropack_settings', plugin_dir_url( NITROPACK_FILE ) . 'view/javascript/np_settings.js', array( 'np-select' ), NITROPACK_VERSION, true );
 					wp_localize_script(
 						'nitropack_settings',
 						'np_settings',
@@ -203,9 +205,6 @@ class Admin {
 							)
 						)
 					);
-					//select2
-					wp_register_script( 'np-select2', 'https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.9/js/select2.min.js', array( 'jquery' ), NITROPACK_VERSION, true );
-					wp_enqueue_script( 'np-select2' );
 				}
 				//system report page
 				if ( isset( $_GET['subpage'] ) && $_GET['subpage'] === 'system-report' ) {

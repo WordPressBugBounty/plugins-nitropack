@@ -2298,9 +2298,13 @@ function nitropack_prevent_connecting( $nitroSDK ) {
 }
 
 function nitropack_verify_connect( $siteId, $siteSecret ) {
-
-	NitroPack\WordPress\NitroPack::getInstance()->getLogger()->notice( 'Verifying connection to NitroPack API' );
-
+	$blogId = get_current_blog_id();
+	$multisite_reason = ' ';
+	if ($blogId) {
+		$multisite_reason .= is_main_site() ? "in main site" : "in multisite: $blogId";
+	}
+	NitroPack\WordPress\NitroPack::getInstance()->getLogger()->notice( 'Verifying connection to NitroPack API'.$multisite_reason );
+		
 	if ( ! nitropack_check_func_availability( 'stream_socket_client' ) ) {
 
 		NitroPack\WordPress\NitroPack::getInstance()->getLogger()->error( 'stream_socket_client function is not allowed by your host.' );
@@ -2327,13 +2331,13 @@ function nitropack_verify_connect( $siteId, $siteSecret ) {
 
 	if ( ! nitropack_validate_site_id( $siteId ) || ! nitropack_validate_site_secret( $siteSecret ) ) {
 
-		NitroPack\WordPress\NitroPack::getInstance()->getLogger()->error( 'Invalid API key or API secret key value' );
+		NitroPack\WordPress\NitroPack::getInstance()->getLogger()->error( 'Invalid API key or API secret key value'.$multisite_reason );
 
 		nitropack_json_and_exit( array( "status" => "error", "message" => __( 'Invalid API key or API secret key value', 'nitropack' ) ) );
 	}
 
 	try {
-		$blogId = get_current_blog_id();
+		
 		if ( null !== $nitro = get_nitropack_sdk( $siteId, $siteSecret, NULL, true ) ) {
 			if ( ! $nitro->checkHealthStatus() ) {
 
@@ -2395,7 +2399,7 @@ function nitropack_verify_connect( $siteId, $siteSecret ) {
 				$nitro->getApi()->runWarmup( [ $siteConfig['home_url'] ], true ); // force run a warmup on the home page
 			}
 
-			NitroPack\WordPress\NitroPack::getInstance()->getLogger()->notice( 'NitroPack connected' );
+			NitroPack\WordPress\NitroPack::getInstance()->getLogger()->notice( 'NitroPack connected'.$multisite_reason );
 
 			$onboarding = get_option( 'nitropack-onboardingPassed' );
 			$url = $onboarding === '1' ? get_admin_url( $blogId, "admin.php?page=nitropack" ) : get_admin_url( $blogId, "admin.php?page=nitropack&onboarding=1" );
@@ -2432,7 +2436,7 @@ function nitropack_verify_connect( $siteId, $siteSecret ) {
 		nitropack_json_and_exit( array( "status" => "error", "message" => __( 'Incorrect API credentials. Please make sure that you copied them correctly and try again.', 'nitropack' ) ) );
 	}
 
-	NitroPack\WordPress\NitroPack::getInstance()->getLogger()->error( 'Error verifying connection to NitroPack.' );
+	NitroPack\WordPress\NitroPack::getInstance()->getLogger()->error( 'Error verifying connection to NitroPack'.$multisite_reason );
 
 	nitropack_json_and_exit( array( "status" => "error" ) );
 }
@@ -2460,7 +2464,12 @@ function nitropack_setup_webhooks( $nitro, $token = NULL ) {
 
 function nitropack_disconnect() {
 	nitropack_verify_ajax_nonce( $_REQUEST );
-
+	$blogId = get_current_blog_id();
+	$multisite_reason = ' ';
+	if ($blogId) {
+		$multisite_reason .= is_main_site() ? "in main site" : "in multisite: $blogId";
+	}
+	NitroPack\WordPress\NitroPack::getInstance()->getLogger()->notice( 'NitroPack disconnecting... '.$multisite_reason );
 	nitropack_uninstall_advanced_cache();
 
 	try {
@@ -2483,7 +2492,7 @@ function nitropack_disconnect() {
 			@unlink( $hostingNoticeFile );
 		}
 	}
-	NitroPack\WordPress\NitroPack::getInstance()->getLogger()->notice( 'NitroPack disconnected' );
+	NitroPack\WordPress\NitroPack::getInstance()->getLogger()->notice( 'NitroPack disconnected.'.$multisite_reason );
 	nitropack_json_and_exit( array( "status" => "success", "message" => __( "Disconnected", "nitropack" ) ) );
 }
 
@@ -2519,6 +2528,7 @@ function nitropack_update_blog_compression( $enableCompression = false ) {
 		$siteId = $siteConfig["siteId"];
 		$siteSecret = $siteConfig["siteSecret"];
 		$blogId = get_current_blog_id();
+		NitroPack\WordPress\NitroPack::getInstance()->getLogger()->notice( 'update_blog_compression' );
 		get_nitropack()->updateCurrentBlogConfig( $siteId, $siteSecret, $blogId, $enableCompression );
 	}
 }

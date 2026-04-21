@@ -90,7 +90,6 @@
         // Create instances for elements with data-modal-backdrop
         document.querySelectorAll('.modal-wrapper').forEach(function (el) {
             if (!el.id || instances[el.id]) return;
-            console.log(el.id);
             var backdrop = el.getAttribute('data-modal-backdrop') || 'dynamic';
             new Modal(el, { backdrop: backdrop });
         });
@@ -119,7 +118,6 @@
         
             trigger.addEventListener('click', function () {
                 var inst = instances[id];
-                    console.log(instances);
                 if (inst) inst.toggle();
             });
         });

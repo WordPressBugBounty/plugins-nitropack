@@ -436,64 +436,33 @@ jQuery(document).ready(function ($) {
 				nitroSelf.initial_settings.ajaxShortcodes.enabled = 1;
 			}
 
-			$(setting_id).change(function () {
-				if ($(this).is(":checked")) {
-					ajaxShortcodeRequest(null, 1);
-				} else {
-					ajaxShortcodeRequest(null, 0);
-				}
-			});
-			//template for selected shortcodes tags
-			let select2 = $("#ajax-shortcodes-dropdown").select2({
-					selectOnClose: false,
-					tags: true,
-					multiple: true,
-					width: "100%",
-					placeholder: "Enter a shortcode",
-					templateSelection: shortcodeTagTemplate,
-				}),
-				shortcodes_val = select2.val();
+			const $shortcodesDropdown = $("#ajax-shortcodes-dropdown");
+			$shortcodesDropdown.npSelect();
+			let shortcodes_val = $shortcodesDropdown.val();
 
-			/* Show the container when select2 is initialized to avoid flickering! */
+			/* Show the container when npSelect is initialized to avoid flickering. */
 			if (nitroSelf.initial_settings.ajaxShortcodes.enabled) $(".ajax-shortcodes").removeClass("hidden");
 
 			if (shortcodes_val && shortcodes_val.length > 0) {
-				nitroSelf.initial_settings.ajaxShortcodes.shortcodes = select2.val();
+				nitroSelf.initial_settings.ajaxShortcodes.shortcodes = $shortcodesDropdown.val();
 			} else {
 				nitroSelf.initial_settings.ajaxShortcodes.shortcodes = [];
 			}
 
-			select2.on("change", (event) => {
-				const selectedValues = $(event.target).val(); // Get selected values
+			$shortcodesDropdown.on("change", (event) => {
+				const selectedValues = $(event.target).val() || [];
 				this.modified_settings.ajaxShortcodes.shortcodes = selectedValues;
-				if (selectedValues.length === 0) {
-					$(".select2-search.select2-search--inline .select2-search__field").addClass("w-full");
+			});
+
+			$(setting_id).change(function () {
+				let shortcodes = $shortcodesDropdown.val();
+				if ($(this).is(":checked")) {					
+					ajaxShortcodeRequest(shortcodes, 1);
 				} else {
-					$(".select2-search.select2-search--inline .select2-search__field").removeClass("w-full");
+					ajaxShortcodeRequest(shortcodes, 0);
 				}
 			});
-			$(".select2-search.select2-search--inline .select2-search__field").addClass("w-full");
-			//select2
-			function shortcodeTagTemplate(item) {
-				if (!item.id) {
-					return item.text;
-				}
-				var $item = $(
-					'<span class="select2-selection__choice-inner">' +
-						item.text +
-						'<span class="np-select2-remove"></span>' +
-						"</span>",
-				);
-				return $item;
-			}
-			//remove single shortcode
-			$(".ajax-shortcodes").on("click", ".np-select2-remove", function () {
-				let valueToRemove = $(this).closest("li.select2-selection__choice").attr("title"),
-					newVals = select2.val().filter(function (item) {
-						return item !== valueToRemove;
-					});
-				select2.val(newVals).trigger("change");
-			});
+			
 			//btn save click
 			$(".ajax-shortcodes #save-shortcodes").click(function () {
 				let shortcodes = $("#ajax-shortcodes-dropdown").val();
@@ -686,7 +655,7 @@ jQuery(document).ready(function ($) {
 						}
 					} else {
 						if (resp.status_code) {
-							let text = '[Error] HTTP Status Code: ' + resp.status_code;
+							let text = "[Error] HTTP Status Code: " + resp.status_code;
 							msg_box.text(text);
 						} else {
 							msg_box.text(np_settings.compression_not_determined);

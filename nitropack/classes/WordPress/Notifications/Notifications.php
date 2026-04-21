@@ -3,6 +3,7 @@ namespace NitroPack\WordPress\Notifications;
 
 use NitroPack\WordPress\Settings\TestMode;
 use NitroPack\HttpClient\HttpClient;
+use Nitropack\WordPress\NitroPack;
 /* 
  * Class Notifications
  *
@@ -95,6 +96,7 @@ class Notifications {
 					'actions' => '<a class="btn btn-secondary modal-plugin-deactivate" data-plugin-path="' . $clashingPlugin['plugin'] . '" data-plugin-name="' . $clashingPlugin['name'] . '" title="Disable ' . $clashingPlugin['name'] . ' ">' . sprintf( "Deactivate %s", $clashingPlugin['name'] ) . '</a>',
 					'classes' => [ 'conflicting-plugins plugin-' . sanitize_title( $clashingPlugin['name'] ) ],
 				);
+				NitroPack::getInstance()->getLogger()->notice( sprintf( "Conflicting plugin detected: %s", $clashingPlugin['name'] ) );
 			}
 
 		}
@@ -107,6 +109,7 @@ class Notifications {
 				'msg' => sprintf( esc_html__( 'We found residual cache files from %s. These files can interfere with the caching process and must be deleted.', 'nitropack' ), $rcpName, $rcpName ),
 				'actions' => '<a class="btn btn-warning" nitropack-rc-data="' . $rcpName . '">' . esc_html__( 'Delete now', 'nitropack' ) . '</a>',
 			);
+			NitroPack::getInstance()->getLogger()->notice( sprintf( "Residual cache files detected from plugin: %s", $rcpName ) );
 		}
 		/* Sets a warning if there is any activity in the plugins such as new activations, updates, or deletions. */
 		if ( isset( $_COOKIE['nitropack_apwarning'] ) ) {
@@ -117,6 +120,7 @@ class Notifications {
 				'actions' => "<a class=\"btn btn-secondary\" href=\"javascript:void(0);\" id=\"np-onstate-cache-purge\" onclick=\"document.cookie = 'nitropack_apwarning=; expires=Thu, 01 Jan 1970 00:00:01 GMT; path=$cookie_path';window.location.reload();\">" . esc_html__( 'Dismiss', 'nitropack' ) . "</a>",
 				'classes' => [ 'plugins-state' ],
 			);
+			NitroPack::getInstance()->getLogger()->notice( "Plugin activity detected: new activations, updates, or deletions." );
 		}
 
 		/* Sets a warning if the Test Mode is enabled. */
@@ -155,6 +159,7 @@ class Notifications {
 									'actions' => '<a href="' . admin_url() . 'plugins.php" target="_blank" class="btn btn-secondary">' . esc_html__( 'Plugins page', 'nitropack' ) . '</a>',
 									'classes' => $notification_class,
 								);
+								NitroPack::getInstance()->getLogger()->info( "File advanced-cache.php re-installed." );
 							}
 						} else {
 							if ( ! $conflictingPlugins->nitropack_is_conflicting_plugin_active() ) {
@@ -166,6 +171,7 @@ class Notifications {
 									'msg' => __( 'Please make sure that the /wp-content/ directory is writable and refresh this page.', 'nitropack' ),
 									'classes' => $notification_class,
 								);
+								NitroPack::getInstance()->getLogger()->error( "Please make sure that the /wp-content/ directory is writable." );
 							}
 						}
 					}
@@ -179,12 +185,14 @@ class Notifications {
 									'actions' => '<a href="' . admin_url() . 'plugins.php" target="_blank" class="btn btn-primary">Plugins page</a>',
 									'classes' => $notification_class,
 								);
+								NitroPack::getInstance()->getLogger()->error( "The file /wp-content/advanced-cache.php cannot be created because a conflicting plugin is active." );
 							} else {
 								$errors[] = array(
 									'title' => $notification_title,
 									'msg' => esc_html__( 'The file /wp-content/advanced-cache.php cannot be created. Please make sure that the /wp-content/ directory is writable and refresh this page.', 'nitropack' ),
 									'classes' => $notification_class,
 								);
+								NitroPack::getInstance()->getLogger()->error( "The file /wp-content/advanced-cache.php cannot be created. Please make sure that the /wp-content/ directory is writable." );
 							}
 						}
 					}
@@ -199,27 +207,31 @@ class Notifications {
 				$notification_class = [ 'wp-cache' ];
 				if ( \NitroPack\Integration\Hosting\Flywheel::detect() ) { // Flywheel: This is configured throught the FW control panel
 					$warnings[] = array(
-						'title' => esc_html__( "WP_CACHE not enabled", 'nitropack' ),
+						'title' => esc_html__( "Constant WP_CACHE not enabled", 'nitropack' ),
 						'msg' => esc_html__( "Please go to your FlyWheel control panel and enable this setting.", 'nitropack' ),
 						'actions' => '<a href="https://getflywheel.com/wordpress-support/how-to-enable-wp_cache/" target="_blank" class="btn btn-primary">View more</a>',
 						'classes' => $notification_class,
 					);
+					NitroPack::getInstance()->getLogger()->notice( "Constant WP_CACHE not enabled." );
 				} else if ( ! nitropack_set_wp_cache_const( true ) ) {
 					$errors[] = array(
 						'title' => esc_html__( 'Constant WP_CACHE cannot be set', 'nitropack' ),
 						'msg' => esc_html__( 'This can lead to slower cache delivery. Please make sure that the /wp-config.php file is writable and refresh this page.', 'nitropack' ),
 						'classes' => $notification_class,
 					);
+					NitroPack::getInstance()->getLogger()->error( "Constant WP_CACHE cannot be set." );
 				}
 			}
 
 			if ( apply_filters( 'nitropack_needs_htaccess_changes', false ) ) {
 				if ( ! nitropack_set_htaccess_rules( true ) ) {
-					$warnings[] = array(
-						'title' => esc_html__( "File .htaccess is not writable", 'nitropack' ),
-						'msg' => esc_html__( 'Unable to configure LiteSpeed specific rules for maximum performance. Please make sure your .htaccess file is writable or contact support.', 'nitropack' ),
-						'classes' => [ 'htaccess' ],
+					$errors[] = array(
+						'title' => esc_html__( "LiteSpeed configuration needed", 'nitropack' ),
+						'msg' => esc_html__( 'NitroPack is optimizing your pages but it can\'t set up the caching rules your LiteSpeed server needs. Your site will work but it will be slower than it should be. Make .htaccess writable and reload this page to fix it.', 'nitropack' ),
+						'actions' => '<a href="https://support.nitropack.io/en/articles/14301910-how-nitropack-works-with-litespeed-servers/" target="_blank" class="btn btn-primary">How to fix this</a>',
+						'classes' => [ 'litespeed' ],
 					);
+					NitroPack::getInstance()->getLogger()->error( "LiteSpeed configuration needed." );
 				}
 			}
 
@@ -229,6 +241,7 @@ class Notifications {
 					'msg' => esc_html__( 'Please make sure that the /wp-content/ directory is writable and refresh this page.', 'nitropack' ),
 					'classes' => [ 'np-data-dir' ],
 				);
+				NitroPack::getInstance()->getLogger()->error( "NitroPack data directory cannot be created." );
 				return [
 					'error' => $errors,
 					'warning' => $warnings,
@@ -243,6 +256,7 @@ class Notifications {
 
 					'classes' => [ 'np-data-dir' ],
 				);
+				NitroPack::getInstance()->getLogger()->error( "NitroPack plugin data directory cannot be created." );
 				return [
 					'error' => $errors,
 					'warning' => $warnings,
@@ -261,12 +275,14 @@ class Notifications {
 					'title' => esc_html__( "NitroPack static config file cannot be created", 'nitropack' ),
 					'msg' => esc_html__( 'Please make sure that the /wp-content/config-nitropack/ directory is writable and refresh this page.', 'nitropack' ),
 				);
+				NitroPack::getInstance()->getLogger()->error( "NitroPack static config file cannot be created." );
 			} else if ( $isConfigOutdated ) {
 				if ( ! get_nitropack()->updateCurrentBlogConfig( $siteId, $siteSecret, $blogId ) ) {
 					$errors[] = array(
 						'title' => esc_html__( "NitroPack static config file cannot be updated", 'nitropack' ),
 						'msg' => esc_html__( 'Please make sure that the /wp-content/config-nitropack/ directory is writable and refresh this page.', 'nitropack' ),
 					);
+					NitroPack::getInstance()->getLogger()->error( "NitroPack static config file cannot be updated." );
 				} else {
 
 					if ( ! $siteConfig ) {
@@ -287,6 +303,7 @@ class Notifications {
 						'title' => esc_html__( "Unable to configure webhooks", 'nitropack' ),
 						'msg' => esc_html__( 'This can impact the stability of the plugin. Please disconnect and connect again in order to retry configuring the webhooks.', 'nitropack' ),
 					);
+					NitroPack::getInstance()->getLogger()->notice( "Unable to configure webhooks." );
 				}
 			} else {
 				$optionsMismatch = false;
@@ -352,6 +369,7 @@ class Notifications {
 							'title' => esc_html__( "NitroPack static config file cannot be updated", 'nitropack' ),
 							'msg' => esc_html__( 'Please make sure that the /wp-content/config-nitropack/ directory is writable and refresh this page.', 'nitropack' ),
 						);
+						NitroPack::getInstance()->getLogger()->error( "NitroPack static config file cannot be updated." );
 					}
 				}
 
@@ -372,6 +390,7 @@ class Notifications {
 											'msg' => esc_html__( 'Most likely you have used the same API credentials to connect another website (e.g. dev or staging). Click to restore the connection to this site.', 'nitropack' ),
 											'actions' => '<a id="nitro-restore-connection-btn" class="btn btn-warning">Restore connection</a>',
 										);
+										NitroPack::getInstance()->getLogger()->notice( "Connection problems detected. Webhook token mismatch." );
 									}
 								}
 							}
@@ -387,6 +406,7 @@ class Notifications {
 							'title' => esc_html__( "The .htaccess file cannot be modified", 'nitropack' ),
 							'msg' => esc_html__( 'Please make sure that it is writable and refresh this page.', 'nitropack' ),
 						);
+						NitroPack::getInstance()->getLogger()->error( "The .htaccess file cannot be modified." );
 					}
 				}
 			}
@@ -404,6 +424,7 @@ class Notifications {
 					'title' => esc_html__( "Cache By Device Type is not activate", 'nitropack' ),
 					'msg' => esc_html__( 'It seems Cache By Device Type is not activate with the Cloudflare APO. It is recommended that you enable it for a more optimized experience.', 'nitropack' ),
 				);
+				NitroPack::getInstance()->getLogger()->notice( "Cache By Device Type is not activate with the Cloudflare APO." );
 			}
 		}
 
@@ -648,7 +669,7 @@ class Notifications {
 			$http_client = new HttpClient( $dismiss_url );
 			$http_client->fetch( true, "GET" );
 			$resp = $http_client->getStatusCode() == 200 ? json_decode( $http_client->getBody(), true ) : false;
-			if ( $resp['status']) {				
+			if ( $resp['status'] ) {
 				$app_notifications = AppNotifications::getInstance();
 				$removed = $app_notifications->removeNotificationById( $notification_id );
 				if ( $removed ) {

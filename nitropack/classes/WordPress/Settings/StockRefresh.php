@@ -38,8 +38,8 @@ class StockRefresh {
 		}
 	}
 	/**
-	 * Invalidate cache when stock changes on any occasion - related pages when goes out of stock or back in stock - 0 or 1 
-	 * Else, keep only the product page invalidated.
+	 * Invalidate related pages when stock crosses zero (to 0 or from 0 to positive).
+	 * For all other stock changes, invalidate only the product page.
 	 * @param \WC_Product $product_with_stock The WooCommerce product object.
 	 * @return void
 	 */
@@ -54,10 +54,17 @@ class StockRefresh {
 		$product_id = (int) $product_with_stock->get_id();
 		$post = get_post( $product_id );
 		$product_new_stock = $product_with_stock->get_stock_quantity();
+		$product_data = method_exists( $product_with_stock, 'get_data' ) ? $product_with_stock->get_data() : [];
+		$product_old_stock = isset( $product_data['stock_quantity'] ) ? $product_data['stock_quantity'] : null;
 
-		$low_stock = [ 0, 1 ];
-		if ( in_array( $product_new_stock, $low_stock ) ) {
-			$reason = ( $product_new_stock == 0 ) ? "out of stock" : "low in stock";
+		$product_old_stock = is_numeric( $product_old_stock ) ? (float) $product_old_stock : null;
+		$product_new_stock = is_numeric( $product_new_stock ) ? (float) $product_new_stock : null;
+
+		$went_out_of_stock = null !== $product_new_stock && 0.0 === $product_new_stock && ( null === $product_old_stock || 0.0 !== $product_old_stock );
+		$went_back_in_stock = null !== $product_old_stock && 0.0 === $product_old_stock && null !== $product_new_stock && $product_new_stock > 0;
+		
+		if ( $went_out_of_stock || $went_back_in_stock ) {
+			$reason = $went_out_of_stock ? "out of stock" : "back in stock";
 			nitropack_clean_post_cache( $post, array( 'added' => nitropack_get_taxonomies( $post ) ), true, sprintf( "Invalidate related pages due to %s change on product '%s'", $reason, $post->post_title ), true );
 		} else {
 			nitropack_clean_post_cache( $post, NULL, false, sprintf( "Invalidate stock change on product '%s'", $post->post_title ) );

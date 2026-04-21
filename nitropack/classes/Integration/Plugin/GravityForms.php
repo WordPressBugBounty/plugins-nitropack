@@ -16,6 +16,8 @@ use WP_block;
 class GravityForms {
 
 	const STAGE = 'late';
+	const BLOCK_AJAX_NONCE_ACTION = 'nitropack_gf_block_output_ajax';
+	const SHORTCODE_AJAX_NONCE_ACTION = 'nitropack_gf_shortcode_output_ajax';
 
 
 	/**
@@ -196,7 +198,28 @@ class GravityForms {
 	 */
 	public function modify_gf_block($attributes, $content, $block = null) {
 
-		return '<div class="nitropack-gravityforms-block" data-block-name="'.esc_attr($block -> name).'" data-block-attributes="'.esc_attr(json_encode($attributes)).'"><img src="'.esc_url(NITROPACK_PLUGIN_DIR_URL . 'view/images/loading.gif').'" alt="loading" /></div>';
+		$block_name = ! empty( $block->name ) ? $block->name : '';
+		$block_attributes = wp_json_encode( $attributes );
+
+		if ( false === $block_attributes ) {
+			$block_attributes = '{}';
+		}
+
+		$block_nonce = wp_create_nonce( $this->get_block_nonce_action( $block_name, $block_attributes ) );
+
+		return '<div class="nitropack-gravityforms-block" data-block-name="' . esc_attr( $block_name ) . '" data-block-attributes="' . esc_attr( $block_attributes ) . '" data-block-nonce="' . esc_attr( $block_nonce ) . '"><img src="' . esc_url( NITROPACK_PLUGIN_DIR_URL . 'view/images/loading.gif' ) . '" alt="loading" /></div>';
+	}
+
+	/**
+	 * Build nonce action for Gravity Forms block output.
+	 *
+	 * @param string $block_name       The block name.
+	 * @param string $block_attributes The block attributes as JSON.
+	 *
+	 * @return string
+	 */
+	private function get_block_nonce_action( $block_name, $block_attributes ) {
+		return self::BLOCK_AJAX_NONCE_ACTION . '|' . $block_name . '|' . wp_hash( $block_attributes, 'nonce' );
 	}
 
 	/**
@@ -231,8 +254,19 @@ class GravityForms {
 	 */
 	public function block_output_ajax(){
 
-		$block_name = isset($_GET['block_name']) ? sanitize_text_field(wp_unslash($_GET['block_name'])) : ''; //phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		$block_attributes = isset($_GET['block_attributes']) ? sanitize_text_field(wp_unslash($_GET['block_attributes'])) : ''; //phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$block_name = isset( $_GET['block_name'] ) ? sanitize_text_field( wp_unslash( $_GET['block_name'] ) ) : '';
+		$block_attributes = isset( $_GET['block_attributes'] ) && is_string( $_GET['block_attributes'] ) ? wp_unslash( $_GET['block_attributes'] ) : '';
+		$block_nonce = isset( $_GET['block_nonce'] ) ? sanitize_text_field( wp_unslash( $_GET['block_nonce'] ) ) : '';
+
+		if (
+			empty( $block_name ) ||
+			empty( $block_attributes ) ||
+			empty( $block_nonce ) ||
+			0 !== strpos( $block_name, 'gravityforms/' ) ||
+			! wp_verify_nonce( $block_nonce, $this->get_block_nonce_action( $block_name, $block_attributes ) )
+		) {
+			wp_die();
+		}
 
 		if (!empty($block_name) && !empty($block_attributes)) {
 
@@ -241,6 +275,10 @@ class GravityForms {
 			if ( $block_type && !empty( $block_type ) ) {
 
 				$block_attributes = json_decode($block_attributes, true);
+
+				if ( ! is_array( $block_attributes ) ) {
+					wp_die();
+				}
 
 				$block_attributes['ajax'] = 'true';
 
@@ -265,7 +303,26 @@ class GravityForms {
 	 */
 	public function modify_gf_shortcode($atts, $content = null ) {
 
-		return '<div class="nitropack-gravityforms-shortcode" data-shortcode-attributes="'.esc_attr(json_encode($atts)).'"><img src="'.esc_url(NITROPACK_PLUGIN_DIR_URL . 'view/images/loading.gif').'" alt="loading" /></div>';
+		$shortcode_attributes = wp_json_encode( $atts );
+
+		if ( false === $shortcode_attributes ) {
+			$shortcode_attributes = '{}';
+		}
+
+		$shortcode_nonce = wp_create_nonce( $this->get_shortcode_nonce_action( $shortcode_attributes ) );
+
+		return '<div class="nitropack-gravityforms-shortcode" data-shortcode-attributes="' . esc_attr( $shortcode_attributes ) . '" data-shortcode-nonce="' . esc_attr( $shortcode_nonce ) . '"><img src="' . esc_url( NITROPACK_PLUGIN_DIR_URL . 'view/images/loading.gif' ) . '" alt="loading" /></div>';
+	}
+
+	/**
+	 * Build nonce action for Gravity Forms shortcode output.
+	 *
+	 * @param string $shortcode_attributes The shortcode attributes as JSON.
+	 *
+	 * @return string
+	 */
+	private function get_shortcode_nonce_action( $shortcode_attributes ) {
+		return self::SHORTCODE_AJAX_NONCE_ACTION . '|' . wp_hash( $shortcode_attributes, 'nonce' );
 	}
 
 	/**
@@ -275,7 +332,16 @@ class GravityForms {
 	 */
 	public function shortcode_output_ajax(){
 
-		$shortcode_attributes = isset($_GET['shortcode-attributes']) ? sanitize_text_field(wp_unslash($_GET['shortcode-attributes'])) : ''; //phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$shortcode_attributes = isset( $_GET['shortcode-attributes'] ) && is_string( $_GET['shortcode-attributes'] ) ? wp_unslash( $_GET['shortcode-attributes'] ) : '';
+		$shortcode_nonce = isset( $_GET['shortcode_nonce'] ) ? sanitize_text_field( wp_unslash( $_GET['shortcode_nonce'] ) ) : '';
+
+		if (
+			empty( $shortcode_attributes ) ||
+			empty( $shortcode_nonce ) ||
+			! wp_verify_nonce( $shortcode_nonce, $this->get_shortcode_nonce_action( $shortcode_attributes ) )
+		) {
+			wp_die();
+		}
 
 		$shortcode_attributes = json_decode($shortcode_attributes, true);
 

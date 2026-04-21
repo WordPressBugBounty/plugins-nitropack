@@ -290,30 +290,6 @@ p {
         inset-inline-start: 2px;
     }
 }
-/* Tags */
-.selected-shortcodes {
-    margin-top: 1rem;
-    background-color: #fff;
-    border-radius: $border-radius;
-    padding: 1rem;
-    border: 1px solid $divider-color;
-    min-height: 6rem;
-    #selected-shortcodes {
-        gap: 10px;
-        display: flex;
-    }
-}
-.shortcode-tag {
-    padding: 2px 6px;
-    border-radius: $border-radius;
-    background-color: #edebf1;
-    display: inline-block;
-    font-size: 0.75rem;
-    .remove {
-        cursor: pointer;
-        padding: 0px 4px;
-    }
-}
 #ajax-shortcodes-widget {
     label {
         font-weight: 500;
