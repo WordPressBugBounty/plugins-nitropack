@@ -155,24 +155,24 @@ class Admin {
 	 */
 	public function load_nitropack_scripts_styles( $page ) {
 		//global WP
-		wp_enqueue_style( 'nitropack-notifications', plugin_dir_url( NITROPACK_FILE ) . 'view/stylesheet/nitro-notifications.min.css', array(), NITROPACK_VERSION );
-		wp_enqueue_script( 'nitropack_notices_js', plugin_dir_url( NITROPACK_FILE ) . 'view/javascript/np_notices.js', array(), NITROPACK_VERSION, true );
+		wp_enqueue_style( 'nitropack-notifications', plugin_dir_url( NITROPACK_FILE ) . 'assets/css/nitro-notifications.min.css', array(), NITROPACK_VERSION );
+		wp_enqueue_script( 'nitropack_notices_js', plugin_dir_url( NITROPACK_FILE ) . 'assets/js/np_notices.min.js', array(), NITROPACK_VERSION, true );
 		wp_localize_script( 'nitropack_notices_js', 'nitropack_notices_vars', array(
 			'nonce' => wp_create_nonce( NITROPACK_NONCE ),
 		) );
 		//plugin only
 		if ( $page === 'toplevel_page_nitropack' ) {
 			//css
-			wp_enqueue_style( 'nitropack', plugin_dir_url( NITROPACK_FILE ) . 'view/stylesheet/style.min.css', array(), NITROPACK_VERSION );
-			wp_enqueue_style( 'nitropack-connect', plugin_dir_url( NITROPACK_FILE ) . 'view/stylesheet/connect.min.css', array(), NITROPACK_VERSION );
+			wp_enqueue_style( 'nitropack', plugin_dir_url( NITROPACK_FILE ) . 'assets/css/style.min.css', array(), NITROPACK_VERSION );
+			wp_enqueue_style( 'nitropack-connect', plugin_dir_url( NITROPACK_FILE ) . 'assets/css/connect.min.css', array(), NITROPACK_VERSION );
 			//json animations
 			wp_enqueue_script( 'lottie', 'https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js', array(), null, false );
 			//js
-			wp_enqueue_script( 'nitropack_ui', plugin_dir_url( NITROPACK_FILE ) . 'view/javascript/nitropackUI.js', array(), NITROPACK_VERSION, true );
+			wp_enqueue_script( 'nitropack_ui', plugin_dir_url( NITROPACK_FILE ) . 'assets/js/nitropackUI.min.js', array(), NITROPACK_VERSION, true );
 			if ( get_nitropack()->isConnected() ) {
 				$passed_onboarding = get_option( 'nitropack-onboardingPassed' );
 				if ( ! $passed_onboarding ) {
-					wp_enqueue_script( 'nitropack_preview_site', plugin_dir_url( NITROPACK_FILE ) . 'view/javascript/preview_site.js', array( 'nitropack_ui' ), NITROPACK_VERSION, true );
+					wp_enqueue_script( 'nitropack_preview_site', plugin_dir_url( NITROPACK_FILE ) . 'assets/js/preview_site.min.js', array( 'nitropack_ui' ), NITROPACK_VERSION, true );
 					wp_localize_script(
 						'nitropack_preview_site',
 						'np_onboarding',
@@ -187,9 +187,9 @@ class Admin {
 				}
 				//dashboard page
 				if ( ! isset( $_GET['subpage'] ) ) {
-					wp_enqueue_style( 'np-select', plugin_dir_url( NITROPACK_FILE ) . 'view/stylesheet/np_select2.min.css', array( 'nitropack' ), NITROPACK_VERSION );
-					wp_enqueue_script( 'np-select', plugin_dir_url( NITROPACK_FILE ) . 'view/javascript/np_select2.min.js', array( 'jquery' ), NITROPACK_VERSION, true );
-					wp_enqueue_script( 'nitropack_settings', plugin_dir_url( NITROPACK_FILE ) . 'view/javascript/np_settings.js', array( 'np-select' ), NITROPACK_VERSION, true );
+					wp_enqueue_style( 'np-select', plugin_dir_url( NITROPACK_FILE ) . 'assets/css/np_select2.min.css', array( 'nitropack' ), NITROPACK_VERSION );
+					wp_enqueue_script( 'np-select', plugin_dir_url( NITROPACK_FILE ) . 'assets/js/np_select2.min.js', array( 'jquery' ), NITROPACK_VERSION, true );
+					wp_enqueue_script( 'nitropack_settings', plugin_dir_url( NITROPACK_FILE ) . 'assets/js/np_settings.min.js', array( 'np-select' ), NITROPACK_VERSION, true );
 					wp_localize_script(
 						'nitropack_settings',
 						'np_settings',
@@ -208,7 +208,7 @@ class Admin {
 				}
 				//system report page
 				if ( isset( $_GET['subpage'] ) && $_GET['subpage'] === 'system-report' ) {
-					wp_enqueue_script( 'nitropack_system_report', plugin_dir_url( NITROPACK_FILE ) . 'view/javascript/system_report.js', array(), NITROPACK_VERSION, true );
+					wp_enqueue_script( 'nitropack_system_report', plugin_dir_url( NITROPACK_FILE ) . 'assets/js/system_report.min.js', array(), NITROPACK_VERSION, true );
 					wp_localize_script(
 						'nitropack_system_report',
 						'np_system_report',
@@ -242,7 +242,7 @@ class Admin {
 				if ( ! $allowed_capabilities ) {
 					return;
 				}
-				wp_enqueue_script( 'nitropack_post_clear_cache', NITROPACK_PLUGIN_DIR_URL . 'view/javascript/post_clear_cache.js?np_v=' . NITROPACK_VERSION, true );
+				wp_enqueue_script( 'nitropack_post_clear_cache', NITROPACK_PLUGIN_DIR_URL . 'assets/js/post_clear_cache.min.js?np_v=' . NITROPACK_VERSION, true );
 				wp_localize_script(
 					'nitropack_post_clear_cache',
 					'np_post_clear_cache',
@@ -261,7 +261,7 @@ class Admin {
 		if ( $page === 'elementor_page_elementor-tools' && get_nitropack()->isConnected() ) {
 			wp_enqueue_script(
 				'nitropack_elementor_integration',
-				plugin_dir_url( NITROPACK_FILE ) . 'view/javascript/elementor_cache_integration.js',
+				plugin_dir_url( NITROPACK_FILE ) . 'assets/js/elementor_cache_integration.min.js',
 				array( 'jquery' ),
 				NITROPACK_VERSION,
 				true
@@ -409,7 +409,7 @@ class Admin {
 	}
 	public function nitropack_admin_bar_script( $hook ) {
 		if ( ! nitropack_is_amp_page() ) {
-			wp_enqueue_script( 'topbar_admin_menu_script', plugin_dir_url( NITROPACK_FILE ) . 'view/javascript/admin_bar_menu.js?np_v=' . NITROPACK_VERSION, [ 'jquery' ], false, true );
+			wp_enqueue_script( 'topbar_admin_menu_script', plugin_dir_url( NITROPACK_FILE ) . 'assets/js/admin_bar_menu.min.js?np_v=' . NITROPACK_VERSION, [ 'jquery' ], false, true );
 			wp_localize_script( 'topbar_admin_menu_script', 'frontendajax', array( 'ajaxurl' => admin_url( 'admin-ajax.php' ), 'nitroNonce' => wp_create_nonce( NITROPACK_NONCE ), 'nitro_plugin_url' => plugin_dir_url( NITROPACK_FILE ) ) );
 		}
 	}
@@ -417,7 +417,7 @@ class Admin {
 
 	public function enqueue_topbar_admin_menu_stylesheet() {
 		if ( ! nitropack_is_amp_page() ) {
-			wp_enqueue_style( 'topbar_admin_menu_stylesheet', plugin_dir_url( NITROPACK_FILE ) . 'view/stylesheet/admin_bar_menu.min.css?np_v=' . NITROPACK_VERSION );
+			wp_enqueue_style( 'topbar_admin_menu_stylesheet', plugin_dir_url( NITROPACK_FILE ) . 'assets/css/admin_bar_menu.min.css?np_v=' . NITROPACK_VERSION );
 		}
 	}
 }

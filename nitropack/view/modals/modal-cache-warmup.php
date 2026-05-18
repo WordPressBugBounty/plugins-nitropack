@@ -13,8 +13,8 @@
 					</svg>
 					<span class="sr-only"><?php esc_html_e( 'Close modal', 'nitropack' ); ?></span>
 				</button>
-				<img src="<?php echo plugin_dir_url( __FILE__ ) . '../images/info.svg'; ?>" width="46" height="46"
-					class="icon rotate-180">
+							<img src="<?php echo NITROPACK_PLUGIN_DIR_URL . 'assets/img/info.svg'; ?>" width="46" height="46"
+					alt="" class="icon rotate-180">
 				<h3><?php esc_html_e( 'Cache warmup', 'nitropack' ); ?></h3>
                 <p><?php esc_html_e('Automatically re-optimizes purged/invalidated pages.', 'nitropack'); ?></p>
 			</div>

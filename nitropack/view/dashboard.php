@@ -12,6 +12,28 @@ $notifications->nitropack_display_admin_notices();
 $dismissed_notices = get_option( 'nitropack-dismissed-notices' );
 
 $nitro = get_nitropack_sdk();
+if ( ! $nitro ) {
+	?>
+	<div class="card">
+		<div class="card-header">
+			<h3><?php esc_html_e( 'NitroPack failed to connect correctly', 'nitropack' ); ?>
+			</h3>
+		</div>
+		<div class="card-body">
+			<p><?php esc_html_e( 'This usually happens when the plugin is installed and the connection process is started, but for some reason the connection process is not completed.', 'nitropack' ); ?><br>
+			<?php esc_html_e( 'Please disconnect and re-connect the plugin again and make sure your API key is correct and the site is connected in', 'nitropack' ); ?>
+				<a href="https://app.nitropack.io/dashboard" target="_blank">https://app.nitropack.io/dashboard</a>			
+			</p>
+			<p><?php esc_html_e( 'If the issue persists, please contact our support team.', 'nitropack' ); ?></p>
+		</div>
+		<div class="card-footer disconnect-container">
+			<a class="btn btn-primary" id="disconnect-btn"><?php esc_html_e( 'Disconnect NitroPack', 'nitropack' ); ?></a>
+			<?php require_once NITROPACK_PLUGIN_DIR . 'view/modals/modal-disconnect.php'; ?>
+		</div>
+	</div>
+	<?php
+	return;
+}
 try {
 	$cache_warmup_stats = $nitro->getApi()->getWarmupStats();
 } catch ( \Exception $e ) {

@@ -40,7 +40,7 @@ class EditorClearCache {
 	 * @return void
 	 */
 	public function render() {
-		$canEditorClearCache = get_option( $this->option_name, 1 );
+		$canEditorClearCache = get_option( $this->option_name );
 		?>
 		<div class="nitro-option" id="can-editor-clear-cache-widget">
 			<div class="nitro-option-main">

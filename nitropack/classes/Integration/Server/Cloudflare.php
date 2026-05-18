@@ -2,6 +2,8 @@
 
 namespace NitroPack\Integration\Server;
 
+use NitroPack\Integration\Hosting\WPEngine;
+
 // We need this to control Cloudflare in addition to any other proxy potentially provided by the origin host company
 class Cloudflare {
     const STAGE = "very_early";
@@ -36,14 +38,24 @@ class Cloudflare {
 
     public function allowProxyCache() {
         $siteConfig = get_nitropack()->getSiteConfig();
-        if ($siteConfig && !empty($siteConfig["hosting"]) && $siteConfig["hosting"] == "rocketnet") {
-	        nitropack_header( "Cloudflare-CDN-Cache-Control: public, max-age=0, s-maxage=300, stale-while-revalidate=3600" );
-        } else if ($siteConfig && !empty($siteConfig["isApoActive"])) {
-            nitropack_header("Cloudflare-CDN-Cache-Control: public, max-age=0, s-maxage=3600, stale-while-revalidate=3600");
-        } else {
-            nitropack_header("Vary: sec-ch-ua-mobile");
-            nitropack_header("Cloudflare-CDN-Cache-Control: public, max-age=0, s-maxage=15, stale-while-revalidate=3600");
+        $cfTtl = 15;
+        $addVaryHeader = true;
+
+        if (!empty($siteConfig["hosting"]) && $siteConfig["hosting"] == "rocketnet") {
+	        $cfTtl = 300;
+            $addVaryHeader = false;
+        } elseif (!empty($siteConfig["isApoActive"])) {
+            $cfTtl = 3600;
+            $addVaryHeader = false;
+        } elseif (WPEngine::isEfpc()) {
+            $cfTtl = 300;
+        } 
+        
+        if ($addVaryHeader) {
+            nitropack_header( "Vary: sec-ch-ua-mobile");
         }
+
+        nitropack_header( "Cloudflare-CDN-Cache-Control: public, max-age=0, s-maxage={$cfTtl}, stale-while-revalidate=3600" );
     }
 
     public function preventProxyCache() {

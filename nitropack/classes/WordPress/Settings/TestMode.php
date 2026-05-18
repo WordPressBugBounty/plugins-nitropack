@@ -23,8 +23,8 @@ class TestMode {
 		global $pagenow;
 		if ( $pagenow == 'plugins.php' && ! $this->is_test_mode_enabled() ) {
 			add_action( 'admin_enqueue_scripts', function () {
-				wp_enqueue_script( 'np_safemode', NITROPACK_PLUGIN_DIR_URL . 'view/javascript/np_safemode.js', array( 'jquery' ) );
-				wp_enqueue_style( 'np_safemode', NITROPACK_PLUGIN_DIR_URL . 'view/stylesheet/safemode.min.css' );
+				wp_enqueue_script( 'np_safemode', NITROPACK_PLUGIN_DIR_URL . 'assets/js/np_safemode.min.js', array( 'jquery' ) );
+				wp_enqueue_style( 'np_safemode', NITROPACK_PLUGIN_DIR_URL . 'assets/css/safemode.min.css' );
 			} );
 			add_action( 'admin_footer', function () {
 				require_once NITROPACK_PLUGIN_DIR . 'view/modals/modal-safemode.php';
@@ -154,7 +154,7 @@ class TestMode {
 				?>
 			</div>
 			<div class="msg-container hidden" id="loading-safemode-status">
-				<img src="<?php echo plugin_dir_url( NITROPACK_FILE ) . 'view/images/loading.svg'; ?>" alt="loading"
+				<img src="<?php echo plugin_dir_url( NITROPACK_FILE ) . 'assets/img/loading.svg'; ?>" alt="loading"
 					class="icon">
 				<?php esc_html_e( 'Loading test mode status', 'nitropack' ); ?>
 			</div>

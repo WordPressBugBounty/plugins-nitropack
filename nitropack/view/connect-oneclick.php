@@ -9,9 +9,9 @@
     </header>
     <main id="main">
         <div class="logos">
-            <img src="<?php echo plugin_dir_url(__FILE__) . 'images/nitropack_logo.svg'; ?>" class="" width="116" height="44" alt="NitroPack" />
-            <img src="<?php echo plugin_dir_url(__FILE__) . 'images/plus.svg'; ?>" class="" width="32" height="32" alt="+" />
-            <img src="<?php echo plugin_dir_url(__FILE__) . 'images/wp_logo.svg'; ?>" class="" width="52" height="52" alt="WordPress" />
+            <img src="<?php echo NITROPACK_PLUGIN_DIR_URL . 'assets/img/nitropack_logo.svg'; ?>" class="" width="116" height="44" alt="NitroPack" />
+            <img src="<?php echo NITROPACK_PLUGIN_DIR_URL . 'assets/img/plus.svg'; ?>" class="" width="32" height="32" alt="+" />
+            <img src="<?php echo NITROPACK_PLUGIN_DIR_URL . 'assets/img/wp_logo.svg'; ?>" class="" width="52" height="52" alt="WordPress" />
         </div>
         <div class="connect">
             <div class="headline-container">
@@ -24,7 +24,7 @@
                     do_settings_sections(NITROPACK_OPTION_GROUP); ?>
                     <?php if ($oneClickConnectUrl) : ?>
                     <a class="btn btn-primary btn-xl w-100" href="<?php esc_attr_e($oneClickConnectUrl); ?>">
-                        <img src="<?php echo plugin_dir_url(__FILE__) . 'images/loading.svg'; ?>" alt="loading" class="icon-left hidden">
+                        <img src="<?php echo NITROPACK_PLUGIN_DIR_URL . 'assets/img/loading.svg'; ?>" alt="loading" class="icon-left hidden">
                         <?php esc_html_e('Connect to NitroPack', 'nitropack'); ?>
                     </a>
                     <?php endif; ?>

@@ -39,8 +39,8 @@ $is_free_plan = $plan_details === 'Free';
 					<div class="nitropack-badge-wrapper">
 						<div class="logo-wrapper">
 							<span class="optimized-by"><?php esc_html_e( 'optimized by', 'nitropack' ); ?></span>
-							<img src="<?php echo plugin_dir_url( __FILE__ ) . '../images/nitropack-logo-horizontal.svg'; ?>"
-								height="13" />
+							<img src="<?php echo NITROPACK_PLUGIN_DIR_URL . 'assets/img/nitropack-logo-horizontal.svg'; ?>"
+								alt="NitroPack" height="13" />
 						</div>
 						<span
 							class="badge-text"><?php esc_html_e( 'Automated page speed optimizations for fast site performance', 'nitropack' ); ?></span>

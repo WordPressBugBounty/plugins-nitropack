@@ -11,8 +11,8 @@
 							fill="#1B004E" />
 					</svg>
 				</button>
-				<img src="<?php echo NITROPACK_PLUGIN_DIR_URL . 'view/images/info.svg'; ?>" width="46" height="46"
-					class="icon rotate-180">
+							<img src="<?php echo NITROPACK_PLUGIN_DIR_URL . 'assets/img/info.svg'; ?>" width="46" height="46"
+					alt="" class="icon rotate-180">
 				<h3><?php esc_html_e( 'Final check before going live', 'nitropack' ); ?></h3>
 			</div>
 			<!-- Modal body -->

@@ -61,7 +61,7 @@ class Optimizations {
 				<h3><?php esc_html_e( 'Optimized pages', 'nitropack' ); ?></h3>
 				<div class="flex flex-row items-center" style="<?php echo $pending_optimizations ? '' : 'display: none;'; ?>"
 					id="pending-optimizations-section">
-					<img src="<?php echo plugin_dir_url( NITROPACK_FILE ) . 'view/images/loading.svg'; ?>" alt="loading"
+					<img src="<?php echo plugin_dir_url( NITROPACK_FILE ) . 'assets/img/loading.svg'; ?>" alt="loading"
 						class="w-4 h-4">
 					<span class="ml-2 mr-1 text-primary"> <?php esc_html_e( 'Processing', 'nitropack' ); ?>
 						<span id="pending-optimizations-count"><?php echo esc_html( $pending_optimizations ); ?></span>

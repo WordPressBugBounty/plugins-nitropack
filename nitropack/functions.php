@@ -1914,7 +1914,7 @@ function nitropack_detect_changes_and_clean_post_cache( $post ) {
 			$metaCurrent = get_post_meta( $post->ID );
 			$metaPreUpdate = nitropack_get_meta_pre_update( $post );
 			$metaIsEqual = nitropack_compare_posts( $metaCurrent, $metaPreUpdate );
-			if ( ! $metaIsEqual ) {				
+			if ( ! $metaIsEqual ) {
 				$canCleanPostCache = true;
 			}
 		} else {
@@ -1994,7 +1994,7 @@ function nitropack_handle_post_transition( $new, $old, $post ) {
 				} else if ( $new == "draft" && $old == "publish" ) {
 					nitropack_clean_post_cache( $post, array( 'deleted' => nitropack_get_taxonomies( $post ) ), true, sprintf( "Invalidate related pages due to making %s '%s' a draft", $nicePostTypeLabel, $post->post_title ), true );
 				} else if ( $new != "trash" ) {
-					if ( ! defined( 'NITROPACK_PURGE_CACHE' ) ) {						
+					if ( ! defined( 'NITROPACK_PURGE_CACHE' ) ) {
 						nitropack_detect_changes_and_clean_post_cache( $post );
 					}
 					if ( $new == 'publish' ) {
@@ -2210,6 +2210,10 @@ function nitropack_log_tags() {
 }
 
 function nitropack_extend_nonce_life( $life ) {
+	if ( nitropack_is_rest() && empty( $_COOKIE["nitroCachedPage"] ) ) {
+		return $life;
+	}
+
 	// Nonce life should be extended only:
 	//  - if NitroPack is connected for this site
 	//  - if the current value is shorter than the life time of a cache file
@@ -2300,11 +2304,11 @@ function nitropack_prevent_connecting( $nitroSDK ) {
 function nitropack_verify_connect( $siteId, $siteSecret ) {
 	$blogId = get_current_blog_id();
 	$multisite_reason = ' ';
-	if ($blogId) {
+	if ( $blogId ) {
 		$multisite_reason .= is_main_site() ? "in main site" : "in multisite: $blogId";
 	}
-	NitroPack\WordPress\NitroPack::getInstance()->getLogger()->notice( 'Verifying connection to NitroPack API'.$multisite_reason );
-		
+	NitroPack\WordPress\NitroPack::getInstance()->getLogger()->notice( 'Verifying connection to NitroPack API' . $multisite_reason );
+
 	if ( ! nitropack_check_func_availability( 'stream_socket_client' ) ) {
 
 		NitroPack\WordPress\NitroPack::getInstance()->getLogger()->error( 'stream_socket_client function is not allowed by your host.' );
@@ -2331,13 +2335,13 @@ function nitropack_verify_connect( $siteId, $siteSecret ) {
 
 	if ( ! nitropack_validate_site_id( $siteId ) || ! nitropack_validate_site_secret( $siteSecret ) ) {
 
-		NitroPack\WordPress\NitroPack::getInstance()->getLogger()->error( 'Invalid API key or API secret key value'.$multisite_reason );
+		NitroPack\WordPress\NitroPack::getInstance()->getLogger()->error( 'Invalid API key or API secret key value' . $multisite_reason );
 
 		nitropack_json_and_exit( array( "status" => "error", "message" => __( 'Invalid API key or API secret key value', 'nitropack' ) ) );
 	}
 
 	try {
-		
+
 		if ( null !== $nitro = get_nitropack_sdk( $siteId, $siteSecret, NULL, true ) ) {
 			if ( ! $nitro->checkHealthStatus() ) {
 
@@ -2399,7 +2403,7 @@ function nitropack_verify_connect( $siteId, $siteSecret ) {
 				$nitro->getApi()->runWarmup( [ $siteConfig['home_url'] ], true ); // force run a warmup on the home page
 			}
 
-			NitroPack\WordPress\NitroPack::getInstance()->getLogger()->notice( 'NitroPack connected'.$multisite_reason );
+			NitroPack\WordPress\NitroPack::getInstance()->getLogger()->notice( 'NitroPack connected' . $multisite_reason );
 
 			$onboarding = get_option( 'nitropack-onboardingPassed' );
 			$url = $onboarding === '1' ? get_admin_url( $blogId, "admin.php?page=nitropack" ) : get_admin_url( $blogId, "admin.php?page=nitropack&onboarding=1" );
@@ -2436,7 +2440,7 @@ function nitropack_verify_connect( $siteId, $siteSecret ) {
 		nitropack_json_and_exit( array( "status" => "error", "message" => __( 'Incorrect API credentials. Please make sure that you copied them correctly and try again.', 'nitropack' ) ) );
 	}
 
-	NitroPack\WordPress\NitroPack::getInstance()->getLogger()->error( 'Error verifying connection to NitroPack'.$multisite_reason );
+	NitroPack\WordPress\NitroPack::getInstance()->getLogger()->error( 'Error verifying connection to NitroPack' . $multisite_reason );
 
 	nitropack_json_and_exit( array( "status" => "error" ) );
 }
@@ -2466,10 +2470,10 @@ function nitropack_disconnect() {
 	nitropack_verify_ajax_nonce( $_REQUEST );
 	$blogId = get_current_blog_id();
 	$multisite_reason = ' ';
-	if ($blogId) {
+	if ( $blogId ) {
 		$multisite_reason .= is_main_site() ? "in main site" : "in multisite: $blogId";
 	}
-	NitroPack\WordPress\NitroPack::getInstance()->getLogger()->notice( 'NitroPack disconnecting... '.$multisite_reason );
+	NitroPack\WordPress\NitroPack::getInstance()->getLogger()->notice( 'NitroPack disconnecting... ' . $multisite_reason );
 	nitropack_uninstall_advanced_cache();
 
 	try {
@@ -2492,7 +2496,7 @@ function nitropack_disconnect() {
 			@unlink( $hostingNoticeFile );
 		}
 	}
-	NitroPack\WordPress\NitroPack::getInstance()->getLogger()->notice( 'NitroPack disconnected.'.$multisite_reason );
+	NitroPack\WordPress\NitroPack::getInstance()->getLogger()->notice( 'NitroPack disconnected.' . $multisite_reason );
 	nitropack_json_and_exit( array( "status" => "success", "message" => __( "Disconnected", "nitropack" ) ) );
 }
 
@@ -2703,6 +2707,13 @@ function nitropack_handle_request( $servedFrom = "unknown" ) {
 						if ( $nitro->isCacheAllowed() ) {
 							if ( ! nitropack_is_ajax() ) {
 								do_action( "nitropack_cacheable_cache_headers" );
+							}
+
+							// Handle corner cases where the URL contains multiple slashes
+							if ( ! empty( $_SERVER['REQUEST_URI'] ) && strpos( $_SERVER['REQUEST_URI'], '//' ) !== false ) {
+								header( 'HTTP/1.1 301 Moved Permanently' );
+								header( 'Location: ' . $nitro->getUrl() );
+								exit;
 							}
 
 							if ( ! empty( $siteConfig["compression"] ) ) {

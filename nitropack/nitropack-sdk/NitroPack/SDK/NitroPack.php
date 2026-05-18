@@ -861,7 +861,13 @@ class NitroPack {
     }
 
     public function isAllowedRequest($allowServiceRequests = false) {
-        if (($this->isAJAXRequest() && !$this->isAllowedAJAX()) || !($this->isRequestMethod("GET") || $this->isRequestMethod("HEAD"))) {// TODO: Allow URLs which match a pattern in the AJAX URL whitelist
+        if (!$this->isAllowedUserAgent()) {
+            return false;
+        }
+
+        // TODO: Allow URLs which match a pattern in the AJAX URL whitelist
+        if (($this->isAJAXRequest() && !$this->isAllowedAJAX()) || !($this->isRequestMethod("GET") || $this->isRequestMethod("HEAD"))) {
+
             return false; // don't cache ajax or not GET requests
         }
 
@@ -991,6 +997,19 @@ class NitroPack {
             }
         }
         return false;
+    }
+
+    public function isAllowedUserAgent()
+    {
+        if ($this->config->ExcludeByUserAgent->Status && !empty($this->config->ExcludeByUserAgent->UserAgents)) {
+            foreach ($this->config->ExcludeByUserAgent->UserAgents as $uaValue) {
+                if (preg_match('/^' . self::wildcardToRegex($uaValue) . '$/', $this->userAgent)) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
     }
 
     public function isCacheAllowed() {

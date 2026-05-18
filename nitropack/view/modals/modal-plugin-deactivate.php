@@ -12,8 +12,8 @@
 					</svg>
 					<span class="sr-only"><?php esc_html_e( 'Close modal', 'nitropack' ); ?></span>
 				</button>
-				<img src="<?php echo plugin_dir_url( __FILE__ ) . '../images/info.svg'; ?>" width="46" height="46"
-					class="icon rotate-180">
+							<img src="<?php echo NITROPACK_PLUGIN_DIR_URL . 'assets/img/info.svg'; ?>" width="46" height="46"
+					alt="" class="icon rotate-180">
 				<h3 class="text-center"><?php esc_html_e( 'Deactivate', 'nitropack' ); ?> <span
 						class="plugin-name"></span>?</h3>
 			</div>
@@ -78,7 +78,7 @@
 					nonce: nitroNonce
 				},
 				beforeSend: function () {
-					modal_icon.attr('src', '<?php echo plugin_dir_url( __FILE__ ) . '../images/loading.svg'; ?>');
+									modal_icon.attr('src', '<?php echo NITROPACK_PLUGIN_DIR_URL . 'assets/img/loading.svg'; ?>');
 					modal_title.html('<?php esc_html_e( 'Deactivating ', 'nitropack' ); ?>' + plugin_name + '...');
 					modal_footer.addClass('hidden');
 					modal_text.text('');

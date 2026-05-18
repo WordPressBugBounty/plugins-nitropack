@@ -18,7 +18,7 @@
 						<div class="form-row">
 							<label><span><?php esc_html_e( 'API key', 'nitropack' ); ?></span>
 								<div class="tooltip"><span class="tooltip-icon" data-tooltip-target="tooltip-api-key">
-										<img src="<?php echo plugin_dir_url( __FILE__ ) . 'images/info.svg'; ?>">
+										<img src="<?php echo NITROPACK_PLUGIN_DIR_URL . 'assets/img/info.svg'; ?>" alt="info">
 									</span>
 									<div id="tooltip-api-key" role="tooltip" class="tooltip-container hidden">
 										<?php
@@ -35,7 +35,7 @@
 							<label><span><?php esc_html_e( 'API secret key', 'nitropack' ); ?></span>
 								<div class="tooltip"><span class="tooltip-icon"
 										data-tooltip-target="tooltip-secret-key">
-										<img src="<?php echo plugin_dir_url( __FILE__ ) . 'images/info.svg'; ?>">
+										<img src="<?php echo NITROPACK_PLUGIN_DIR_URL . 'assets/img/info.svg'; ?>" alt="info">
 									</span>
 									<div id="tooltip-secret-key" role="tooltip" class="tooltip-container hidden">
 										<?php
@@ -56,7 +56,7 @@
 					</div>
 				</form>
 				<a href="#" class="btn btn-primary btn-xl w-100" id="connect-nitropack">
-					<img src="<?php echo plugin_dir_url( __FILE__ ) . 'images/loading.svg'; ?>" alt="loading"
+					<img src="<?php echo NITROPACK_PLUGIN_DIR_URL . 'assets/img/loading.svg'; ?>" alt="loading"
 						class="icon-left hidden">
 					<?php esc_html_e( 'Connect NitroPack', 'nitropack' ); ?>
 				</a>
@@ -75,7 +75,7 @@
 						renderer: 'svg',    // Render as 'svg', 'canvas', or 'html'
 						loop: false,
 						autoplay: true,
-						path: '<?php echo plugin_dir_url( __FILE__ ) . 'animations/nitropack+wp.json'; ?>'
+						path: '<?php echo NITROPACK_PLUGIN_DIR_URL . 'assets/animations/nitropack+wp.json'; ?>'
 					});
 				</script>
 			</div>
@@ -141,7 +141,7 @@
 								if ($('#api-details-form .nitro-notification').length) {
 									$('#api-details-form .nitro-notification .notification-inner p').text(errorMessage);
 								} else {
-									$('#api-details-form').prepend('<div class="nitro-notification notification-error"><div class="text-box text-center"><div class="notification-inner" style="justify-content: center; gap: 0;""><img src="<?php echo plugin_dir_url( __FILE__ ) . 'images/alert-circle.svg'; ?>" alt="Error" class="icon"><p>' + errorMessage + '</p></div></div></div>');
+									$('#api-details-form').prepend('<div class="nitro-notification notification-error"><div class="text-box text-center"><div class="notification-inner" style="justify-content: center; gap: 0;""><img src="<?php echo NITROPACK_PLUGIN_DIR_URL . 'assets/img/alert-circle.svg'; ?>" alt="Error" class="icon"><p>' + errorMessage + '</p></div></div></div>');
 								}
 								loading_icon.addClass('hidden');
 							}

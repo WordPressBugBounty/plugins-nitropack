@@ -150,7 +150,7 @@ class OptimizationLevel {
 				<div class="flex items-center">
 					<h3 class="mb-0"><?php esc_html_e( 'Optimization mode', 'nitropack' ); ?></h3>
 					<span class="tooltip-icon" data-tooltip-target="tooltip-optimization">
-						<img src="<?php echo plugin_dir_url( NITROPACK_FILE ) . 'view/images/info.svg'; ?>">
+						<img src="<?php echo plugin_dir_url( NITROPACK_FILE ) . 'assets/img/info.svg'; ?>" alt="info">
 					</span>
 					<div id="tooltip-optimization" role="tooltip" class="tooltip-container hidden">
 						<?php esc_html_e( 'Select from our range of predefined optimization modes to boost your site\'s performance.', 'nitropack' );
@@ -182,7 +182,7 @@ class OptimizationLevel {
 							data-modal-target="modal-optimization-mode"
 							data-modal-toggle="modal-optimization-mode"><?php echo $mode['human_readable_name']; ?>
 							<?php if ( ! $mode['is_available'] && $mode['human_readable_name'] === 'Ludicrous' ) { ?>
-								<img src="<?php echo plugin_dir_url( NITROPACK_FILE ) . 'view/images/lock.svg'; ?>" />
+								<img src="<?php echo plugin_dir_url( NITROPACK_FILE ) . 'assets/img/lock.svg'; ?>" alt="lock" />
 							<?php } ?>
 						</a>
 					<?php endforeach; ?>
@@ -312,7 +312,7 @@ class OptimizationLevel {
 								?>
 								<a class="btn btn-secondary text-center <?php echo esc_attr( $css ); ?>"
 									href="https://app.nitropack.io/subscription/buy" target="_blank"><img
-										src="<?php echo plugin_dir_url( NITROPACK_FILE ) . 'view/images/lock.svg'; ?>" />
+										src="<?php echo plugin_dir_url( NITROPACK_FILE ) . 'assets/img/lock.svg'; ?>" alt="lock" />
 									<?php esc_html_e( 'Upgrade plan', 'nitropack' ); ?></a>
 							<?php } else { ?>
 								<a

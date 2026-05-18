@@ -15,12 +15,17 @@ class Components {
 	 */
 	private $plugin_dir_url;
 	/**
+	 * @var string $img_path The URL path to the plugin's image assets.
+	 */
+	private $img_path;
+	/**
 	 * Components constructor.
 	 *
 	 * Initializes the plugin directory URL.
 	 */
 	public function __construct() {
 		$this->plugin_dir_url = plugin_dir_url( NITROPACK_FILE );
+		$this->img_path = $this->plugin_dir_url . 'assets/img/';
 	}
 	/**
 	 * Get the URL of the notification icon based on the type.
@@ -29,7 +34,7 @@ class Components {
 	 * @return string The URL of the notification icon.
 	 */
 	private function get_icon_notification_url( $type ) {
-		$icon_path = $this->plugin_dir_url . 'view/images/';
+		$icon_path = $this->img_path;
 		switch ( $type ) {
 			case 'success':
 				return $icon_path . 'check.svg';
@@ -198,7 +203,7 @@ class Components {
 			echo '<a href="' . $options['href'] . '"'; ?> 		<?php endif; ?>
 			class="<?php echo esc_attr( $options['classes'] ); ?>" <?php echo $attrs; ?>>
 			<?php if ( $options['icon'] ) : ?>
-				<img src="<?php echo esc_url( $this->plugin_dir_url . 'view/images/' . $options['icon'] ); ?>"
+				<img src="<?php echo esc_url( $this->img_path . $options['icon'] ); ?>"
 					class="inline-block mr-2" alt="">
 			<?php endif; ?>
 			<span class="btn-text"><?php echo esc_html( $options['text'], 'nitropack' ); ?></span>
@@ -218,7 +223,7 @@ class Components {
 	 */
 	public function render_tooltip( $id, $text, $icon = 'info.svg' ) { ?>
 		<span class="tooltip-icon" data-tooltip-target="tooltip-<?php echo $id; ?>">
-			<img src="<?php echo $this->plugin_dir_url . 'view/images/' . $icon; ?>">
+			<img src="<?php echo $this->img_path . $icon; ?>" alt="info">
 		</span>
 		<div id="tooltip-<?php echo $id; ?>" role="tooltip" class="tooltip-container hidden">
 			<?php echo wp_kses_post( $text ); ?>

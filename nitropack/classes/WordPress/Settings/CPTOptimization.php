@@ -250,7 +250,7 @@ class CPTOptimization {
 					<p><?php esc_html_e( 'Select what post/page types get optimized', 'nitropack' ); ?></p>
 				</div>
 				<a data-modal-target="modal-posttypes" data-modal-toggle="modal-posttypes" class="btn btn-secondary btn-icon">
-					<img src="<?php echo plugin_dir_url( NITROPACK_FILE ); ?>view/images/setting-icon.svg">
+					<img src="<?php echo plugin_dir_url( NITROPACK_FILE ); ?>assets/img/setting-icon.svg" alt="" class="icon">
 				</a>
 			</div>
 			<?php require_once NITROPACK_PLUGIN_DIR . 'view/modals/modal-posttypes.php'; ?>

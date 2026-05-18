@@ -9,7 +9,7 @@
                     </svg>
                     <span class="sr-only"><?php esc_html_e('Close modal', 'nitropack'); ?></span>
                 </button>
-                <img src="<?php echo plugin_dir_url(__FILE__) . '../images/info.svg'; ?>" width="46" height="46" class="icon rotate-180">
+                <img src="<?php echo NITROPACK_PLUGIN_DIR_URL . 'assets/img/info.svg'; ?>" width="46" height="46" alt="" class="icon rotate-180">
                 <h3><?php esc_html_e('Are you sure you want to disconnect NitroPack?', 'nitropack'); ?></h3>
             </div>
             <!-- Modal body -->
@@ -38,7 +38,7 @@
 
         $('#disconnect-btn').click(function() {
             //always with info icon
-            modal_icon.attr('src', '<?php echo plugin_dir_url(__FILE__) . '../images/info.svg'; ?>');
+            modal_icon.attr('src', '<?php echo NITROPACK_PLUGIN_DIR_URL . 'assets/img/info.svg'; ?>');
             //reset clicks
             secondary_btn.off('click');
             action_btn.off('click');
@@ -87,7 +87,7 @@
                     nonce: nitroNonce
                 },
                 beforeSend: function() {
-                    modal_icon.attr('src', '<?php echo plugin_dir_url(__FILE__) . '../images/loading.svg'; ?>');
+                    modal_icon.attr('src', '<?php echo NITROPACK_PLUGIN_DIR_URL . 'assets/img/loading.svg'; ?>');
                     modal_title.html('<?php esc_html_e('Disconnecting...', 'nitropack'); ?>');
                     modal_footer.addClass('hidden');
                     modal_text.text('');
@@ -102,7 +102,7 @@
 
         }
         var enableSafemode = () => {
-            modal_icon.attr('src', '<?php echo plugin_dir_url(__FILE__) . '../images/loading.svg'; ?>');
+            modal_icon.attr('src', '<?php echo NITROPACK_PLUGIN_DIR_URL . 'assets/img/loading.svg'; ?>');
             modal_title.html('<?php esc_html_e('Switching to Test Mode...', 'nitropack'); ?>');
             modal_footer.addClass('hidden');
             modal_text.text('');

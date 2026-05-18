@@ -13,8 +13,8 @@
 					</svg>
 					<span class="sr-only"><?php esc_html_e( 'Close modal', 'nitropack' ); ?></span>
 				</button>
-				<img src="<?php echo plugin_dir_url( __FILE__ ) . '../images/info.svg'; ?>" width="46" height="46"
-					class="icon rotate-180">
+							<img src="<?php echo NITROPACK_PLUGIN_DIR_URL . 'assets/img/info.svg'; ?>" width="46" height="46"
+					alt="" class="icon rotate-180">
 				<h3><?php esc_html_e( 'Enable Test Mode?', 'nitropack' ); ?></h3>
 			</div>
 			<!-- Modal body -->
@@ -56,7 +56,7 @@
 		$(setting_id).change(function () {
 			close_btn.off("click");
 			action_btn.off("click");
-			modal_icon.attr('src', '<?php echo plugin_dir_url( __FILE__ ) . '../images/info.svg'; ?>');
+					modal_icon.attr('src', '<?php echo NITROPACK_PLUGIN_DIR_URL . 'assets/img/info.svg'; ?>');
 			modal_footer.removeClass('hidden');
 			if (this.checked) {
 				modal_title.text('<?php esc_html_e( 'Enable Test Mode?', 'nitropack' ); ?>');
@@ -111,7 +111,7 @@
 			modal.hide();
 		});
 		var enableSafemode = () => {
-			modal_icon.attr('src', '<?php echo plugin_dir_url( __FILE__ ) . '../images/loading.svg'; ?>');
+					modal_icon.attr('src', '<?php echo NITROPACK_PLUGIN_DIR_URL . 'assets/img/loading.svg'; ?>');
 			return $.ajax({
 				url: ajaxurl,
 				type: "POST",

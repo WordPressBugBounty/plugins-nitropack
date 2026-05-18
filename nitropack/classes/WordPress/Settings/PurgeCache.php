@@ -29,7 +29,7 @@ class PurgeCache {
 
 	/**
 	 * AJAX handler when clicking Purge Entire Cache in admin topbar NitroPack menu
-	 * Triggered in nitropack/view/javascript/admin_bar_menu.js
+	 * Triggered in nitropack/assets/js/admin_bar_menu.min.js
 	 * @return void
 	 */
 	public function nitropack_purge_entire_cache() {
@@ -54,7 +54,7 @@ class PurgeCache {
 
 	/**
 	 * AJAX handler when clicking Invalidate Entire Cache in admin topbar NitroPack menu
-	 * Triggered in nitropack/view/javascript/admin_bar_menu.js
+	 * Triggered in nitropack/assets/js/admin_bar_menu.min.js
 	 * @return void
 	 */
 	public function nitropack_invalidate_entire_cache() {
@@ -79,7 +79,7 @@ class PurgeCache {
 	}
 	/**
 	 * AJAX handler when clicking Purge Cache in Dashboard > NitroPack. Performs light purge (excludes images).
-	 * Triggered in nitropack/view/javascript/np_settings.js -> clearCacheHandler()
+	 * Triggered in nitropack/assets/js/np_settings.min.js -> clearCacheHandler()
 	 * @return void
 	 */
 	public function nitropack_purge_cache() {
@@ -101,8 +101,7 @@ class PurgeCache {
 		) );
 	}
 	/**
-	 * Extended capabilities when purging or invalidating single post cache in a metabox
-	 * Triggered in nitropack/view/javascript/metabox.js
+	 * Extended capabilities when purging or invalidating single post cache in a metabox.
 	 * @return string[]
 	 */
 	private function capabilities_prior_purge() {
@@ -114,8 +113,7 @@ class PurgeCache {
 		}
 	}
 	/**
-	 * AJAX Handler when purging a single post cache via meta box
-	 * Triggered in nitropack/view/javascript/metabox.js
+	 * AJAX Handler when purging a single post cache via meta box.
 	 * @return void
 	 */
 	public function nitropack_purge_single_cache() {
@@ -160,8 +158,7 @@ class PurgeCache {
 	}
 
 	/**
-	 * AJAX handler when invalidating single post cache via metabox
-	 * Triggered in nitropack/view/javascript/metabox.js
+	 * AJAX handler when invalidating single post cache via metabox.
 	 * @return void
 	 */
 	public function nitropack_invalidate_single_cache() {

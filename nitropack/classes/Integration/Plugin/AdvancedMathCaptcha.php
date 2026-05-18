@@ -266,7 +266,7 @@ class AdvancedMathCaptcha {
 	 * @return void
 	 */
 	public function enqueue_scripts() {
-		wp_enqueue_script( 'nitropack-math-captcha-ajax-script', NITROPACK_PLUGIN_DIR_URL . 'view/javascript/math_captcha.js?np_v=' . NITROPACK_VERSION, array( 'jquery' ), NITROPACK_VERSION, true );
+		wp_enqueue_script( 'nitropack-math-captcha-ajax-script', NITROPACK_PLUGIN_DIR_URL . 'assets/js/math_captcha.min.js?np_v=' . NITROPACK_VERSION, array( 'jquery' ), NITROPACK_VERSION, true );
 
 		$vars = [
 			'root'  => esc_url_raw( untrailingslashit( rest_url() ) ),
@@ -286,7 +286,7 @@ class AdvancedMathCaptcha {
 		$this->enqueue_scripts();
 
 		?>
-		<div class="nitropack_math_captcha" data-form-type="default"><img src="<?php echo esc_url( NITROPACK_PLUGIN_DIR_URL . 'view/images/loading.gif' ); ?>" alt="loading" /></div>
+		<div class="nitropack_math_captcha" data-form-type="default"><img src="<?php echo esc_url( NITROPACK_PLUGIN_DIR_URL . 'assets/img/loading.gif' ); ?>" alt="loading" /></div>
 		<?php
 	}
 
@@ -300,7 +300,7 @@ class AdvancedMathCaptcha {
 		$this->enqueue_scripts();
 
 		?>
-		<div class="nitropack_math_captcha" data-form-type="bbpress"><img src="<?php echo esc_url( NITROPACK_PLUGIN_DIR_URL . 'view/images/loading.gif' ); ?>" alt="loading" /></div>
+		<div class="nitropack_math_captcha" data-form-type="bbpress"><img src="<?php echo esc_url( NITROPACK_PLUGIN_DIR_URL . 'assets/img/loading.gif' ); ?>" alt="loading" /></div>
 		<?php
 	}
 

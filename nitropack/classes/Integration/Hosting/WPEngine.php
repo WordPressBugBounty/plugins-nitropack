@@ -15,6 +15,10 @@ class WPEngine extends Hosting {
             || (\NitroPack\WordPress\NitroPack::isWpCli() && strpos($_SERVER['DOCUMENT_ROOT'], '/nas/content/live/') === 0);
     }
 
+    public static function isEfpc() {
+        return !empty($_SERVER['HTTP_X_EFPC_ENABLED']);
+    }
+
     public function init($stage) {
         if (self::detect()) {
             switch ($stage) {
@@ -61,6 +65,9 @@ class WPEngine extends Hosting {
             add_filter( 'wpe_purge_varnish_cache_paths', $handler );
             if (class_exists("\WpeCommon")) { // We need to have this check for clients that switch hosts
                 \WpeCommon::purge_varnish_cache();
+                if (self::isEfpc()) {
+                    \WpeCommon::clear_cdn_cache();
+                }
             }
             remove_filter( 'wpe_purge_varnish_cache_paths', $handler );
         } catch (\Exception $e) {
@@ -72,6 +79,9 @@ class WPEngine extends Hosting {
         try {
             if (class_exists("\WpeCommon")) { // We need to have this check for clients that switch hosts
                 \WpeCommon::purge_varnish_cache();
+                if (self::isEfpc()) {
+                    \WpeCommon::clear_cdn_cache();
+                }
             }
         } catch (\Exception $e) {
             // WPE exception

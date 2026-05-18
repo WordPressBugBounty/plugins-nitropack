@@ -78,7 +78,7 @@ class GravityForms {
 		// Gravity Forms form detected? Enqueue scripts and exit.
 		if ( false !== $this->check_gf( $post ) ) {
 
-			wp_enqueue_script( 'nitropack-gf-ajax-script', NITROPACK_PLUGIN_DIR_URL . 'view/javascript/gravity_forms.js?np_v=' . NITROPACK_VERSION, array('jquery'), NITROPACK_VERSION, true );
+			wp_enqueue_script( 'nitropack-gf-ajax-script', NITROPACK_PLUGIN_DIR_URL . 'assets/js/gravity_forms.min.js?np_v=' . NITROPACK_VERSION, array('jquery'), NITROPACK_VERSION, true );
 			wp_localize_script( 'nitropack-gf-ajax-script', 'nitropack_gf_ajax', array( 'ajax_url' => admin_url( 'admin-ajax.php' ) ) );
 
 			return;
@@ -207,7 +207,7 @@ class GravityForms {
 
 		$block_nonce = wp_create_nonce( $this->get_block_nonce_action( $block_name, $block_attributes ) );
 
-		return '<div class="nitropack-gravityforms-block" data-block-name="' . esc_attr( $block_name ) . '" data-block-attributes="' . esc_attr( $block_attributes ) . '" data-block-nonce="' . esc_attr( $block_nonce ) . '"><img src="' . esc_url( NITROPACK_PLUGIN_DIR_URL . 'view/images/loading.gif' ) . '" alt="loading" /></div>';
+		return '<div class="nitropack-gravityforms-block" data-block-name="' . esc_attr( $block_name ) . '" data-block-attributes="' . esc_attr( $block_attributes ) . '" data-block-nonce="' . esc_attr( $block_nonce ) . '"><img src="' . esc_url( NITROPACK_PLUGIN_DIR_URL . 'assets/img/loading.gif' ) . '" alt="loading" /></div>';
 	}
 
 	/**
@@ -311,7 +311,7 @@ class GravityForms {
 
 		$shortcode_nonce = wp_create_nonce( $this->get_shortcode_nonce_action( $shortcode_attributes ) );
 
-		return '<div class="nitropack-gravityforms-shortcode" data-shortcode-attributes="' . esc_attr( $shortcode_attributes ) . '" data-shortcode-nonce="' . esc_attr( $shortcode_nonce ) . '"><img src="' . esc_url( NITROPACK_PLUGIN_DIR_URL . 'view/images/loading.gif' ) . '" alt="loading" /></div>';
+		return '<div class="nitropack-gravityforms-shortcode" data-shortcode-attributes="' . esc_attr( $shortcode_attributes ) . '" data-shortcode-nonce="' . esc_attr( $shortcode_nonce ) . '"><img src="' . esc_url( NITROPACK_PLUGIN_DIR_URL . 'assets/img/loading.gif' ) . '" alt="loading" /></div>';
 	}
 
 	/**

@@ -18,7 +18,7 @@ $modal_header = esc_html__( 'Optimizing your home page', 'nitropack' );
 						renderer: 'svg',
 						loop: true,
 						autoplay: true,
-						path: '<?php echo plugin_dir_url( __FILE__ ) . '../animations/setting-html.json'; ?>'
+						path: '<?php echo NITROPACK_PLUGIN_DIR_URL . 'assets/animations/setting-html.json'; ?>'
 					});
 				</script>
 				<p class="text-center">

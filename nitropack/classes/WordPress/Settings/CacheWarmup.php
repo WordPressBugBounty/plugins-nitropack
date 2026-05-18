@@ -240,7 +240,7 @@ class CacheWarmup {
 					<h6><?php esc_html_e( 'Cache warmup', 'nitropack' ); ?> <span
 							class="badge badge-primary ml-2"><?php esc_html_e( 'Recommended', 'nitropack' ); ?></span>
 						<span class="tooltip-icon <?php echo $toolTipDisplayState; ?>" data-tooltip-target="tooltip-sitemap">
-							<img src="<?php echo plugin_dir_url( NITROPACK_FILE ) . 'view/images/info.svg'; ?>">
+							<img src="<?php echo plugin_dir_url( NITROPACK_FILE ) . 'assets/img/info.svg'; ?>" alt="info">
 						</span>
 					</h6>
 					<div id="tooltip-sitemap" role="tooltip" class="tooltip-container hidden">
@@ -257,7 +257,7 @@ class CacheWarmup {
 				?>
 			</div>
 			<div class="msg-container hidden" id="loading-warmup-status">
-				<img src="<?php echo plugin_dir_url( NITROPACK_FILE ) . 'view/images/loading.svg'; ?>" alt="loading"
+				<img src="<?php echo plugin_dir_url( NITROPACK_FILE ) . 'assets/img/loading.svg'; ?>" alt="loading"
 					class="icon">
 				<span class="msg"><?php esc_html_e( 'Loading cache warmup status', 'nitropack' ); ?></span>
 			</div>

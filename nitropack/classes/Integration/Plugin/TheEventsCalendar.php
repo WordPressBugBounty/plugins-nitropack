@@ -111,13 +111,13 @@ class TheEventsCalendar {
 	 */
 	public function widget_output_filter( $widget_output, $widget_id_base, $widget_id, $sidebar_id ) {
 
-			wp_enqueue_script( 'nitropack-widget-ajax-script', NITROPACK_PLUGIN_DIR_URL . 'view/javascript/widgets_ajax.js?np_v=' . NITROPACK_VERSION, array('jquery'), NITROPACK_VERSION, true );
+			wp_enqueue_script( 'nitropack-widget-ajax-script', NITROPACK_PLUGIN_DIR_URL . 'assets/js/widgets_ajax.min.js?np_v=' . NITROPACK_VERSION, array('jquery'), NITROPACK_VERSION, true );
 			wp_localize_script( 'nitropack-widget-ajax-script', 'nitropack_widget_ajax', array( 'ajax_url' => admin_url( 'admin-ajax.php' ) ) );
 			$widget_nonce = wp_create_nonce( $this->get_widget_nonce_action( $widget_id, $sidebar_id ) );
 
 			ob_start();
 			?>
-			<div class="nitropack-widget-ajax" data-widget-id="<?php echo esc_attr($widget_id); ?>" data-sidebar-id="<?php echo esc_attr($sidebar_id); ?>" data-widget-nonce="<?php echo esc_attr( $widget_nonce ); ?>"><img src="<?php echo esc_url(NITROPACK_PLUGIN_DIR_URL . 'view/images/loading.gif'); ?>" alt="loading" /></div>
+				<div class="nitropack-widget-ajax" data-widget-id="<?php echo esc_attr($widget_id); ?>" data-sidebar-id="<?php echo esc_attr($sidebar_id); ?>" data-widget-nonce="<?php echo esc_attr( $widget_nonce ); ?>"><img src="<?php echo esc_url(NITROPACK_PLUGIN_DIR_URL . 'assets/img/loading.gif'); ?>" alt="loading" /></div>
 			<?php
 			$widget_output = ob_get_clean();
 

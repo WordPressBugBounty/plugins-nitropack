@@ -2,7 +2,7 @@
     <div class="toast-inner">
         <div class="msg-box">
             <div class="icon">              
-                <img src="<?php echo plugin_dir_url(__FILE__) . '../images/check-circle.svg'; ?>" width="16" height="16">
+                <img src="<?php echo NITROPACK_PLUGIN_DIR_URL . 'assets/img/check-circle.svg'; ?>" width="16" height="16" alt="">
             </div>
             <div class="text">Settings updated.</div>
         </div>

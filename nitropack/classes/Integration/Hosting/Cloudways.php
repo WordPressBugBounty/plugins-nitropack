@@ -21,7 +21,7 @@ class Cloudways extends Hosting {
 
     public function purgeUrl($url) {
         try {
-            $purger = new \NitroPack\SDK\Integrations\Varnish(array("127.0.0.1"), "URLPURGE");
+            $purger = new \NitroPack\SDK\Integrations\Varnish(array("127.0.0.1:8080"), "PURGE");
             $purger->purge($url);
         } catch (\Exception $e) {
             // Exception
