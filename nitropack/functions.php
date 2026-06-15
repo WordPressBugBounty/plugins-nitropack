@@ -2865,6 +2865,11 @@ add_action( 'update_option_show_on_front', 'nitropack_frontpage_changed_handler'
 add_action( 'update_option_page_on_front', 'nitropack_frontpage_changed_handler', 10, 2 );
 add_action( 'update_option_page_for_posts', 'nitropack_frontpage_changed_handler', 10, 2 );
 
+//to be removed when the mu-file is removed
+function nitropack_verify_connect(string $siteId, string $siteSecret) {
+	$nitropack_connect = new \NitroPack\WordPress\Connect();
+	$nitropack_connect->nitropack_verify_connect($siteId, $siteSecret);
+}
 // Init integration action handlers
 $modHandler = NitroPack\ModuleHandler::getInstance();
 $modHandler->init();
