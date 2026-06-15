@@ -122,7 +122,7 @@
 				if (isManualConnect || (siteId && siteSecret)) {
 
 					$.post(ajaxurl, {
-						action: 'nitropack_verify_connect',
+						action: 'nitropack_connect',
 						siteId: siteId,
 						siteSecret: siteSecret,
 						nonce: nitroNonce

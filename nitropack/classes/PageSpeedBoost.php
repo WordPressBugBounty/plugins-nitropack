@@ -266,6 +266,8 @@ class PageSpeedBoost {
 	 * @param array $psb_command_assoc_args Command parameters.
 	 */
 	public function command_psb_connect( $psb_command_args, $psb_command_assoc_args ) {
+		$nitropack_connect = new \NitroPack\WordPress\Connect();
+
 		if ( ! function_exists( 'nitropack_verify_connect' ) ) {
 			$psb_vendor_plugin_file = $this->get_vendor_plugin_file();
 			include_once WP_PLUGIN_DIR . '/' . $psb_vendor_plugin_file;
@@ -275,7 +277,7 @@ class PageSpeedBoost {
 			}
 		}
 
-		nitropack_verify_connect(
+		$nitropack_connect->nitropack_verify_connect(
 			empty( $psb_command_args[0] ) ? '' : $psb_command_args[0],
 			empty( $psb_command_args[1] ) ? '' : $psb_command_args[1]
 		);

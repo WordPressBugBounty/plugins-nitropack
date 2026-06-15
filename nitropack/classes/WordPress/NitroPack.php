@@ -11,6 +11,7 @@ namespace NitroPack\WordPress;
 use \NitroPack\SDK\Filesystem;
 use \NitroPack\Feature\Logger\Logger as Logger;
 use \NitroPack\Feature\Logger\LoggingEvents as LoggingEvents;
+use NitroPack\WordPress\Connect;
 
 class NitroPack {
 	private static $instance = NULL;
@@ -57,6 +58,12 @@ class NitroPack {
 	 * @var LoggingEvents
 	 */
 	private $loggingEvents;
+		/**
+	 * Logger instance.
+	 *
+	 * @var Connect
+	 */
+	private $connect;
 	/**
 	 * Config instance.
 	 *
@@ -87,6 +94,7 @@ class NitroPack {
 		$this->Notifications = Notifications\Notifications::getInstance();
 		$this->settings = new Settings( $this->Config );
 		$this->logger = new Logger( $this );
+		$this->connect = new Connect();
 		$this->loggingEvents = new LoggingEvents( $this->logger );
 		$this->sdkObjects = array();
 		$this->disabledReason = NULL;

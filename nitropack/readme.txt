@@ -2,9 +2,9 @@
 Contributors: nitropack
 Tags: cache, performance, page speed, website speed, core web vitals
 Requires at least: 4.7
-Tested up to: 6.9.4
+Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 1.19.5
+Stable tag: 1.19.6
 License: GNU General Public License, version 2
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -269,10 +269,16 @@ Yes, the plugin uses the [Intercom Chat Widget](https://widget.intercom.io), whi
 5. The only solution you will ever need
 
 == Changelog ==
+= 1.19.6 =
+2026-06-15
+
+* Bugfix: Overall stability fixes
+
 = 1.19.5 =
 2026-05-18
 
 * Improvement: Skip serving cache for AI Bots
+* Improvement: Better support for Edge Cache (EFPC)
 * Improvement: Minify all static assets and folder restructuring for the plugin
 * Improvement: Handle cases with multiple subsequent slashes in the request URL
 * Bugfix: Overall stability fixes

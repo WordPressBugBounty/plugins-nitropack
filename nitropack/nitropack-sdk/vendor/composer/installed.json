@@ -28,7 +28,7 @@
             "time": "2026-02-18T15:16:23+00:00",
             "default-branch": true,
             "type": "library",
-            "installation-source": "source",
+            "installation-source": "dist",
             "autoload": {
                 "psr-4": {
                     "NitroPack\\HttpClient\\": "src/"
@@ -65,6 +65,10 @@
                 "library",
                 "php"
             ],
+            "support": {
+                "source": "https://github.com/wpengine/np-httpclient/tree/master",
+                "issues": "https://github.com/wpengine/np-httpclient/issues"
+            },
             "install-path": "../nitropack/httpclient"
         },
         {
@@ -74,12 +78,12 @@
             "source": {
                 "type": "git",
                 "url": "git@github.com:wpengine/np-url.git",
-                "reference": "1987bbdf5152552ad6663a1a125c4e3e9b512950"
+                "reference": "fd7e66dc1da4c5d36b5b991f9aaa5c1f295eea8d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/wpengine/np-url/zipball/1987bbdf5152552ad6663a1a125c4e3e9b512950",
-                "reference": "1987bbdf5152552ad6663a1a125c4e3e9b512950",
+                "url": "https://api.github.com/repos/wpengine/np-url/zipball/fd7e66dc1da4c5d36b5b991f9aaa5c1f295eea8d",
+                "reference": "fd7e66dc1da4c5d36b5b991f9aaa5c1f295eea8d",
                 "shasum": ""
             },
             "require": {
@@ -88,10 +92,10 @@
             "require-dev": {
                 "phpunit/phpunit": "^9.0||^10.0||^11.0"
             },
-            "time": "2025-06-24T07:02:36+00:00",
+            "time": "2026-06-01T11:54:42+00:00",
             "default-branch": true,
             "type": "library",
-            "installation-source": "source",
+            "installation-source": "dist",
             "autoload": {
                 "psr-4": {
                     "NitroPack\\Url\\": "src/"
@@ -114,6 +118,10 @@
                 "php",
                 "url"
             ],
+            "support": {
+                "source": "https://github.com/wpengine/np-url/tree/master",
+                "issues": "https://github.com/wpengine/np-url/issues"
+            },
             "install-path": "../nitropack/url"
         }
     ],

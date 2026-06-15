@@ -194,44 +194,25 @@ class WooCommerce {
 	/**
 	 * Retrieves all products that have sale dates.
 	 *
-	 * @return array An array of products that are currently on sale.
+	 * @return array An array of product IDs that have future sale dates.
 	 */
 	public function get_products_with_sale() {
+		global $wpdb;
 
-		$product_ids = [];
-		$args = array(
-			'post_type' => array( 'product', 'product_variation' ),
-			'post_status' => 'publish',
-			'posts_per_page' => -1,
-			'meta_query' => array(
-				'relation' => 'OR',
-				array(
-					'key' => '_sale_price_dates_from',
-					'value' => time(),
-					'compare' => '>=',
-					'type' => 'NUMERIC',
-				),
-				array(
-					'key' => '_sale_price_dates_to',
-					'value' => time(),
-					'compare' => '>=',
-					'type' => 'NUMERIC',
-				),
-			),
-		);
+		$current_time = time();
 
-		$query = new \WP_Query( $args );
+		$product_ids = $wpdb->get_col( $wpdb->prepare(
+			"SELECT DISTINCT pm.post_id
+			FROM {$wpdb->postmeta} pm
+			INNER JOIN {$wpdb->posts} p ON p.ID = pm.post_id
+			WHERE p.post_type IN ('product', 'product_variation')
+			AND p.post_status = 'publish'
+			AND pm.meta_key IN ('_sale_price_dates_from', '_sale_price_dates_to')
+			AND pm.meta_value >= %d",
+			$current_time
+		) );
 
-		if ( $query->have_posts() ) {
-			while ( $query->have_posts() ) {
-				global $post;
-				$query->the_post();
-				$product_ids[] = $post->ID;
-			}
-		}
-		wp_reset_postdata();
-
-		return $product_ids;
+		return $product_ids ?: [];
 	}
 	/**
 	 * Updates the product in the transient cache when its status changes.

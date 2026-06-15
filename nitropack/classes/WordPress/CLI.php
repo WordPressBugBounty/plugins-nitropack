@@ -89,7 +89,8 @@ class CLI {
 	public function nitropack_cli_connect( $args, $assocArgs ) {
 		$siteId = ! empty( $args[0] ) ? $args[0] : "";
 		$siteSecret = ! empty( $args[1] ) ? $args[1] : "";
-		nitropack_verify_connect( $siteId, $siteSecret );
+		$nitropack_connect = new \NitroPack\WordPress\Connect;
+		$nitropack_connect->nitropack_verify_connect( $siteId, $siteSecret );
 	}
 
 	/**
@@ -98,7 +99,8 @@ class CLI {
 	 */
 
 	public function nitropack_cli_disconnect( $args, $assocArgs ) {
-		nitropack_disconnect();
+		$nitropack_connect = new \NitroPack\WordPress\Connect;
+		$nitropack_connect->nitropack_disconnect();
 	}
 
 	/**
@@ -206,16 +208,16 @@ class CLI {
 		$site_config = $this->get_site_config();
 		$keys = $this->keys_instance();
 		$url = new \NitroPack\SDK\IntegrationUrl( $change ? 'quicksetup' : 'quicksetup_json', $site_config['siteId'], $site_config['siteSecret'] );
-		$headers = [ 
+		$headers = [
 			'X-Nitro-Public-Key' => base64_encode( $keys->publicKey ), // phpcs:ignore
 		];
 
 		if ( $change ) {
 			$response = \wp_remote_post(
 				$url->getUrl(),
-				[ 
+				[
 					'headers' => $headers,
-					'body' => [ 
+					'body' => [
 						'setting' => $mode,
 					],
 				]
@@ -642,7 +644,7 @@ class CLI {
 					$all_excludes = $api->getExcludes();
 					$all_excludes = array_filter(
 						$all_excludes,
-						function ($exclusion) use ($url_pattern) {
+						function ( $exclusion ) use ( $url_pattern ) {
 							return $exclusion->string !== $url_pattern;
 						}
 					);

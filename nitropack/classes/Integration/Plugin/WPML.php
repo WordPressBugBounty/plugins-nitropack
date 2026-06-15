@@ -27,7 +27,7 @@ class WPML {
             remove_filter('home_url', [$wpml_url_filters, 'home_url_filter'], -10);
         }
         //remove it only on ajax calls for nitropack connect and disconnect, for correct config fetch
-        if (wp_doing_ajax() && isset($_REQUEST['action']) && ($_REQUEST['action'] === 'nitropack_disconnect' || $_REQUEST['action'] === 'nitropack_verify_connect')) {        
+        if (wp_doing_ajax() && isset($_REQUEST['action']) && ($_REQUEST['action'] === 'nitropack_disconnect' || $_REQUEST['action'] === 'nitropack_connect')) {        
             remove_filter('home_url', [$wpml_url_filters, 'home_url_filter'], -10);
         }
     }

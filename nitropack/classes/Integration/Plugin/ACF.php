@@ -21,10 +21,9 @@ class ACF {
         if (!get_option("nitropack-autoCachePurge", 1)) return;
 
         $allowed_cpts = get_option('nitropack-cacheableObjectTypes');
-
         //refresh option if not set when activating already connected NitroPack
-        if (!is_array($allowed_cpts)) update_option("nitropack-cacheableObjectTypes", CPTOptimization::getInstance()->nitropack_get_default_cacheable_object_types());
-
+        if (!$allowed_cpts || !is_array($allowed_cpts)) update_option("nitropack-cacheableObjectTypes", CPTOptimization::getInstance()->nitropack_get_default_cacheable_object_types());
+        
         if (!in_array(get_post_type($post_id), $allowed_cpts)) return;
 
         //acf update check
