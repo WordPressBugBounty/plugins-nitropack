@@ -4,6 +4,7 @@ namespace NitroPack\WordPress\Notifications;
 use NitroPack\WordPress\Settings\TestMode;
 use NitroPack\HttpClient\HttpClient;
 use Nitropack\WordPress\NitroPack;
+use Nitropack\WordPress\AdvancedCache\AdvancedCache;
 /* 
  * Class Notifications
  *
@@ -138,18 +139,18 @@ class Notifications {
 		}
 
 		$nitropackIsConnected = get_nitropack()->isConnected();
-
+		$advanced_cache = new AdvancedCache();
 		if ( $nitropackIsConnected ) {
 			if ( nitropack_is_advanced_cache_allowed() ) {
 				$notification_title = esc_html__( "File advanced-cache.php cannot be created", 'nitropack' );
 				$notification_class = [ 'advanced-cache' ];
 
-				if ( ! nitropack_has_advanced_cache() ) {
+				if ( ! $advanced_cache->has_advanced_cache() ) {
 
 					$advancedCacheFile = nitropack_trailingslashit( WP_CONTENT_DIR ) . 'advanced-cache.php';
 					if ( ! file_exists( $advancedCacheFile ) || strpos( file_get_contents( $advancedCacheFile ), "NITROPACK_ADVANCED_CACHE" ) === false ) { // For some reason we get the notice right after connecting (even though the advanced-cache file is already in place). This check works around this issue :(
 
-						if ( nitropack_install_advanced_cache() ) {
+						if ( $advanced_cache->install_advanced_cache() ) {
 							if ( ! \NitroPack\Integration\Hosting\WPEngine::detect() ) { // The advanced-cache.php file in WP Engine is reset fairly often and we don't want to show the notice every time. This is an info we can skip in this case.
 
 								/* Sets an info notifications if the advanced-cache.php file was re-installed. */
@@ -177,7 +178,7 @@ class Notifications {
 					}
 				} else {
 					if ( ! defined( "NITROPACK_ADVANCED_CACHE_VERSION" ) || NITROPACK_VERSION != NITROPACK_ADVANCED_CACHE_VERSION ) {
-						if ( ! nitropack_install_advanced_cache() ) {
+						if ( ! $advanced_cache->install_advanced_cache() ) {
 							if ( $conflictingPlugins->nitropack_is_conflicting_plugin_active() ) {
 								$errors[] = array(
 									'title' => $notification_title,
@@ -198,8 +199,8 @@ class Notifications {
 					}
 				}
 			} else {
-				if ( nitropack_has_advanced_cache() ) {
-					nitropack_uninstall_advanced_cache();
+				if ( $advanced_cache->has_advanced_cache() ) {
+					$advanced_cache->uninstall_advanced_cache();
 				}
 			}
 

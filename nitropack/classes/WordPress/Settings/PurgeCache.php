@@ -25,6 +25,11 @@ class PurgeCache {
 		add_filter( 'page_row_actions', [ $this, 'purge_invalidate_post_links' ], 10, 2 );
 		//metaboxes
 		add_action( 'add_meta_boxes', [ $this, 'nitropack_meta_box' ] );
+		//purge/invalidate entire cache when permalink structure or front page is changed
+		add_action( 'permalink_structure_changed', [ $this, 'nitropack_permalink_structure_changed_handler' ], 10, 2 );
+		add_action( 'update_option_show_on_front', [ $this, 'nitropack_frontpage_changed_handler' ], 10, 2 );
+		add_action( 'update_option_page_on_front', [ $this, 'nitropack_frontpage_changed_handler' ], 10, 2 );
+		add_action( 'update_option_page_for_posts', [ $this, 'nitropack_frontpage_changed_handler' ], 10, 2 );
 	}
 
 	/**
@@ -288,4 +293,46 @@ class PurgeCache {
 
 		return $actions;
 	}
+	/**
+	 * Purge entire cache when permalink structure is changed.
+	 *
+	 * @param string $old_permalink_structure The previous permalink structure.
+	 * @param string $permalink_structure     The new permalink structure.
+	 *
+	 * @return void
+	 */
+	public function nitropack_permalink_structure_changed_handler( $old_permalink_structure, $permalink_structure ) {
+
+		if ( $old_permalink_structure != $permalink_structure && get_option( "nitropack-autoCachePurge", 1 ) ) {
+			$msg = 'The permalink structure is changed. Purging the cache for the home page.';
+			$url = get_home_url();
+
+			nitropack_sdk_purge( $url, null, $msg );
+
+			// run warmup
+			if ( null !== $nitro = get_nitropack_sdk() ) {
+				$nitro->getApi()->runWarmup();
+			}
+		}
+	}
+	/**
+	 * Purge entire cache when front page is changed.
+	 *
+	 * @param array $old_value An array of previous settings values.
+	 * @param array $value An array of submitted settings values.
+	 *
+	 * @return void
+	 */
+	public function nitropack_frontpage_changed_handler( $old_value, $value ) {
+
+		if ( $old_value !== $value ) {
+			$msg = 'The front page is changed';
+			$url = get_home_url();
+
+			nitropack_sdk_purge( $url, null, $msg ); // purge entire cache
+		
+		}
+	}
+
+
 }

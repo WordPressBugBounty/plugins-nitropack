@@ -1,7 +1,11 @@
 <?php
 
 namespace NitroPack\WordPress;
+use NitroPack\WordPress\AdvancedCache\AdvancedCache;
 
+/**
+ * Here we handle the connection and disconnection of the plugin to NitroPack.
+ */
 class Connect {
 	private $nitropack;
 	public function __construct() {
@@ -102,7 +106,8 @@ class Connect {
 				$nitro->fetchConfig(); // Reload the variation cookies
 
 				get_nitropack()->updateCurrentBlogConfig( $siteId, $siteSecret, $blogId );
-				nitropack_install_advanced_cache();
+				$advanced_cache = new AdvancedCache();
+				$advanced_cache->install_advanced_cache();
 
 				try {
 					do_action( 'nitropack_integration_purge_all' );
@@ -169,7 +174,10 @@ class Connect {
 		}
 		$this->nitropack = NitroPack::getInstance();
 		$this->nitropack->getLogger()->notice( 'NitroPack disconnecting... ' . $multisite_reason );
-		nitropack_uninstall_advanced_cache();
+
+		//Uninstall advanced cache
+		$advanced_cache = new AdvancedCache();
+		$advanced_cache->uninstall_advanced_cache();
 
 		try {
 			nitropack_event( "disconnect" );

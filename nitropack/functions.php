@@ -78,8 +78,8 @@ function nitropack_activate() {
 	if ( ! file_exists( $pluginHtaccessFile ) && get_nitropack()->initPluginDataDir() ) {
 		file_put_contents( $pluginHtaccessFile, "deny from all" ); // TODO: Convert this to use the Filesystem abstraction for better Redis support
 	}
-
-	nitropack_install_advanced_cache();
+	$advanced_cache = new \NitroPack\WordPress\AdvancedCache\AdvancedCache();
+	$advanced_cache->install_advanced_cache();
 
 	// Htaccess mods need to happen after installing the advanced cache file so the healthcheck can execute fast
 	nitropack_set_htaccess_rules( true );
@@ -134,7 +134,8 @@ add_action( 'admin_init', 'nitropack_activation_redirect' );
 function nitropack_deactivate() {
 	nitropack_set_htaccess_rules( false );
 	nitropack_set_wp_cache_const( false );
-	nitropack_uninstall_advanced_cache();
+	$advanced_cache = new \Nitropack\WordPress\AdvancedCache\AdvancedCache();
+	$advanced_cache->uninstall_advanced_cache();
 
 	try {
 		do_action( 'nitropack_integration_purge_all' );
@@ -153,41 +154,7 @@ function nitropack_deactivate() {
 	\NitroPack\WordPress\Cron::unschedule_events();
 }
 
-function nitropack_install_advanced_cache() {
-	$conflictingPlugins = \NitroPack\WordPress\ConflictingPlugins::getInstance();
-	$nitropack_is_conflicting_plugin_active = $conflictingPlugins->nitropack_is_conflicting_plugin_active();
-	if ( $nitropack_is_conflicting_plugin_active )
-		return false;
-	if ( ! nitropack_is_advanced_cache_allowed() )
-		return false;
 
-	$templatePath = nitropack_trailingslashit( __DIR__ ) . "advanced-cache.php";
-	if ( file_exists( $templatePath ) ) {
-		$contents = file_get_contents( $templatePath );
-		$contents = str_replace( "/*NITROPACK_FUNCTIONS_FILE*/", __FILE__, $contents );
-		$contents = str_replace( "/*NITROPACK_ABSPATH*/", ABSPATH, $contents );
-		$contents = str_replace( "/*LOGIN_COOKIES*/", defined( "LOGGED_IN_COOKIE" ) ? LOGGED_IN_COOKIE : "", $contents );
-		$contents = str_replace( "/*NP_VERSION*/", NITROPACK_VERSION, $contents );
-
-		$advancedCacheFile = nitropack_trailingslashit( WP_CONTENT_DIR ) . 'advanced-cache.php';
-		if ( WP_DEBUG ) {
-			return file_put_contents( $advancedCacheFile, $contents );
-		} else {
-			return @file_put_contents( $advancedCacheFile, $contents );
-		}
-	}
-}
-
-function nitropack_uninstall_advanced_cache() {
-	$advancedCacheFile = nitropack_trailingslashit( WP_CONTENT_DIR ) . 'advanced-cache.php';
-	if ( file_exists( $advancedCacheFile ) ) {
-		if ( WP_DEBUG ) {
-			return file_put_contents( $advancedCacheFile, "" );
-		} else {
-			return @file_put_contents( $advancedCacheFile, "" );
-		}
-	}
-}
 
 function nitropack_set_wp_cache_const( $status ) {
 	if ( \NitroPack\Integration\Hosting\Flywheel::detect() ) { // Flywheel: This is configured throught the FW control panel
@@ -1125,10 +1092,6 @@ function nitropack_print_element_override() {
 function nitropack_get_element_override_script() {
 	$nitro = get_nitropack_sdk();
 	return $nitro !== NULL ? $nitro->getStatefulCacheHandlerScript() : "";
-}
-
-function nitropack_has_advanced_cache() {
-	return defined( 'NITROPACK_ADVANCED_CACHE' );
 }
 
 function nitropack_validate_site_id( $siteId ) {
@@ -2266,6 +2229,9 @@ function nitropack_reconfigure_webhooks() {
 }
 
 function nitropack_generate_webhook_token( $siteId ) {
+	if ( defined( "NITROPACK_WEBHOOK_TOKEN" ) && ! empty( NITROPACK_WEBHOOK_TOKEN ) ) {
+		return NITROPACK_WEBHOOK_TOKEN;
+	}
 	return md5( __FILE__ . ":" . $siteId );
 }
 
@@ -2590,10 +2556,6 @@ function nitropack_is_dropin_cache_allowed() {
 	return $siteConfig && empty( $siteConfig["isEzoicActive"] );
 }
 
-
-
-
-
 function nitropack_cookiepath() {
 	$siteConfig = nitropack_get_site_config();
 	$homeUrl = $siteConfig && ! empty( $siteConfig["home_url"] ) ? $siteConfig["home_url"] : get_home_url();
@@ -2808,62 +2770,6 @@ function getNewCookies() {
 		return $val;
 	}, $cookies ) );
 }
-
-/**
- * Purge entire cache when permalink structure is changed.
- *
- * @param string $old_permalink_structure The previous permalink structure.
- * @param string $permalink_structure     The new permalink structure.
- *
- * @return void
- */
-function nitropack_permalink_structure_changed_handler( $old_permalink_structure, $permalink_structure ) {
-
-	if ( $old_permalink_structure != $permalink_structure && get_option( "nitropack-autoCachePurge", 1 ) ) {
-		$msg = 'The permalink structure is changed. Purging the cache for the home page.';
-		$url = get_home_url();
-
-		try {
-			nitropack_sdk_purge( $url, NULL, $msg ); // purge cache for the home page
-		} catch (\Exception $e) {
-		}
-
-		// run warmup
-		if ( null !== $nitro = get_nitropack_sdk() ) {
-			try {
-				$nitro->getApi()->runWarmup();
-			} catch (\Exception $e) {
-			}
-		}
-	}
-}
-
-add_action( 'permalink_structure_changed', 'nitropack_permalink_structure_changed_handler', 10, 2 );
-
-/**
- * Purge entire cache when front page is changed.
- *
- * @param array $old_value An array of previous settings values.
- * @param array $value An array of submitted settings values.
- *
- * @return void
- */
-function nitropack_frontpage_changed_handler( $old_value, $value ) {
-
-	if ( $old_value !== $value ) {
-		$msg = 'The front page is changed';
-		$url = get_home_url();
-
-		try {
-			nitropack_sdk_purge( $url, NULL, $msg ); // purge entire cache
-		} catch (\Exception $e) {
-		}
-	}
-}
-
-add_action( 'update_option_show_on_front', 'nitropack_frontpage_changed_handler', 10, 2 );
-add_action( 'update_option_page_on_front', 'nitropack_frontpage_changed_handler', 10, 2 );
-add_action( 'update_option_page_for_posts', 'nitropack_frontpage_changed_handler', 10, 2 );
 
 //to be removed when the mu-file is removed
 function nitropack_verify_connect(string $siteId, string $siteSecret) {

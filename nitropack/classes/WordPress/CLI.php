@@ -3,6 +3,7 @@
 namespace NitroPack\WordPress;
 
 use \WP_CLI;
+use NitroPack\WordPress\Settings\OptimizationLevel;
 
 defined( 'ABSPATH' ) || die( 'No script kiddies please!' );
 
@@ -13,6 +14,11 @@ class CLI {
 	 * @var null|object
 	 */
 	protected $keys;
+	/**
+	 * Logger for logging events
+	 *
+	 * @var null|object
+	 */
 	private $logger;
 	public function init() {
 		add_action( 'init', [ $this, 'register_hooks' ] );
@@ -182,7 +188,8 @@ class CLI {
 	 *   - 2 - medium
 	 *   - 3 - strong
 	 *   - 4 - ludicrous
-	 *   - 5 - custom - readable only
+	 *   - 5 - ludicrous+ for PSB only
+	 *   - 5/6 - custom - readable only
 	 * 
 	 * Example: wp nitropack mode 3
 	 * @when before_wp_load
@@ -190,29 +197,27 @@ class CLI {
 	 * @param array $args       Command arguments.
 	 * @param array $assoc_args Command parameters.
 	 */
-	private function nitropack_modes( $mode ) {
-		$modes = [ 0 => 'Off', 1 => 'Standard', 2 => 'Medium', 3 => 'Strong', 4 => 'Ludicrous', 5 => 'Custom' ];
-		if ( $mode !== null ) {
-			return $modes[ $mode ];
-		}
-		return $modes;
-	}
+
 	public function nitropack_mode( $args ) {
+		//check it if the mode is number
 		$mode = isset( $args[0] ) ? intval( $args[0] ) : null;
-		if ( $mode !== null && ( 1 > $mode || 4 < $mode ) ) {
-			$this->logger->error( 'The mode is invalid! Valid modes are from 1-4' );
-			WP_CLI::error( 'The mode is invalid! Valid modes are from 1-4.' );
+		$optimization_class = new OptimizationLevel();
+		//fetch the available modes for the website
+		$modes = $optimization_class->optimization_modes()['optimization_options'];
+		$modes_max = count( $modes ) - 1; // Subtract 1 to exclude the "custom" option
+		if ( $mode !== null && ( 1 > $mode || $modes_max < $mode ) ) {
+			$this->logger->error( 'The mode is invalid! Valid modes are from 1-' . $modes_max );
+			WP_CLI::error( 'The mode is invalid! Valid modes are from 1-' . $modes_max . '.' );
 			return;
 		}
-		$change = $mode > 1 && $mode < 4;
 		$site_config = $this->get_site_config();
 		$keys = $this->keys_instance();
-		$url = new \NitroPack\SDK\IntegrationUrl( $change ? 'quicksetup' : 'quicksetup_json', $site_config['siteId'], $site_config['siteSecret'] );
+		$url = new \NitroPack\SDK\IntegrationUrl( $mode ? 'quicksetup' : 'quicksetup_json', $site_config['siteId'], $site_config['siteSecret'] );
 		$headers = [
 			'X-Nitro-Public-Key' => base64_encode( $keys->publicKey ), // phpcs:ignore
 		];
 
-		if ( $change ) {
+		if ( $mode ) {
 			$response = \wp_remote_post(
 				$url->getUrl(),
 				[
@@ -244,10 +249,10 @@ class CLI {
 			WP_CLI::error( sprintf( 'Request has failed with %d %s.', $response['response']['code'], $response['response']['message'] ) );
 			return;
 		}
-
-		if ( $change ) {
-			$this->logger->notice( 'Mode has been changed to ' . $this->nitropack_modes( $mode ) );
-			WP_CLI::success( 'Mode has been changed to ' . $this->nitropack_modes( $mode ) );
+		$mode_name = $optimization_class->fetch_optimization_name();
+		if ( $mode ) {
+			$this->logger->notice( 'Mode has been changed to ' . $mode_name . ')' );
+			WP_CLI::success( 'Mode has been changed to ' . $mode_name . '.' );
 			return;
 		}
 
@@ -258,8 +263,8 @@ class CLI {
 			return;
 		}
 
-		$this->logger->notice( 'Mode is: ' . $this->nitropack_modes( $body['optimization_level'] ) );
-		WP_CLI::success( sprintf( 'Mode is: %s.', $this->nitropack_modes( $body['optimization_level'] ) ) );
+		$this->logger->notice( 'Mode is ' . $mode_name . '' );
+		WP_CLI::success( sprintf( 'Mode is %s.', $mode_name ) );
 	}
 	/**
 	 * NitroPack test mode.

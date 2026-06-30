@@ -92,50 +92,63 @@ class OptimizationLevel {
 	 */
 	private function static_modes() {
 		$free_plan = $this->fetch_plan() === 'Free' ? true : false;
-		$modes = [
-			'optimization_selected' => 'medium',
-			'optimization_options' => [
-				'standard' => [
-					'human_readable_name' => 'Standard',
-					'description' => 'Standard optimization features enabled for your site. Ideal choice for maximum stability.',
-					'description_onboarding' => 'Applies basic optimizations.',
-					'is_available' => true,
-				],
-				'medium' => [
-					'human_readable_name' => 'Medium',
-					'description' => 'Adds image lazy loading to standard optimizations. Uses built-in browser techniques for loading resources.',
-					'description_onboarding' => 'Implements moderate optimizations.',
-					'is_available' => true,
-				],
-				'strong' => [
-					'human_readable_name' => 'Strong',
-					'description' => 'Includes smart resource loading on top of Medium optimizations. Balances speed boost with stability.',
-					'description_onboarding' => 'Strikes a great balance between stability and website speed.',
-					'is_available' => true,
-				],
-				'ludicrous' => [
-					'human_readable_name' => 'Ludicrous',
-					'description' => 'Applies deferred JS and advanced resource loading for optimal performance and Core Web Vitals.',
-					'description_onboarding' => 'The most powerful optimization setting, aiming for best possible performance.',
-					'is_available' => $free_plan ? false : true,
-				],
-				'custom' => [
-					'human_readable_name' => 'Custom',
-					'description' => 'Activated when manual setups are made. Ideal for advanced NitroPack optimizations.',
-					'description_onboarding' => 'Activated when manual setups are made. Ideal for advanced NitroPack optimizations.',
-					'is_available' => false,
-				],
+		$optimization_options = [
+			'standard' => [
+				'human_readable_name' => 'Standard',
+				'description' => 'Standard optimization features enabled for your site. Ideal choice for maximum stability.',
+				'description_onboarding' => 'Applies basic optimizations.',
+				'is_available' => true,
+			],
+			'medium' => [
+				'human_readable_name' => 'Medium',
+				'description' => 'Adds image lazy loading to standard optimizations. Uses built-in browser techniques for loading resources.',
+				'description_onboarding' => 'Implements moderate optimizations.',
+				'is_available' => true,
+			],
+			'strong' => [
+				'human_readable_name' => 'Strong',
+				'description' => 'Includes smart resource loading on top of Medium optimizations. Balances speed boost with stability.',
+				'description_onboarding' => 'Strikes a great balance between stability and website speed.',
+				'is_available' => true,
+			],
+			'ludicrous' => [
+				'human_readable_name' => 'Ludicrous',
+				'description' => 'Applies deferred JS and advanced resource loading for optimal performance and Core Web Vitals.',
+				'description_onboarding' => 'The most powerful optimization setting, aiming for best possible performance.',
+				'is_available' => $free_plan ? false : true,
 			],
 		];
-		return $modes;
+
+		if ( get_nitropack()->getDistribution() == "oneclick" ) {
+			$optimization_options['ludicrous_plus'] = [
+				'human_readable_name' => 'Ludicrous Plus',
+				'description' => 'Extends Ludicrous optimizations with additional features for maximum performance.',
+				'description_onboarding' => 'Extends Ludicrous optimizations with additional features for maximum performance.',
+				'is_available' => true,
+			];
+		}
+
+		$optimization_options['custom'] = [
+			'human_readable_name' => 'Custom',
+			'description' => 'Activated when manual setups are made. Ideal for advanced NitroPack optimizations.',
+			'description_onboarding' => 'Activated when manual setups are made. Ideal for advanced NitroPack optimizations.',
+			'is_available' => false,
+		];
+
+		return [
+			'optimization_selected' => 'medium',
+			'optimization_options' => $optimization_options,
+		];
 	}
 	/**
 	 * Fetch optimization name from NitroPack App
-	 * @return array Optimization name (standard, medium, etc.)
+	 * @return string Optimization name (standard, medium, etc.)
 	 */
 	public function fetch_optimization_name() {
 		if ( ! empty( $this->optimization_modes() ) ) {
 			$optimization_name = $this->optimization_modes()['optimization_selected'];
+		} else {
+			$optimization_name = 'N/A';
 		}
 
 		return $optimization_name;
@@ -167,6 +180,9 @@ class OptimizationLevel {
 					$optimization_level_name = $modes['optimization_selected'];
 					foreach ( $modes['optimization_options'] as $mode_id => $mode ) :
 						$active = $optimization_level_name === $mode_id;
+						if ( $active ) {
+							$optimization_level_name = $mode['human_readable_name'];
+						}
 						$css = [];
 						$css[] = $active ? 'active btn-primary' : 'btn-link';
 						$css[] = "mode-{$mode_id}";
@@ -227,7 +243,7 @@ class OptimizationLevel {
 						<div class="tab-content <?php echo esc_attr( $css ); ?>" role="tabpanel"
 							data-tab="<?php echo $mode_id; ?>-tab">
 							<p class="text-secondary mt-2">
-							<?php echo esc_html( $mode['description'] ); ?>
+								<?php echo esc_html( $mode['description'] ); ?>
 							</p>
 						</div>
 					<?php endforeach; ?>
