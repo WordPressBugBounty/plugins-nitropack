@@ -2,7 +2,7 @@
 
 namespace NitroPack\WordPress;
 use NitroPack\WordPress\AdvancedCache\AdvancedCache;
-
+use NitroPack\WordPress\Webhooks;
 /**
  * Here we handle the connection and disconnection of the plugin to NitroPack.
  */
@@ -84,10 +84,11 @@ class Connect {
                     <a href='https://support.nitropack.io/hc/en-us/articles/4405254569745' target='_blank' rel='noreferrer noopener'>Read more</a>"
 					) );
 				}
-				$token = nitropack_generate_webhook_token( $siteId );
+				$webhooks = new Webhooks();
+				$token = $webhooks->generate_webhook_token();
 				get_nitropack()->settings->set_required_settings( $token );
 
-				nitropack_setup_webhooks( $nitro, $token );
+				$webhooks->nitropack_setup_webhooks( $nitro, $token );
 
 				// _icl_current_language is WPML cookie, it is added here for compatibility with this module
 				$customVariationCookies = array( "np_wc_currency", "np_wc_currency_language", "_icl_current_language" );
@@ -182,7 +183,8 @@ class Connect {
 		try {
 			nitropack_event( "disconnect" );
 			if ( null !== $nitro = get_nitropack_sdk() ) {
-				nitropack_reset_webhooks( $nitro );
+				$webhooks = new Webhooks();
+				$webhooks->reset_webhooks( $nitro );
 			}
 		} catch (\Exception $e) {
 			$this->nitropack->getLogger()->error( 'NitroPack cannot be disconnected. Error: ' . $e );

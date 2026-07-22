@@ -2,6 +2,8 @@
 
 namespace NitroPack\Integration\Plugin;
 
+use \NitroPack\SDK\Filesystem;
+
 class GeoTargetingWP {
     const STAGE = "very_early";
     const allGeoWpCookies = ['geot_rocket_country', 'geot_rocket_state', 'geot_rocket_city', 'STYXKEY_geot_country'];
@@ -163,13 +165,13 @@ class GeoTargetingWP {
 
         if ($key) {
             $cacheFile = $this->getCacheFile($key);
-            if (file_exists($cacheFile)) {
-                unlink($cacheFile);
+            if (Filesystem::fileExists($cacheFile)) {
+                Filesystem::deleteFile($cacheFile);
             }
 
             $cacheFileWp = $this->getCacheFile("wpremote-" . $key);
-            if (file_exists($cacheFileWp)) {
-                unlink($cacheFileWp);
+            if (Filesystem::fileExists($cacheFileWp)) {
+                Filesystem::deleteFile($cacheFileWp);
             }
             return;
         }
@@ -180,7 +182,7 @@ class GeoTargetingWP {
 
             $cacheFile = $this->cacheDir . $entry;
             if (!is_file($cacheFile)) continue;
-            unlink($cacheFile);
+            Filesystem::deleteFile($cacheFile);
         }
         closedir($dh);
         rmdir($this->cacheDir);
@@ -192,7 +194,7 @@ class GeoTargetingWP {
         }
 
         $cacheFile = $this->getCacheFile($key);
-        if (file_exists($cacheFile)) {
+        if (Filesystem::fileExists($cacheFile)) {
             return true;
         }
 
@@ -202,7 +204,7 @@ class GeoTargetingWP {
     public function getCache($key) {
         if(empty($this->cache[$key])) {
             $cacheFile = $this->getCacheFile($key);
-            if (file_exists($cacheFile)) {
+            if (Filesystem::fileExists($cacheFile)) {
                 $this->cache[$key] = file_get_contents($cacheFile);
             }
         }
@@ -225,7 +227,7 @@ class GeoTargetingWP {
             return;
         }
 
-        file_put_contents($this->getCacheFile($key), $content);
+        Filesystem::filePutContents($this->getCacheFile($key), $content);
     }
 
     private function getCacheFile($key) {

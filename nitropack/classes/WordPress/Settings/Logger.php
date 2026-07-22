@@ -2,6 +2,8 @@
 
 namespace NitroPack\WordPress\Settings;
 
+use \NitroPack\SDK\Filesystem;
+
 /**
  * Logger Class for NitroPack WordPress plugin
  *
@@ -258,7 +260,7 @@ class Logger {
 			}
 
 			// Check if the archive file exists
-			if ( file_exists( $archivePath ) ) {
+			if ( Filesystem::fileExists( $archivePath ) ) {
 				$archive_url = $this->get_archive_url();
 				error_log( "Archive URL: " . $archive_url );
 

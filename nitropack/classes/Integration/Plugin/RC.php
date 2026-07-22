@@ -2,6 +2,8 @@
 
 namespace NitroPack\Integration\Plugin;
 
+use \NitroPack\SDK\Filesystem;
+
 class RC {
 	public static $modules = [//Key should match the value from nitropack_get_conflicting_plugins() assigned to the $clashingPlugins array
 		'WP-Rocket' => 'NitroPack\Integration\Plugin\WPRocket',
@@ -36,7 +38,7 @@ class RC {
 
 	public static function clearResidualCache( $full_cache_path ) {
 		try {
-			if ( file_exists( $full_cache_path ) ) {
+			if ( Filesystem::fileExists( $full_cache_path ) ) {
 				if ( is_dir( $full_cache_path ) && is_writable( $full_cache_path ) ) {
 					$diskStorage = new \NitroPack\SDK\StorageDriver\Disk();
 					$diskStorage->deleteDir( $full_cache_path );
@@ -57,7 +59,7 @@ class RC {
 
 	public static function getWPCacheDir() {
 		$wpc_dir = nitropack_trailingslashit( defined( 'WP_CONTENT_DIR' ) ? WP_CONTENT_DIR : ( defined( 'ABSPATH' ) ? ABSPATH . '/wp-content' : 'Undefined' ) ) . 'cache';
-		if ( file_exists( $wpc_dir ) ) {
+		if ( Filesystem::fileExists( $wpc_dir ) ) {
 			return $wpc_dir;
 		}
 		return false;

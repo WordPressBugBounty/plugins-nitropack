@@ -5,6 +5,8 @@ use NitroPack\WordPress\Settings\TestMode;
 use NitroPack\HttpClient\HttpClient;
 use Nitropack\WordPress\NitroPack;
 use Nitropack\WordPress\AdvancedCache\AdvancedCache;
+use NitroPack\SDK\Filesystem;
+
 /* 
  * Class Notifications
  *
@@ -13,7 +15,7 @@ use Nitropack\WordPress\AdvancedCache\AdvancedCache;
  * @package NitroPack\WordPress\Notifications
  */
 class Notifications {
-	private static $instance = NULL;
+	private static $instance = null;
 	public function __construct() {
 
 		add_action( 'admin_init', [ $this, 'move_existing_notices' ] );
@@ -74,9 +76,9 @@ class Notifications {
 		if ( ! $this->pass_notification_capabilities() )
 			return;
 
-		static $npPluginNotices = NULL;
+		static $npPluginNotices = null;
 
-		if ( $npPluginNotices !== NULL ) {
+		if ( $npPluginNotices !== null ) {
 			return $npPluginNotices;
 		}
 
@@ -148,7 +150,7 @@ class Notifications {
 				if ( ! $advanced_cache->has_advanced_cache() ) {
 
 					$advancedCacheFile = nitropack_trailingslashit( WP_CONTENT_DIR ) . 'advanced-cache.php';
-					if ( ! file_exists( $advancedCacheFile ) || strpos( file_get_contents( $advancedCacheFile ), "NITROPACK_ADVANCED_CACHE" ) === false ) { // For some reason we get the notice right after connecting (even though the advanced-cache file is already in place). This check works around this issue :(
+					if ( ! Filesystem::fileExists( $advancedCacheFile ) || strpos( file_get_contents( $advancedCacheFile ), "NITROPACK_ADVANCED_CACHE" ) === false ) { // For some reason we get the notice right after connecting (even though the advanced-cache file is already in place). This check works around this issue :(
 
 						if ( $advanced_cache->install_advanced_cache() ) {
 							if ( ! \NitroPack\Integration\Hosting\WPEngine::detect() ) { // The advanced-cache.php file in WP Engine is reset fairly often and we don't want to show the notice every time. This is an info we can skip in this case.
@@ -266,8 +268,8 @@ class Notifications {
 			}
 
 			$siteConfig = nitropack_get_site_config();
-			$siteId = $siteConfig ? $siteConfig["siteId"] : NULL;
-			$siteSecret = $siteConfig ? $siteConfig["siteSecret"] : NULL;
+			$siteId = $siteConfig ? $siteConfig["siteId"] : null;
+			$siteSecret = $siteConfig ? $siteConfig["siteSecret"] : null;
 			$webhookToken = esc_attr( get_option( 'nitropack-webhookToken' ) );
 			$blogId = get_current_blog_id();
 			$isConfigOutdated = ! nitropack_is_config_up_to_date();
@@ -298,7 +300,8 @@ class Notifications {
 				}
 
 				try {
-					nitropack_setup_webhooks( get_nitropack_sdk(), $webhookToken );
+					$webhooks = new \NitroPack\WordPress\Webhooks();
+					$webhooks->nitropack_setup_webhooks( get_nitropack_sdk(), $webhookToken );
 				} catch (\NitroPack\SDK\WebhookException $e) {
 					$warnings[] = array(
 						'title' => esc_html__( "Unable to configure webhooks", 'nitropack' ),
@@ -496,7 +499,7 @@ class Notifications {
 	private function nitropack_print_hosting_notice() {
 
 		$hostingNoticeFile = nitropack_get_hosting_notice_file();
-		if ( ! get_nitropack()->isConnected() || file_exists( $hostingNoticeFile ) )
+		if ( ! get_nitropack()->isConnected() || Filesystem::fileExists( $hostingNoticeFile ) )
 			return;
 
 		$documentedHostingSetups = array(

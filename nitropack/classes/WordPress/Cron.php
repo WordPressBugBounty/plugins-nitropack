@@ -8,6 +8,8 @@
 
 namespace NitroPack\WordPress;
 
+use \NitroPack\SDK\Filesystem;
+
 /**
  * Cron class for sheduling events.
  */
@@ -61,7 +63,7 @@ class Cron {
 		foreach ( $files as $file ) {
 			if ( is_file( $file ) ) {
 				if ( $now - filemtime( $file ) >= $seconds ) {
-					unlink( $file );
+					Filesystem::deleteFile( $file );
 				}
 			}
 		}

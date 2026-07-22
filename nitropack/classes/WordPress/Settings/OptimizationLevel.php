@@ -162,14 +162,14 @@ class OptimizationLevel {
 			<div class="card-header no-border mb-0">
 				<div class="flex items-center">
 					<h3 class="mb-0"><?php esc_html_e( 'Optimization mode', 'nitropack' ); ?></h3>
-					<span class="tooltip-icon" data-tooltip-target="tooltip-optimization">
+					<div class="tooltip-icon" data-tooltip-target="tooltip-optimization">
 						<img src="<?php echo plugin_dir_url( NITROPACK_FILE ) . 'assets/img/info.svg'; ?>" alt="info">
-					</span>
-					<div id="tooltip-optimization" role="tooltip" class="tooltip-container hidden">
-						<?php esc_html_e( 'Select from our range of predefined optimization modes to boost your site\'s performance.', 'nitropack' );
-						?>
-						<div class="tooltip-arrow" data-popper-arrow></div>
+						<div id="tooltip-optimization" role="tooltip" class="tooltip-container">
+							<?php esc_html_e( 'Select from our range of predefined optimization modes to boost your site\'s performance.', 'nitropack' );
+							?>
+						</div>
 					</div>
+
 				</div>
 			</div>
 			<?php ?>

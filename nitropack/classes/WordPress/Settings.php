@@ -1,6 +1,7 @@
 <?php
 
 namespace NitroPack\WordPress;
+use NitroPack\WordPress\Webhooks;
 use NitroPack\WordPress\Settings\Subscription;
 use NitroPack\WordPress\Settings\PurgeCache;
 use NitroPack\WordPress\Settings\CacheWarmup;
@@ -170,8 +171,9 @@ class Settings {
 		if ( $token !== null ) {
 			$this->settings['nitropack-webhookToken'] = $token;
 		} else {
+			$webhooks = new Webhooks();
 			// Generate a new webhook token if it is not passed
-			$this->generate_webhook_token();
+			$webhooks->generate_webhook_token();
 		}
 
 		foreach ( $this->settings as $option => $value ) {
@@ -181,34 +183,6 @@ class Settings {
 				}
 				update_option( $option, $value );
 			}
-		}
-	}
-	/**
-	 * Generates a webhook token for the NitroPack settings.
-	 *
-	 * This function retrieves the site configuration and checks if a webhook token
-	 * is already set. If a token is provided, it generates a new webhook token using
-	 * the site ID from the POST request. If no site ID is provided in the POST request,
-	 * it sets the webhook token to null.
-	 *
-	 * @param string|null $token Optional. The token to be used for generating the webhook token.
-	 *                           If not provided, a new token will be generated.
-	 */
-	public function generate_webhook_token() {
-		$siteConfig = nitropack_get_site_config();
-		//grab existing from config
-		if ( isset( $siteConfig['webhookToken'] ) ) {
-			$this->settings['nitropack-webhookToken'] = $siteConfig['webhookToken'];
-		} elseif ( isset( $siteConfig['siteId'] ) ) {
-			//generate from existing siteId
-			$siteId = $siteConfig['siteId'];
-			$this->settings['nitropack-webhookToken'] = nitropack_generate_webhook_token( $siteId );
-		} elseif ( ! empty( $_POST["siteId"] ) ) {
-			//try to generate from POST
-			$siteId = $_POST["siteId"];
-			$this->settings['nitropack-webhookToken'] = nitropack_generate_webhook_token( $siteId );
-		} else {
-			$this->settings['nitropack-webhookToken'] = null;
 		}
 	}
 

@@ -2,6 +2,8 @@
 
 namespace NitroPack\Feature\Logger;
 
+use \NitroPack\SDK\Filesystem;
+
 class Logger {
 	private $nitro;
 	public $separator;
@@ -96,7 +98,7 @@ class Logger {
 		$log_file = $this->get_log_file_path();
 		$max_size = $this->get_max_log_filesize();
 
-		if ( file_exists( $log_file ) && filesize( $log_file ) > $max_size ) {
+		if ( Filesystem::fileExists( $log_file ) && filesize( $log_file ) > $max_size ) {
 			error_log( "NitroPack log file has reached maximum size. Logging stopped." );
 			return;
 		}
@@ -136,11 +138,11 @@ class Logger {
 		if ( $create_dir ) {
 			// Create .htaccess file with deny from all
 			$htaccess_path = NITROPACK_LOGS_DATA_DIR . '/.htaccess';
-			file_put_contents( $htaccess_path, "Order Allow,Deny\nAllow from all\n<FilesMatch \"\.(csv|zip)$\">\nOrder Deny,Allow\nAllow from all\n</FilesMatch>" );
+			Filesystem::filePutContents( $htaccess_path, "Order Allow,Deny\nAllow from all\n<FilesMatch \"\.(csv|zip)$\">\nOrder Deny,Allow\nAllow from all\n</FilesMatch>" );
 
 			// Create empty index.html file
 			$index_path = NITROPACK_LOGS_DATA_DIR . '/index.html';
-			file_put_contents( $index_path, "" );
+			Filesystem::filePutContents( $index_path, "" );
 			return true;
 		} else {
 			error_log( "Failed to create nitroopack logs directory: " . NITROPACK_LOGS_DATA_DIR );
@@ -203,7 +205,7 @@ class Logger {
 	 * @return void
 	 */
 	private function write_to_log_file( $log_file, $content ) {
-		$file_exists = file_exists( $log_file );
+		$file_exists = Filesystem::fileExists( $log_file );
 		$file_handle = fopen( $log_file, 'a' );
 
 		if ( $file_handle === false ) {

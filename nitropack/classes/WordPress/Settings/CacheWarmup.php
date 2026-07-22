@@ -4,7 +4,7 @@ namespace NitroPack\WordPress\Settings;
 use NitroPack\WordPress\NitroPack;
 
 class CacheWarmup {
-	private static $instance = NULL;
+	private static $instance = null;
 	public function __construct() {
 		add_action( 'wp_ajax_nitropack_skip_cache_warmup', [ $this, 'nitropack_skip_cache_warmup' ] );
 		add_action( 'wp_ajax_nitropack_enable_warmup', [ $this, 'nitropack_enable_warmup' ] );
@@ -125,74 +125,95 @@ class CacheWarmup {
 	 */
 	public function nitropack_estimate_warmup() {
 		nitropack_verify_ajax_nonce( $_REQUEST );
-		if ( null !== $nitro = get_nitropack_sdk() ) {
-			try {
-				if ( ! session_id() ) {
-					session_start();
-				}
-				$id = ! empty( $_POST["estId"] ) ? preg_replace( "/[^a-fA-F0-9]/", "", (string) $_POST["estId"] ) : NULL;
-				if ( $id !== NULL && ( ! is_string( $id ) || $id != $_SESSION["nitroEstimateId"] ) ) {
-					nitropack_json_and_exit( array(
-						"type" => "error",
-						"message" => __( 'Invalid estimation ID!', 'nitropack' )
-					) );
-				}
 
-				$sitemapUrls = nitropack_active_sitemap_plugins() ? nitropack_get_site_maps() : NULL;
-				$configuredSitemap = false;
+		$nitro = get_nitropack_sdk();
+		if ( null === $nitro ) {
+			nitropack_json_and_exit( array(
+				"type" => "error",
+				"message" => __( 'Warmup estimation failed.', 'nitropack' )
+			) );
+		}
 
-				if ( $sitemapUrls === NULL ) {
+		$this->start_estimation_session();
+		$id = $this->get_and_validate_estimation_id();
 
-					$defaultSitemap = get_default_sitemap();
-					if ( $defaultSitemap ) {
-						$nitro->getApi()->setWarmupSitemap( $defaultSitemap );
-						$configuredSitemap = true;
-					}
+		$this->configure_warmup_sitemap( $nitro );
+		$nitro->getApi()->setWarmupHomepage( get_home_url() );
 
-					delete_option( 'nitropack-warmup-sitemap' );
-				} else {
-
-					$warmupSitemap = evaluate_warmup_sitemap( $sitemapUrls );
-					if ( $warmupSitemap ) {
-						$nitro->getApi()->setWarmupSitemap( $warmupSitemap );
-						$configuredSitemap = true;
-					}
-				}
-
-				if ( ! $configuredSitemap ) {
-					$nitro->getApi()->setWarmupSitemap( NULL );
-				}
-
-				$nitro->getApi()->setWarmupHomepage( get_home_url() );
-
-				$optimizationsEstimate = $nitro->getApi()->estimateWarmup( $id );
-
-				if ( $id === NULL ) {
-					$_SESSION["nitroEstimateId"] = $optimizationsEstimate; // When id is NULL, $optimizationsEstimate holds the ID for the newly started estimate
-				}
-			} catch (\Exception $e) {
-			}
-			$json_data = array(
-				"type" => "success",
-				"res" => $optimizationsEstimate,
-				"sitemap_indication" => get_option( 'nitropack-warmup-sitemap', false ),
-				"message" => __( 'Warmup estimation failed.', 'nitropack' ),
-			);
-			if ( is_int( $optimizationsEstimate ) && $optimizationsEstimate > 0 ) {
-				$json_data["message"] = __( 'Cache warmup has been estimated successfully.', 'nitropack' );
-			} else if ( $optimizationsEstimate === 0 ) {
-				$json_data["message"] = __( 'We could not find any links for warming up on your home page.', 'nitropack' );
-			} else {
-				$json_data["message"] = __( 'Warmup estimation failed. Please try again or contact support if the issue persists', 'nitropack' );
-			}
-			nitropack_json_and_exit( $json_data );
+		$optimizationsEstimate = $nitro->getApi()->estimateWarmup( $id );
+		if ( $id === null ) {
+			$_SESSION["nitroEstimateId"] = $optimizationsEstimate; // When id is null, $optimizationsEstimate holds the ID for the newly started estimate
 		}
 
 		nitropack_json_and_exit( array(
-			"type" => "error",
-			"message" => __( 'Warmup estimation failed.', 'nitropack' )
+			"type" => "success",
+			"res" => $optimizationsEstimate,
+			"sitemap_indication" => get_option( 'nitropack-warmup-sitemap', false ),
+			"message" => $this->get_warmup_estimation_message( $optimizationsEstimate ),
 		) );
 	}
+
+	private function start_estimation_session() {
+		if ( ! session_id() ) {
+			session_start();
+		}
+	}
+	/**
+	 * If there is a timeout when checking, an estId will be sent
+	 * @return array|string|null
+	 */
+	private function get_and_validate_estimation_id() {
+		$id = ! empty( $_POST["estId"] ) ? preg_replace( "/[^a-fA-F0-9]/", "", (string) $_POST["estId"] ) : null;
+		$currentEstimateId = isset( $_SESSION["nitroEstimateId"] ) ? $_SESSION["nitroEstimateId"] : null;
+
+		if ( $id !== null && ( ! is_string( $id ) || $id != $currentEstimateId ) ) {
+			nitropack_json_and_exit( array(
+				"type" => "error",
+				"message" => __( 'Invalid estimation ID!', 'nitropack' )
+			) );
+		}
+
+		return $id;
+	}
+
+	private function configure_warmup_sitemap( $nitro ) {
+		$sitemap = new \NitroPack\WordPress\Sitemap();
+		$sitemapUrls = $sitemap->active_sitemap_plugins() ? $sitemap->get_site_maps() : null;
+		$configuredSitemap = false;
+
+		if ( $sitemapUrls === null ) {
+			$defaultSitemap = $sitemap->get_default_sitemap();
+			if ( $defaultSitemap ) {
+				$nitro->getApi()->setWarmupSitemap( $defaultSitemap );
+				$configuredSitemap = true;
+			}
+
+			delete_option( 'nitropack-warmup-sitemap' );
+		} else {
+			$warmupSitemap = $sitemap->evaluate_warmup_sitemap( $sitemapUrls );
+			if ( $warmupSitemap ) {
+				$nitro->getApi()->setWarmupSitemap( $warmupSitemap );
+				$configuredSitemap = true;
+			}
+		}
+
+		if ( ! $configuredSitemap ) {
+			$nitro->getApi()->setWarmupSitemap( null );
+		}
+	}
+
+	private function get_warmup_estimation_message( $optimizationsEstimate ) {
+		if ( is_int( $optimizationsEstimate ) && $optimizationsEstimate > 0 ) {
+			return __( 'Cache warmup has been estimated successfully.', 'nitropack' );
+		}
+
+		if ( $optimizationsEstimate === 0 ) {
+			return __( 'We could not find any links for warming up on your home page.', 'nitropack' );
+		}
+
+		return __( 'Warmup estimation failed. Please try again or contact support if the issue persists', 'nitropack' );
+	}
+
 	/**
 	 * AJAX handler to get cache warmup stats
 	 * @return void
@@ -226,7 +247,7 @@ class CacheWarmup {
 		$nitro = get_nitropack_sdk();
 		try {
 			$cache_warmup_stats = $nitro->getApi()->getWarmupStats();
-		} catch ( \Exception $e ) {
+		} catch (\Exception $e) {
 			$cache_warmup_stats = [ 'status' => 0 ];
 		}
 		?>
@@ -239,14 +260,14 @@ class CacheWarmup {
 
 					<h6><?php esc_html_e( 'Cache warmup', 'nitropack' ); ?> <span
 							class="badge badge-primary ml-2"><?php esc_html_e( 'Recommended', 'nitropack' ); ?></span>
-						<span class="tooltip-icon <?php echo $toolTipDisplayState; ?>" data-tooltip-target="tooltip-sitemap">
+						<div class="tooltip-icon <?php echo $toolTipDisplayState; ?>" data-tooltip-target="tooltip-sitemap">
 							<img src="<?php echo plugin_dir_url( NITROPACK_FILE ) . 'assets/img/info.svg'; ?>" alt="info">
-						</span>
+							<div id="tooltip-sitemap" role="tooltip" class="tooltip-container">
+								<?php echo $sitemap; ?>
+							</div>
+						</div>
 					</h6>
-					<div id="tooltip-sitemap" role="tooltip" class="tooltip-container hidden">
-						<?php echo $sitemap; ?>
-						<div class="tooltip-arrow" data-popper-arrow></div>
-					</div>
+
 					<p><?php esc_html_e( 'Automatically pre-caches your website\'s page content', 'nitropack' ); ?>.
 						<a href="https://support.nitropack.io/en/articles/8390320-cache-warmup" class="text-blue"
 							target="_blank"><?php esc_html_e( 'Learn more', 'nitropack' ); ?></a>

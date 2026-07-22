@@ -1,6 +1,7 @@
 <?php
 namespace NitroPack\WordPress\Settings;
 use \NitroPack\SDK\Api\ResponseStatus;
+use \NitroPack\SDK\Filesystem;
 
 /**
  * Class System Report used in NitroPack
@@ -72,8 +73,9 @@ class SystemReport {
 		try {
 			$siteConfig = nitropack_get_site_config();
 			if ( ! empty( $siteConfig['siteId'] ) ) {
-				$WHToken = nitropack_generate_webhook_token( $siteConfig['siteId'] );
-				$constructedWH = new \NitroPack\Url\Url( strtolower( get_home_url() ) ) . '?nitroWebhook=config&token=' . $WHToken;
+				$webhooks = new \NitroPack\WordPress\Webhooks();
+				$webhook_token = $webhooks->get_token();
+				$constructedWH = new \NitroPack\Url\Url( strtolower( get_home_url() ) ) . '?nitroWebhook=config&token=' . $webhook_token;
 				$storedWH = $nitro_sdk->getApi()->getWebhook( "config" );
 				$matchResult = ( $constructedWH == $storedWH ) ? __( 'OK', 'nitropack' ) : __( 'Warning: Webhooks do not match this site', 'nitropack' );
 			} else {
@@ -195,10 +197,17 @@ class SystemReport {
 	 */
 	private function get_user_config() {
 		if ( defined( 'NITROPACK_CONFIG_FILE' ) ) {
-			if ( file_exists( NITROPACK_CONFIG_FILE ) ) {
+			if ( Filesystem::fileExists( NITROPACK_CONFIG_FILE ) ) {
+				$info = json_decode( Filesystem::fileGetContents( NITROPACK_CONFIG_FILE ) );
+				if ( ! $info ) {
+					$info = __( 'Config found, but unable to get contents.', 'nitropack' );
+				}
+			} elseif ( file_exists( NITROPACK_CONFIG_FILE ) ) { // Backward compatibility for users with redis cache but config file on disk
 				$info = json_decode( file_get_contents( NITROPACK_CONFIG_FILE ) );
 				if ( ! $info ) {
 					$info = __( 'Config found, but unable to get contents.', 'nitropack' );
+				} else {
+					Filesystem::filePutContents( NITROPACK_CONFIG_FILE, json_encode( $info ) );
 				}
 			} else {
 				$info = __( 'Config file not found.', 'nitropack' );

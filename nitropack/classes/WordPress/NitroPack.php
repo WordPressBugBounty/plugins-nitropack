@@ -521,7 +521,10 @@ class NitroPack {
 	 * @return bool
 	 */
 	public function dataDirExists() {
-		return defined( "NITROPACK_DATA_DIR" ) && is_dir( NITROPACK_DATA_DIR ); // TODO: Convert this to use the Filesystem abstraction for better Redis support
+		if ( defined( "NITROPACK_USE_REDIS" ) && NITROPACK_USE_REDIS ) {
+			return true;
+		}
+		return defined( "NITROPACK_DATA_DIR" ) && is_dir( NITROPACK_DATA_DIR );
 	}
 
 	/**
@@ -530,15 +533,24 @@ class NitroPack {
 	 * @return bool
 	 */
 	public function initDataDir() {
-		return $this->dataDirExists() || @mkdir( NITROPACK_DATA_DIR, 0755, true ); // TODO: Convert this to use the Filesystem abstraction for better Redis support
+		if ( defined( "NITROPACK_USE_REDIS" ) && NITROPACK_USE_REDIS ) {
+			return true;
+		}
+		return $this->dataDirExists() || @mkdir( NITROPACK_DATA_DIR, 0755, true );
 	}
 
 	public function pluginDataDirExists() {
-		return defined( "NITROPACK_PLUGIN_DATA_DIR" ) && is_dir( NITROPACK_PLUGIN_DATA_DIR ); // TODO: Convert this to use the Filesystem abstraction for better Redis support
+		if ( defined( "NITROPACK_USE_REDIS" ) && NITROPACK_USE_REDIS ) {
+			return true;
+		}
+		return defined( "NITROPACK_PLUGIN_DATA_DIR" ) && is_dir( NITROPACK_PLUGIN_DATA_DIR );
 	}
 
 	public function initPluginDataDir() {
-		return $this->pluginDataDirExists() || @mkdir( NITROPACK_PLUGIN_DATA_DIR, 0755, true ); // TODO: Convert this to use the Filesystem abstraction for better Redis support
+		if ( defined( "NITROPACK_USE_REDIS" ) && NITROPACK_USE_REDIS ) {
+			return true;
+		}
+		return $this->pluginDataDirExists() || @mkdir( NITROPACK_PLUGIN_DATA_DIR, 0755, true );
 	}
 
 	public function setDisabledReason( $reason ) {

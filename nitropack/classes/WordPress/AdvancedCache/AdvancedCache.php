@@ -20,6 +20,10 @@ class AdvancedCache {
 	 * @description Installs the advanced-cache.php file in the WP_CONTENT_DIR directory. This file is required for NitroPack to work properly. If the file cannot be created, the function returns
 	 */
 	public function install_advanced_cache() {
+		if ( nitropack_is_autoscale_environment() ) { // Autoscale environment has a non-persistent file system, so advanced cache cannot be used
+			return false;
+		}
+
 		$conflictingPlugins = \NitroPack\WordPress\ConflictingPlugins::getInstance();
 		$nitropack_is_conflicting_plugin_active = $conflictingPlugins->nitropack_is_conflicting_plugin_active();
 		if ( $nitropack_is_conflicting_plugin_active || ! nitropack_is_advanced_cache_allowed() ) {
@@ -46,6 +50,10 @@ class AdvancedCache {
 	 * @description Uninstalls the advanced-cache.php file in the WP_CONTENT_DIR directory.
 	 */
 	public function uninstall_advanced_cache() {
+		if ( nitropack_is_autoscale_environment() ) { // Autoscale environment has a non-persistent file system, so advanced cache cannot be used
+			return false;
+		}
+
 		$advancedCacheFile = nitropack_trailingslashit( WP_CONTENT_DIR ) . 'advanced-cache.php';
 		if ( file_exists( $advancedCacheFile ) ) {
 			if ( WP_DEBUG ) {

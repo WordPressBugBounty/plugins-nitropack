@@ -4,6 +4,7 @@ namespace NitroPack\Feature;
 use NitroPack\Util\CacheStreamWrapper;
 use NitroPack\Interfaces\CacheManager;
 use NitroPack\SDK\NitroPack as NitroPackSDK;
+use NitroPack\SDK\Filesystem;
 
 class SubrequestCache implements CacheManager {
     const STAGE = "very_early";
@@ -89,13 +90,13 @@ class SubrequestCache implements CacheManager {
 
         if ($key) {
             $cacheFile = $this->getCacheFile($key);
-            if (file_exists($cacheFile)) {
-                unlink($cacheFile);
+            if (Filesystem::fileExists($cacheFile)) {
+                Filesystem::deleteFile($cacheFile);
             }
 
             $cacheFileWp = $this->getCacheFile("wpremote-" . $key);
-            if (file_exists($cacheFileWp)) {
-                unlink($cacheFileWp);
+            if (Filesystem::fileExists($cacheFileWp)) {
+                Filesystem::deleteFile($cacheFileWp);
             }
             return;
         }
@@ -106,7 +107,7 @@ class SubrequestCache implements CacheManager {
 
             $cacheFile = $this->cacheDir . $entry;
             if (!is_file($cacheFile)) continue;
-            unlink($cacheFile);
+            Filesystem::deleteFile($cacheFile);
         }
         closedir($dh);
         rmdir($this->cacheDir);
@@ -118,7 +119,7 @@ class SubrequestCache implements CacheManager {
         }
 
         $cacheFile = $this->getCacheFile($key);
-        if (file_exists($cacheFile) && time() - filemtime($cacheFile) <= $this->cacheTtl) {
+        if (Filesystem::fileExists($cacheFile) && time() - filemtime($cacheFile) <= $this->cacheTtl) {
             return true;
         }
 
@@ -128,7 +129,7 @@ class SubrequestCache implements CacheManager {
     public function getCache($key) {
         if(empty($this->cache[$key])) {
             $cacheFile = $this->getCacheFile($key);
-            if (file_exists($cacheFile) && time() - filemtime($cacheFile) <= $this->cacheTtl) {
+            if (Filesystem::fileExists($cacheFile) && time() - filemtime($cacheFile) <= $this->cacheTtl) {
                 $this->cache[$key] = file_get_contents($cacheFile);
             }
         }
@@ -151,7 +152,7 @@ class SubrequestCache implements CacheManager {
             return;
         }
 
-        file_put_contents($this->getCacheFile($key), $content);
+        Filesystem::filePutContents($this->getCacheFile($key), $content);
     }
 
     private function getCacheFile($key) {
