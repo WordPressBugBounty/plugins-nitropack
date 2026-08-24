@@ -7,6 +7,10 @@ use \NitroPack\SDK\Filesystem;
  * Class System Report used in NitroPack
  */
 class SystemReport {
+	/**
+	 * Instance of the SystemReport class
+	 * @var SystemReport $instance
+	 */
 	private static $instance = null;
 	/**
 	 * Singleton instance. Avoids multiple instances.
@@ -129,47 +133,64 @@ class SystemReport {
 	 */
 	private function get_general_info() {
 		global $wp_version;
-		if ( null !== $nitro = get_nitropack_sdk() ) {
-			$probe_result = "OK";
-			try {
-				$nitro->fetchConfig();
-			} catch (\Exception $e) {
-				$probe_result = __( 'Error: ', 'nitropack' ) . $e->getMessage();
-			}
-		} else {
-			$probe_result = __( 'Error: Cannot get an SDK instance', 'nitropack' );
-		}
 
+		$nitro = get_nitropack_sdk();
+		$probe_result = $this->probe_sdk_connection( $nitro );
 		$third_party_residual_cache = $this->detect_third_party_cache();
 
-		$info = array(
-			'Nitro_WP_version' => ! empty( $wp_version ) ? $wp_version : get_bloginfo( 'version' ),
-			'Nitro_Version' => defined( 'NITROPACK_VERSION' ) ? NITROPACK_VERSION : __( 'Undefined', 'nitropack' ),
-			'Nitro_SDK_Connection' => $probe_result,
-			'Nitro_API_Polling' => $nitro ? $this->poll_api( $nitro ) : __( 'Error: Cannot get an SDK instance', 'nitropack' ),
-			'Nitro_SDK_Version' => defined( 'NitroPack\SDK\Nitropack::VERSION' ) ? \NitroPack\SDK\Nitropack::VERSION : __( 'Undefined', 'nitropack' ),
-			'Nitro_WP_Cache' => defined( 'WP_CACHE' ) ? ( WP_CACHE ? __( 'OK for drop-in', 'nitropack' ) : __( 'Turned off', 'nitropack' ) ) : __( 'Undefined', 'nitropack' ),
-			'Advanced_Cache_Version' => defined( 'NITROPACK_ADVANCED_CACHE_VERSION' ) ? NITROPACK_ADVANCED_CACHE_VERSION : __( 'Undefined', 'nitropack' ),
-			'Nitro_Absolute_Path' => defined( 'ABSPATH' ) ? ABSPATH : __( 'Undefined', 'nitropack' ),
-			'Nitro_Plugin_Directory' => defined( 'NITROPACK_PLUGIN_DIR' ) ? NITROPACK_PLUGIN_DIR : dirname( __FILE__ ),
-			'Nitro_Data_Directory' => defined( 'NITROPACK_DATA_DIR' ) ? NITROPACK_DATA_DIR : __( 'Undefined', 'nitropack' ),
-			'Nitro_Plugin_Data_Directory' => defined( 'NITROPACK_PLUGIN_DATA_DIR' ) ? NITROPACK_PLUGIN_DATA_DIR : __( 'Undefined', 'nitropack' ),
-			'Nitro_Config_File' => defined( 'NITROPACK_CONFIG_FILE' ) ? NITROPACK_CONFIG_FILE : __( 'Undefined', 'nitropack' ),
-			'Nitro_Backlog_File_Status' => $nitro ? $this->backlog_status( $nitro ) : __( 'Error: Cannot get an SDK instance', 'nitropack' ),
-			'Nitro_Webhooks' => $nitro ? $this->compare_webhooks( $nitro ) : __( 'Error: Cannot get an SDK instance', 'nitropack' ),
-			'Nitro_Connectivity_Requirements' => nitropack_check_func_availability( 'stream_socket_client' ) ? __( 'OK', 'nitropack' ) : __( 'Warning: "stream_socket_client" function is disabled.', 'nitropack' ),
-			'Residual_Cache_Found_For' => $third_party_residual_cache,
-		);
-
-		if ( defined( "NITROPACK_VERSION" ) && defined( "NITROPACK_ADVANCED_CACHE_VERSION" ) && NITROPACK_VERSION == NITROPACK_ADVANCED_CACHE_VERSION && nitropack_is_dropin_cache_allowed() ) {
-			$info['Nitro_Cache_Method'] = 'drop-in';
-		} elseif ( defined( 'EZOIC_INTEGRATION_VERSION' ) ) {
-			$info['Nitro_Cache_Method'] = 'plugin-ezoic';
-		} else {
-			$info['Nitro_Cache_Method'] = 'plugin';
-		}
+		$info = $this->build_general_info_array( $wp_version, $nitro, $probe_result, $third_party_residual_cache );
+		$info['Nitro_Cache_Method'] = $this->detect_cache_method();
 
 		return $info;
+	}
+
+	private function probe_sdk_connection( $nitro ) {
+		if ( $nitro === null ) {
+			return __( 'Error: Cannot get an SDK instance', 'nitropack' );
+		}
+
+		try {
+			$nitro->fetchConfig();
+			return "OK";
+		} catch (\Exception $e) {
+			return __( 'Error: ', 'nitropack' ) . $e->getMessage();
+		}
+	}
+
+	private function build_general_info_array( $wp_version, $nitro, $probe_result, $third_party_residual_cache ) {
+		$sdkError = __( 'Error: Cannot get an SDK instance', 'nitropack' );
+		$undefined = __( 'Undefined', 'nitropack' );
+
+		return array(
+			'Nitro_WP_version' => ! empty( $wp_version ) ? $wp_version : get_bloginfo( 'version' ),
+			'Nitro_Version' => defined( 'NITROPACK_VERSION' ) ? NITROPACK_VERSION : $undefined,
+			'Nitro_SDK_Connection' => $probe_result,
+			'Nitro_API_Polling' => $nitro ? $this->poll_api( $nitro ) : $sdkError,
+			'Nitro_SDK_Version' => defined( 'NitroPack\SDK\Nitropack::VERSION' ) ? \NitroPack\SDK\Nitropack::VERSION : $undefined,
+			'Nitro_WP_Cache' => defined( 'WP_CACHE' ) ? ( WP_CACHE ? __( 'OK for drop-in', 'nitropack' ) : __( 'Turned off', 'nitropack' ) ) : $undefined,
+			'Advanced_Cache_Version' => defined( 'NITROPACK_ADVANCED_CACHE_VERSION' ) ? NITROPACK_ADVANCED_CACHE_VERSION : $undefined,
+			'Nitro_Absolute_Path' => defined( 'ABSPATH' ) ? ABSPATH : $undefined,
+			'Nitro_Plugin_Directory' => defined( 'NITROPACK_PLUGIN_DIR' ) ? NITROPACK_PLUGIN_DIR : dirname( __FILE__ ),
+			'Nitro_Data_Directory' => defined( 'NITROPACK_DATA_DIR' ) ? NITROPACK_DATA_DIR : $undefined,
+			'Nitro_Plugin_Data_Directory' => defined( 'NITROPACK_PLUGIN_DATA_DIR' ) ? NITROPACK_PLUGIN_DATA_DIR : $undefined,
+			'Nitro_Config_File' => defined( 'NITROPACK_CONFIG_FILE' ) ? NITROPACK_CONFIG_FILE : $undefined,
+			'Nitro_Backlog_File_Status' => $nitro ? $this->backlog_status( $nitro ) : $sdkError,
+			'Nitro_Webhooks' => $nitro ? $this->compare_webhooks( $nitro ) : $sdkError,
+			'Nitro_Connectivity_Requirements' => \NitroPack\WordPress\Connect::check_func_availability( 'stream_socket_client' ) ? __( 'OK', 'nitropack' ) : __( 'Warning: "stream_socket_client" function is disabled.', 'nitropack' ),
+			'Residual_Cache_Found_For' => $third_party_residual_cache,
+		);
+	}
+
+	private function detect_cache_method() {
+		if ( defined( "NITROPACK_VERSION" ) && defined( "NITROPACK_ADVANCED_CACHE_VERSION" ) && NITROPACK_VERSION == NITROPACK_ADVANCED_CACHE_VERSION && nitropack_is_dropin_cache_allowed() ) {
+			return 'drop-in';
+		}
+
+		if ( defined( 'EZOIC_INTEGRATION_VERSION' ) ) {
+			return 'plugin-ezoic';
+		}
+
+		return 'plugin';
 	}
 
 	/**
@@ -219,7 +240,7 @@ class SystemReport {
 		return $info;
 	}
 
-	/**[p]
+	/**
 	 * Gathers information about specific directories related to NitroPack.
 	 *
 	 * @return array An associative array containing the status of various directories.
@@ -254,7 +275,7 @@ class SystemReport {
 	 *
 	 * @return array|string An array of conflicting plugins or a message indicating none were detected.
 	 */
-	private function get_conflicting_plugins()  {
+	private function get_conflicting_plugins() {
 		$conflictingPlugins = \NitroPack\WordPress\ConflictingPlugins::getInstance();
 		$info = $conflictingPlugins->nitropack_get_conflicting_plugins();
 		if ( ! empty( $info ) ) {

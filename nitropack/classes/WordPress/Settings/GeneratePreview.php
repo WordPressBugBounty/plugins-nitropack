@@ -9,7 +9,11 @@ use NitroPack\WordPress\Settings\OptimizationLevel;
  * AJAX handlers to check if preview cache is ready and to finalize onboarding
  */
 class GeneratePreview {
-	private static $instance = NULL;
+	/**
+	 * Instance of the GeneratePreview class
+	 * @var GeneratePreview $instance
+	 */
+	private static $instance = null;
 	public function __construct() {
 		add_action( 'admin_init', [ $this, 'pass_onboarding_for_current_users' ] );
 		add_filter( 'nitropack_passes_cookie_requirements', [ $this, 'enable_cache_for_logged_in_preview_users' ] );
@@ -46,7 +50,7 @@ class GeneratePreview {
 	 * @return boolean
 	 */
 	public function enable_cache_for_logged_in_preview_users( $passes ): bool {
-		$isUserLoggedIn = nitropack_is_logged_in();
+		$isUserLoggedIn = \NitroPack\Util\Utils::is_logged_in();
 		if ( $isUserLoggedIn && ! empty( $_GET['previewmode'] ) ) {
 			return true;
 		}

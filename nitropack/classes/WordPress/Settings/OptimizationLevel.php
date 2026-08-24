@@ -4,14 +4,16 @@ namespace NitroPack\WordPress\Settings;
 use NitroPack\HttpClient\HttpClient;
 
 class OptimizationLevel {
-	private static $instance = NULL;
-	private $levels = [
-		1 => "standard",
-		2 => "medium",
-		3 => "strong",
-		4 => "ludicrous",
-		5 => "custom"
-	];
+	/**
+	 * Instance of the OptimizationLevel class
+	 * @var OptimizationLevel $instance
+	 */
+	private static $instance = null;
+	
+	/**
+	 * the selected level name as string
+	 * @var string
+	 */
 	public $level_name = '';
 	public function __construct() {
 		add_action( 'wp_ajax_nitropack_set_optimization_mode', [ $this, 'nitropack_set_optimization_mode' ] );
@@ -269,6 +271,7 @@ class OptimizationLevel {
 	public function preview_render() {
 		$optimization_modes = $this->optimization_modes();
 		unset( $optimization_modes['optimization_options']['custom'] );
+		$modes = $optimization_modes;
 		?>
 		<div class="optimization-modes">
 			<div class="flex flex-row">

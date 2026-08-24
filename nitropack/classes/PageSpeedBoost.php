@@ -30,7 +30,7 @@ class PageSpeedBoost {
 
 		global $pagenow;
 		
-		$is_wp_cli = nitropack_is_wp_cli();
+		$is_wp_cli = \NitroPack\Util\Utils::is_wp_cli();
 
 		if ( ! is_admin() && ! $is_wp_cli ) {
 			return;

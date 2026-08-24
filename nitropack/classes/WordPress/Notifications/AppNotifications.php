@@ -13,7 +13,7 @@ use \NitroPack\SDK\Filesystem;
  */
 
 class AppNotifications {
-	private static $instance = NULL;
+	private static $instance = null;
 	private $cacheTtl = 3600;
 	private $getSiteId;
 	private $notifications;
@@ -22,7 +22,7 @@ class AppNotifications {
 	public function __construct() {
 		$this->getSiteId = get_nitropack()->getSiteId();
 		$this->notificationsFile = nitropack_trailingslashit( NITROPACK_DATA_DIR ) . 'notifications.json';
-		$this->notifications = NULL;
+		$this->notifications = null;
 	}
 	public static function getInstance() {
 		if ( ! self::$instance ) {
@@ -31,8 +31,8 @@ class AppNotifications {
 
 		return self::$instance;
 	}
-	public function get( $type = NULL ) {
-		if ( $this->notifications === NULL ) {
+	public function get( $type = null ) {
+		if ( $this->notifications === null ) {
 			$this->load();
 		}
 
@@ -85,9 +85,13 @@ class AppNotifications {
 			}
 		}
 	}
-
-	public function removeNotificationById( $notificationId ) {
-		if ( $this->notifications === NULL ) {
+	/**
+	 * Remove a notification by id.
+	 * @param string $notificationId
+	 * @return bool
+	 */
+	public function removeNotificationById( string $notificationId ) {
+		if ( $this->notifications === null ) {
 			$this->load();
 		}
 

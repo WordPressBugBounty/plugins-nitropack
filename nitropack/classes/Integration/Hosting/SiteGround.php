@@ -3,89 +3,96 @@
 namespace NitroPack\Integration\Hosting;
 
 class SiteGround extends Hosting {
-    const STAGE = "very_early";
+	const STAGE = "very_early";
 
-    public static function detect() {
-        if (strpos(gethostname(), "siteground.eu") !== false) return true;
-        $configFilePath = nitropack_get_wpconfig_path();
-        if (!$configFilePath) return false;
-        return strpos(file_get_contents($configFilePath), 'Added by SiteGround WordPress management system') !== false;
-    }
+	public static function detect() {
+		if ( strpos( gethostname(), "siteground.eu" ) !== false ) {
+			return true;
+		}
 
-    public function init($stage) {
-        if ($this->getHosting() == "siteground") {
-            add_action('nitropack_execute_purge_url', [$this, 'purgeUrl']);
-            add_action('nitropack_execute_purge_all', [$this, 'purgeAll']);
-            add_action('nitropack_early_cache_headers', [$this, 'setCacheControl']);
-            add_action('nitropack_cacheable_cache_headers', [$this, 'allowProxyCache']);
-            add_action('nitropack_cachehit_cache_headers', [$this, 'allowProxyCache']);
-        }
-    }
+		$configFilePath = \NitroPack\WordPress\CoreFiles::get_wp_config_path();
 
-    public function purgeUrl($url) {
-        $urlObj = new \NitroPack\Url\Url($url);
+		if ( ! $configFilePath ) {
+			return false;
+		}
+		return strpos( file_get_contents( $configFilePath ), 'Added by SiteGround WordPress management system' ) !== false;
+	}
 
-        $host = preg_replace("/^www\./", "", $urlObj->getHost());
-        $path = $urlObj->getPath();
+	public function init( $stage ) {
+		if ( $this->getHosting() == "siteground" ) {
+			add_action( 'nitropack_execute_purge_url', [ $this, 'purgeUrl' ] );
+			add_action( 'nitropack_execute_purge_all', [ $this, 'purgeAll' ] );
+			add_action( 'nitropack_early_cache_headers', [ $this, 'setCacheControl' ] );
+			add_action( 'nitropack_cacheable_cache_headers', [ $this, 'allowProxyCache' ] );
+			add_action( 'nitropack_cachehit_cache_headers', [ $this, 'allowProxyCache' ] );
+		}
+	}
 
-        if ($urlObj->getQuery()) {
-            $path .= "(.*)";
-        }
+	public function purgeUrl( $url ) {
+		$urlObj = new \NitroPack\Url\Url( $url );
 
-        try {
-            $sock_path = '/chroot/tmp/site-tools.sock';
-            if ( ! file_exists( $sock_path ) ) {
-                return false;
-            }
+		$host = preg_replace( "/^www\./", "", $urlObj->getHost() );
+		$path = $urlObj->getPath();
 
-            $sock = stream_socket_client( 'unix://' . $sock_path, $errno, $errstr, 5 );
+		if ( $urlObj->getQuery() ) {
+			$path .= "(.*)";
+		}
 
-            if ( false === $sock ) {
-                return false;
-            }
+		try {
+			$sock_path = '/chroot/tmp/site-tools.sock';
+			if ( ! file_exists( $sock_path ) ) {
+				return false;
+			}
 
-            $req = array(
-                'api' => 'domain-all',
-                'cmd' => 'update',
-                'settings' => array( 'json' => 1 ),
-                'params' => array(
-                    'flush_cache' => '1',
-                    'id'          => $host,
-                    'path'        => $path,
-                ),
-            );
+			$sock = stream_socket_client( 'unix://' . $sock_path, $errno, $errstr, 5 );
 
-            fwrite( $sock, json_encode( $req, JSON_FORCE_OBJECT ) . "\n" );
-            $response = fgets( $sock, 32 * 1024 );
-            fclose( $sock );
-            $result = @json_decode( $response, true );
-            if ( false === $result || isset( $result['err_code'] ) ) {
-                return false;
-            }
-        } catch (\Exception $e) {}
+			if ( false === $sock ) {
+				return false;
+			}
 
-        return true;
-    }
+			$req = array(
+				'api' => 'domain-all',
+				'cmd' => 'update',
+				'settings' => array( 'json' => 1 ),
+				'params' => array(
+					'flush_cache' => '1',
+					'id' => $host,
+					'path' => $path,
+				),
+			);
 
-    public function purgeAll() {
-        $siteConfig = nitropack_get_site_config();
-        if ($siteConfig && !empty($siteConfig["home_url"])) {
-            return $this->purgeUrl(nitropack_trailingslashit($siteConfig["home_url"]) . "/(.*)");
-        }
-        return false;
-    }
+			fwrite( $sock, json_encode( $req, JSON_FORCE_OBJECT ) . "\n" );
+			$response = fgets( $sock, 32 * 1024 );
+			fclose( $sock );
+			$result = @json_decode( $response, true );
+			if ( false === $result || isset( $result['err_code'] ) ) {
+				return false;
+			}
+		} catch (\Exception $e) {
+		}
 
-    public function setCacheControl() {
-        nitropack_header("Cache-Control: public, max-age=0, s-maxage=3600"); // needs to be like that instead of Cache-Control: no-cache in order to allow caching in the provided reverse proxy, but prevent the browsers from doing so
-    }
+		return true;
+	}
 
-    public function allowProxyCache() {
-        if (!empty($_SERVER['HTTP_IF_MODIFIED_SINCE'])) {
-            nitropack_header('X-Cache-Enabled: False');
-            return;
-        }
-        $this->setCacheControl();
-        nitropack_header('X-Cache-Enabled: True');
-        nitropack_header('Vary: User-Agent');
-    }
+	public function purgeAll() {
+		$siteConfig = nitropack_get_site_config();
+		if ( $siteConfig && ! empty( $siteConfig["home_url"] ) ) {
+			return $this->purgeUrl( nitropack_trailingslashit( $siteConfig["home_url"] ) . "/(.*)" );
+		}
+		return false;
+	}
+
+	public function setCacheControl() {
+		nitropack_header( "Cache-Control: public, max-age=0, s-maxage=3600" ); // needs to be like that instead of Cache-Control: no-cache in order to allow caching in the provided reverse proxy, but prevent the browsers from doing so
+	}
+
+	public function allowProxyCache() {
+		if ( ! empty( $_SERVER['HTTP_IF_MODIFIED_SINCE'] ) ) {
+			nitropack_header( 'X-Cache-Enabled: False' );
+			return;
+		}
+		$this->setCacheControl();
+		nitropack_header( 'X-Cache-Enabled: True' );
+		nitropack_header( 'Vary: User-Agent' );
+	}
 }

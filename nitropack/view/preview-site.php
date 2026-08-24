@@ -21,7 +21,8 @@ $preview_url = $GeneratePreview->get_homepage_preview_url($active_mode_name); ?>
 	</div>
 	<div class="text-content">
 		<h1><?php esc_html_e( 'Preview your site and go live', 'nitropack' ); ?></h1>
-		<p><?php printf( __( 'We\'ve activated <span class="active-mode">%s</span> mode on your home page in a safe testing environment, so changes are visible only to you. Take a moment to:', 'nitropack' ), esc_html( ucfirst( $active_mode_name ) ) ); ?>
+		<!-- translators: %1$s: active mode name (e.g., "Aggressive", "Moderate") -->
+		<p><?php printf( __( 'We\'ve activated <span class="active-mode">%1$s</span> mode on your home page in a safe testing environment, so changes are visible only to you. Take a moment to:', 'nitropack' ), esc_html( ucfirst( $active_mode_name ) ) ); ?>
 		</p>
 		<ol>
 			<li><?php _e( '<b>Preview</b> the newly optimized version and give it your final approval', 'nitropack' ); ?>
@@ -53,7 +54,8 @@ $preview_url = $GeneratePreview->get_homepage_preview_url($active_mode_name); ?>
 	</div>
 	<div class="text-smaller mt-4">
 		<p>
-			<?php printf( __( 'Need help? <a href="%s" target="_blank">Visit our Help Center</a> or contact our <a href="%s">Support team</a>.', 'nitropack' ), 'https://support.nitropack.io/en/', 'https://support.nitropack.io/en/' ); ?>
+			<!-- translators: %1$s: Help Center URL, %2$s: Support team URL -->
+			<?php printf( __( 'Need help? <a href="%1$s" target="_blank">Visit our Help Center</a> or contact our <a href="%2$s">Support team</a>.', 'nitropack' ), 'https://support.nitropack.io/en/', 'https://support.nitropack.io/en/' ); ?>
 		</p>
 	</div>
 </div>

@@ -56,7 +56,7 @@ class CURCY_MultiCurrency {
 			}
 		}
 
-		if ( nitropack_is_optimizer_request() ) {
+		if ( \NitroPack\Util\Utils::is_optimizer_nitropack_request() ) {
 			add_filter( 'wmc_get_currency_code', [ $this, 'modify_cookie_currency' ] );
 		}
 	}

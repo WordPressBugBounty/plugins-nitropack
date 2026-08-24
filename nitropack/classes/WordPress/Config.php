@@ -2,7 +2,9 @@
 namespace NitroPack\WordPress;
 
 use NitroPack\SDK\Filesystem;
-
+/**
+ * Handles the config.json - reading and writing the configuration file.
+ */
 class Config {
     private $config;
 

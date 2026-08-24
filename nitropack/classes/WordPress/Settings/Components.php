@@ -33,7 +33,7 @@ class Components {
 	 * @param string $type The type of notification (success, danger, warning, info).
 	 * @return string The URL of the notification icon.
 	 */
-	private function get_icon_notification_url( $type ) {
+	private function get_icon_notification_url( string $type ) {
 		$icon_path = $this->img_path;
 		switch ( $type ) {
 			case 'success':
@@ -54,7 +54,7 @@ class Components {
 	 * @param string $type The type of notification (success, danger, warning, info).
 	 * @return string The HTML string for the notification icon.
 	 */
-	private function get_icon_notification( $type ) {
+	private function get_icon_notification( string $type ) {
 		$icon_path = $this->get_icon_notification_url( $type );
 		return '<img src="' . $icon_path . '" class="icon" width="16" height="16" alt="icon-' . $type . '">';
 	}
@@ -73,7 +73,7 @@ class Components {
 	 *
 	 * @return void
 	 */
-	public function render_notification( $msg, $type = false, $title = false, $actions = false, $classes = false, $dismissibleId = false, $dismissBy = false, $app_notification = false ) {
+	public function render_notification( string $msg, $type = false, $title = false, $actions = false, $classes = false, $dismissibleId = false, $dismissBy = false, $app_notification = false ) {
 		$default_classes = [ 'nitro-notification', 'notification-' . $type ];
 
 		if ( ! $title ) {
@@ -144,7 +144,7 @@ class Components {
 					}
 				}
 				if ( $app_notification && $app_notification['end_date'] && $app_notification['id'] ) {
-					$dismiss_url = $app_notification['dismiss_url'] ?  $app_notification['dismiss_url'] : '';
+					$dismiss_url = $app_notification['dismiss_url'] ? $app_notification['dismiss_url'] : '';
 					echo '<a class="btn btn-secondary btn-dismiss" data-notification_end="' . $app_notification['end_date'] . '" data-notification_id="' . $app_notification['id'] . '" data-dismiss-url="' . $dismiss_url . '">' . esc_html__( 'Dismiss', 'nitropack' ) . '</a>';
 				} else if ( $dismissibleId && $dismissBy === 'option' ) {
 					echo '<a class="btn btn-secondary btn-dismiss" data-dismissible-id="' . $dismissibleId . '">' . esc_html__( 'Dismiss', 'nitropack' ) . '</a>';
@@ -159,9 +159,9 @@ class Components {
 	 * Renders a toggle switch.
 	 *
 	 * @param string $id The ID attribute for the checkbox input.
-	 * @param int $value The value to determine if the checkbox should be checked. If the value is greater than 0, the checkbox will be checked.
+	 * @param int|null $value The value to determine if the checkbox should be checked. If the value is greater than 0, the checkbox will be checked.
 	 */
-	public function render_toggle( $id, $value, $attr = [] ) {
+	public function render_toggle( string $id, ?int $value, array $attr = [] ) {
 		$disabled = ! empty( $attr['disabled'] ) ? 'disabled' : '';
 		?>
 		<label class="inline-flex items-center cursor-pointer ml-auto">
@@ -183,6 +183,7 @@ class Components {
 	 *     @type string $icon       The filename of the icon to display inside the element. Default empty.
 	 *     @type array $attributes  Additional HTML attributes to apply to the element. Default empty array.
 	 * }
+	 * @return void
 	 */
 	public function render_button( $args ) {
 		$defaults = [
@@ -203,8 +204,7 @@ class Components {
 			echo '<a href="' . $options['href'] . '"'; ?> 		<?php endif; ?>
 			class="<?php echo esc_attr( $options['classes'] ); ?>" <?php echo $attrs; ?>>
 			<?php if ( $options['icon'] ) : ?>
-				<img src="<?php echo esc_url( $this->img_path . $options['icon'] ); ?>"
-					class="inline-block mr-2" alt="">
+				<img src="<?php echo esc_url( $this->img_path . $options['icon'] ); ?>" class="inline-block mr-2" alt="">
 			<?php endif; ?>
 			<span class="btn-text"><?php echo esc_html( $options['text'], 'nitropack' ); ?></span>
 			<?php if ( $options['type'] === 'button' ) : ?>
@@ -239,13 +239,16 @@ class Components {
 	 * @param string $name    The name attribute for the radio button.
 	 * @param bool   $checked Whether the radio button is checked.
 	 * @param string $label   The label text for the radio button.
-	 * @param string $text    Additional text to display under the label.
+	 * @param string|false $text    Additional text to display under the label.
 	 */
 	public function render_fancy_radio( $value, $id, $name, $checked, $label, $text ) { ?>
 		<div class="fancy-radio-container <?php echo $checked ? "selected" : ""; ?>" data-value="<?php echo $value; ?>">
 			<div class="fancy-radio <?php echo $checked ? "selected" : ""; ?>"><span class="input-fancy-radio"></span></div>
 			<label for="<?php echo $id; ?>"><?php echo $label; ?>
-				<p><?php echo $text; ?></p>
+				<?php
+				if ( $text ) : ?>
+					<p><?php echo $text; ?></p>
+				<?php endif; ?>
 			</label>
 		</div>
 		<?php

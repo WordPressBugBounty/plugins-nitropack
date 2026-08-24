@@ -4,7 +4,7 @@ defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 
 use NitroPack\WordPress\Settings\TestMode;
 use NitroPack\SDK\Filesystem;
-use NitroPack\WordPress\Config;
+use NitroPack\Util\Utils;
 
 $np_basePath = dirname( __FILE__ ) . '/';
 require_once $np_basePath . 'nitropack-sdk/autoload.php';
@@ -12,41 +12,18 @@ require_once $np_basePath . 'constants.php';
 
 $np_originalRequestCookies = $_COOKIE;
 $np_customExpirationTimes = array();
-$np_queriedObj = NULL;
+$np_queriedObj = null;
 $np_loggedPurges = array();
 $np_loggedInvalidations = array();
 $np_integrationSetupEvent = "muplugins_loaded";
 
-function nitropack_is_logged_in() {
-	$nitro = get_nitropack_sdk();
-	$useAccountOverride = $nitro !== NULL && $nitro->isStatefulCacheSatisfied( "account" );
-	if ( $useAccountOverride ) {
-		return false;
-	}
-
-	//used for previewing the site while logged in
-	if ( ! empty( $_GET['previewmode'] ) ) {
-		return false;
-	}
-
-	$loginCookies = array( defined( 'NITROPACK_LOGGED_IN_COOKIE' ) ? NITROPACK_LOGGED_IN_COOKIE : ( defined( 'LOGGED_IN_COOKIE' ) ? LOGGED_IN_COOKIE : '' ) );
-	foreach ( $loginCookies as $loginCookie ) {
-		if ( ! empty( $_COOKIE[ $loginCookie ] ) ) {
-			$parts = explode( '|', urldecode( $_COOKIE[ $loginCookie ] ) );
-			if ( count( $parts ) < 3 ) {
-				continue; // Invalid cookie
-			}
-
-			return time() <= (int) $parts[1];
-		}
-	}
-	$cookieStr = implode( "|", array_keys( $_COOKIE ) );
-
-	return strpos( $cookieStr, "wordpress_logged_in_" ) !== false;
-}
-
+/**
+ * Checks if the current request which has cookies passes the requirements to be cached by NitroPack.
+ * If not sets the disabled reason and returns false -> checks if user is logged in, or has items in cart.
+ * @return bool
+ */
 function nitropack_passes_cookie_requirements() {
-	$isUserLoggedIn = nitropack_is_logged_in();
+	$isUserLoggedIn = Utils::is_logged_in();
 	$cookieStr = implode( "|", array_keys( $_COOKIE ) );
 	$safeCookie = (
 		( strpos( $cookieStr, "comment_author" ) === false || ! ! get_nitropack()->setDisabledReason( "comment author" ) )
@@ -68,325 +45,99 @@ function nitropack_passes_cookie_requirements() {
 	return apply_filters( "nitropack_passes_cookie_requirements", $safeCookie && ( ! $isItemsInCart || $useCartOverride ) && ( ! $isUserLoggedIn ) );
 }
 
-function nitropack_activate() {
-	nitropack_set_wp_cache_const( true );
-
-	$htaccessFile = nitropack_trailingslashit( NITROPACK_DATA_DIR ) . ".htaccess";
-	if ( ! Filesystem::fileExists( $htaccessFile ) && get_nitropack()->initDataDir() ) {
-		Filesystem::filePutContents( $htaccessFile, "deny from all" );
-	}
-
-	$pluginHtaccessFile = nitropack_trailingslashit( NITROPACK_PLUGIN_DATA_DIR ) . ".htaccess";
-	if ( ! Filesystem::fileExists( $pluginHtaccessFile ) && get_nitropack()->initPluginDataDir() ) {
-		Filesystem::filePutContents( $pluginHtaccessFile, "deny from all" );
-	}
-	$advanced_cache = new \NitroPack\WordPress\AdvancedCache\AdvancedCache();
-	$advanced_cache->install_advanced_cache();
-
-	// Htaccess mods need to happen after installing the advanced cache file so the healthcheck can execute fast
-	nitropack_set_htaccess_rules( true );
-
-	try {
-		do_action( 'nitropack_integration_purge_all' );
-	} catch (\Exception $e) {
-		// Exception while signaling our 3rd party integration addons to purge their cache
-	}
-
-	if ( get_nitropack()->isConnected() ) {
-		nitropack_event( "enable_extension" );
-		// Refresh needed to make sure we have the latest config
-		get_nitropack()->settings->set_required_settings();
-	} else {
-		setcookie( "nitropack_after_activate_notice", 1, time() + 3600 );
-	}
-
-	if ( function_exists( "opcache_reset" ) ) {
-		opcache_reset();
-	}
-	( new \NitroPack\WordPress\Cron() )->schedule_events();
-
-	// Avoid redirecting when bulk activating plugins
-	if (
-		( isset( $_REQUEST['action'] ) && 'activate-selected' === $_REQUEST['action'] ) &&
-		( isset( $_POST['checked'] ) && count( $_POST['checked'] ) > 1 ) ) {
+/**
+ * Sets a cookie with the given name and value, along with optional expiration time and additional options.
+ * @param string $name Cookie Name
+ * @param string $value Cookie Value
+ * @param ?int $expires Cookie Expiration Time (Unix Timestamp). If null, the cookie will be a session cookie.
+ * @param array $options Additional cookie options (e.g., "SameSite", "Secure", etc.)
+ * @return void
+ */
+function nitropack_setcookie( string $name, string $value, ?int $expires = null, array $options = [] ) {
+	if ( headers_sent() )
 		return;
-	}
-	add_option( 'nitropack-activation-redirect', wp_get_current_user()->ID );
+	$cookie_options = '';
+	$cookie_path = nitropack_cookiepath();
 
+	if ( $expires && is_numeric( $expires ) ) {
+		$options["Expires"] = date( "D, d M Y H:i:s", (int) $expires ) . ' GMT';
+	}
+
+	if ( empty( $options["SameSite"] ) ) {
+		$options["SameSite"] = "Lax";
+	}
+
+	foreach ( $options as $optName => $optValue ) {
+		$cookie_options .= "$optName=$optValue; ";
+	}
+	nitropack_header( "set-cookie: $name=$value; Path=$cookie_path; " . $cookie_options, false );
 }
 
-function nitropack_activation_redirect() {
-	if ( defined( 'DOING_AJAX' ) || defined( 'WP_CLI' ) ) {
-		return;
-	}
-	global $pagenow;
-	$allowed_pages = [ 'plugins.php', 'plugin-install.php' ];
-	if ( ! in_array( $pagenow, $allowed_pages, true ) ) {
-		return;
-	}
-	// Make sure it's the correct user
-	if ( intval( get_option( 'nitropack-activation-redirect', false ) ) === wp_get_current_user()->ID ) {
-		delete_option( 'nitropack-activation-redirect' );
-		wp_safe_redirect( admin_url( 'admin.php?page=nitropack' ) );
-		exit;
-	}
-}
-add_action( 'admin_init', 'nitropack_activation_redirect' );
-
-function nitropack_deactivate() {
-	nitropack_set_htaccess_rules( false );
-	nitropack_set_wp_cache_const( false );
-	$advanced_cache = new \Nitropack\WordPress\AdvancedCache\AdvancedCache();
-	$advanced_cache->uninstall_advanced_cache();
-
-	try {
-		do_action( 'nitropack_integration_purge_all' );
-	} catch (\Exception $e) {
-		// Exception while signaling our 3rd party integration addons to purge their cache
-	}
-
-	if ( get_nitropack()->isConnected() ) {
-		nitropack_event( "disable_extension" );
-	}
-
-	if ( function_exists( "opcache_reset" ) ) {
-		opcache_reset();
-	}
-	// Unscheduling events from the cron.
-	\NitroPack\WordPress\Cron::unschedule_events();
+/**
+ * Returns the cookie path for the current site.
+ * 
+ * @return string The cookie path.
+ */
+function nitropack_cookiepath() {
+	$siteConfig = nitropack_get_site_config();
+	$homeUrl = $siteConfig && ! empty( $siteConfig["home_url"] ) ? $siteConfig["home_url"] : get_home_url();
+	$url = new \NitroPack\Url\Url( $homeUrl );
+	return $url ? $url->getPath() : "/";
 }
 
-function nitropack_set_wp_cache_const( $status ) {
-	if ( \NitroPack\Integration\Hosting\Flywheel::detect() ) { // Flywheel: This is configured throught the FW control panel
-		return true;
+/**
+ * Returns true if the current request passes all requirements to be cached by NitroPack.
+ *
+ * @param bool $no_cache Whether to detect the result if it hasn't been cached yet. Default is true.
+ * @return bool
+ */
+function nitropack_passes_page_requirements( bool $no_cache = true ) {
+	static $cachedResult = null;
+	$reduceCheckoutChecks = defined( "NITROPACK_REDUCE_CHECKOUT_CHECKS" ) && NITROPACK_REDUCE_CHECKOUT_CHECKS;
+	$reduceCartChecks = defined( "NITROPACK_REDUCE_CART_CHECKS" ) && NITROPACK_REDUCE_CART_CHECKS;
+
+	if ( $cachedResult === null && $no_cache ) {
+
+		$cachedResult = ! (
+			( is_404() && ! get_nitropack()->setDisabledReason( "404" ) ) ||
+			( is_preview() && ! get_nitropack()->setDisabledReason( "preview page" ) ) ||
+			( is_feed() && ! get_nitropack()->setDisabledReason( "feed" ) ) ||
+			( is_comment_feed() && ! get_nitropack()->setDisabledReason( "comment feed" ) ) ||
+			( is_trackback() && ! get_nitropack()->setDisabledReason( "trackback" ) ) ||
+			( Utils::is_logged_in() && ! get_nitropack()->setDisabledReason( "logged in" ) ) ||
+			( is_search() && ! get_nitropack()->setDisabledReason( "search" ) ) ||
+			( Utils::is_ajax() && ! get_nitropack()->setDisabledReason( "ajax" ) ) ||
+			( Utils::is_post_request() && ! get_nitropack()->setDisabledReason( "post request" ) ) ||
+			( Utils::is_xmlrpc() && ! get_nitropack()->setDisabledReason( "xmlrpc" ) ) ||
+			( Utils::is_robots_request() && ! get_nitropack()->setDisabledReason( "robots" ) ) ||
+			Utils::is_amp_page() ||
+			! nitropack_is_allowed_request() ||
+			( Utils::is_wp_cron() && ! get_nitropack()->setDisabledReason( "doing cron" ) ) || // CRON request
+			( Utils::is_wp_cli() ) || // CLI request
+			( defined( 'WC_PLUGIN_FILE' ) && ( is_page( 'cart' ) || ( ! $reduceCartChecks && is_cart() ) ) && ! get_nitropack()->setDisabledReason( "cart page" ) ) || // WooCommerce
+			( defined( 'WC_PLUGIN_FILE' ) && ( is_page( 'checkout' ) || ( ! $reduceCheckoutChecks && is_checkout() ) ) && ! get_nitropack()->setDisabledReason( "checkout page" ) ) || // WooCommerce
+			( defined( 'WC_PLUGIN_FILE' ) && is_account_page() && ! get_nitropack()->setDisabledReason( "account page" ) ) // WooCommerce
+		);
 	}
 
-	if ( \NitroPack\Integration\Hosting\Pressable::detect() ) { // Pressable: We need to deal with Batcache here
-		return nitropack_set_batcache_compat( $status );
-	}
-
-	$configFilePath = nitropack_get_wpconfig_path();
-	if ( ! $configFilePath )
-		return false;
-
-	$newVal = sprintf( "define( 'WP_CACHE', %s /* Modified by NitroPack */ );\n", ( $status ? "true" : "false" ) );
-	$replacementVal = sprintf( " %s /* Modified by NitroPack */ ", ( $status ? "true" : "false" ) );
-	$lines = file( $configFilePath );
-
-	if ( empty( $lines ) )
-		return false;
-
-	$wpCacheFound = false;
-	$phpOpeningTagLine = false;
-
-	foreach ( $lines as $lineIndex => &$line ) {
-		if ( strpos( $line, "<?php" ) !== false && strpos( $line, "?>" ) === false ) {
-			$phpOpeningTagLine = $lineIndex;
-		}
-
-		if ( ! $wpCacheFound && preg_match( "/define\s*\(\s*['\"](.*?)['\"].?,(.*?)\)/", $line, $matches ) ) {
-			if ( $matches[1] == "WP_CACHE" ) {
-				$line = str_replace( $matches[2], $replacementVal, $line );
-				$wpCacheFound = true;
-			}
-		}
-
-		if ( $phpOpeningTagLine !== false && $wpCacheFound !== false )
-			break;
-	}
-
-	if ( ! $wpCacheFound ) {
-		if ( ! $status )
-			return true; // No need to modify the file at all
-
-		if ( $phpOpeningTagLine !== false ) {
-			array_splice( $lines, $phpOpeningTagLine + 1, 0, [ $newVal ] );
-		} else {
-			array_unshift( $lines, "<?php " . trim( $newVal ) . " ?>\n" );
-		}
-	}
-
-	return WP_DEBUG ? Filesystem::filePutContents( $configFilePath, implode( "", $lines ) ) : @Filesystem::filePutContents( $configFilePath, implode( "", $lines ) );
+	return $cachedResult;
 }
 
-function nitropack_set_htaccess_rules( $status ) {
-	if ( ! apply_filters( 'nitropack_should_modify_htaccess', false ) )
-		return true;
-
-	$htaccessFilePath = nitropack_get_htaccess_path();
-	if ( ! $htaccessFilePath )
-		return false;
-
-	$htaccessBackupFilePath = $htaccessFilePath . ".nitrobackup";
-	$backupExists = WP_DEBUG ? Filesystem::fileExists( $htaccessBackupFilePath ) : @Filesystem::fileExists( $htaccessBackupFilePath );
-	if ( ! $backupExists ) {
-		$isBackupSuccess = WP_DEBUG ? copy( $htaccessFilePath, $htaccessBackupFilePath ) : @copy( $htaccessFilePath, $htaccessBackupFilePath );
-		if ( ! $isBackupSuccess )
-			return false;
-	}
-
-	$lines = file( $htaccessFilePath );
-	$linesBackup = $lines;
-
-	if ( empty( $lines ) )
-		return false; // We might want to remove this check
-
-	// Remove the old LiteSpeed rules. We need to do this because LiteSpeed's rules are not compatible with NitroPack's rules.
-	if ( $status ) {
-
-		$nitroLsOpenLine = false;
-		$nitroLsCloseLine = false;
-
-		foreach ( $lines as $lineIndex => &$line ) {
-			if ( trim( $line ) == "# BEGIN LSCACHE" ) {
-				$nitroLsOpenLine = $lineIndex;
-			}
-
-			if ( trim( $line ) == "# END LSCACHE" ) {
-				$nitroLsCloseLine = $lineIndex;
-			}
-		}
-
-		if ( $nitroLsOpenLine !== false && $nitroLsCloseLine !== false && $nitroLsCloseLine > $nitroLsOpenLine ) {
-
-			array_splice( $lines, $nitroLsOpenLine, $nitroLsCloseLine - $nitroLsOpenLine + 1 );
-		}
-	}
-
-	$nitroOpenLine = false;
-	$nitroCloseLine = false;
-
-	foreach ( $lines as $lineIndex => &$line ) {
-		if ( trim( $line ) == "# BEGIN NITROPACK" ) {
-			$nitroOpenLine = $lineIndex;
-		}
-
-		if ( trim( $line ) == "# END NITROPACK" ) {
-			$nitroCloseLine = $lineIndex;
-		}
-	}
-
-	$nitroLines = [];
-
-	if ( // We either didn't find the NitroPack markers or we found both in the correct order
-		( $nitroOpenLine === false && $nitroCloseLine === false ) ||
-		( $nitroOpenLine !== false && $nitroCloseLine !== false && $nitroCloseLine > $nitroOpenLine )
-	) {
-		$nitroLines[] = "# BEGIN NITROPACK";
-		if ( $status ) {
-			$rules = apply_filters( "nitropack_htaccess_rules", [] );
-
-			if ( is_string( $rules ) ) {
-				$rules = explode( "\n", $rules );
-			}
-
-			if ( is_array( $rules ) ) {
-				$nitroLines = array_merge( $nitroLines, $rules );
-			}
-		}
-		$nitroLines[] = "# END NITROPACK";
-		$nitroLines = array_map( function ( $line ) {
-			return trim( $line ) . "\n";
-		}, $nitroLines );
-
-		// Begin .htaccess modification
-		$offset = $nitroOpenLine !== false ? $nitroOpenLine : 0;
-		$length = $nitroOpenLine !== false ? $nitroCloseLine - $nitroOpenLine + 1 : 0;
-		array_splice( $lines, $offset, $length, $nitroLines );
-		$writeResult = WP_DEBUG ? Filesystem::filePutContents( $htaccessFilePath, implode( "", $lines ) ) : @Filesystem::filePutContents( $htaccessFilePath, implode( "", $lines ) );
-		if ( $writeResult ) {
-			$homeUrl = NULL;
-			$siteConfig = get_nitropack()->getSiteConfig();
-
-			if ( $siteConfig && ! empty( $siteConfig["home_url"] ) ) {
-				$homeUrl = $siteConfig["home_url"];
-			} else if ( function_exists( get_home_url() ) ) {
-				$homeUrl = get_home_url();
-			}
-
-			if ( $homeUrl ) {
-				$homeUrl .= ( strpos( $homeUrl, "?" ) === false ? "?" : "&" ) . "nitroHealthcheck=1";
-				try {
-					$client = new \NitroPack\HttpClient\HttpClient( $homeUrl );
-					$client->timeout = 5;
-					$client->setHeader( "Accept", "text/html" );
-					$client->fetch();
-					if ( $client->getStatusCode() != 200 ) {
-						// Restore the initial version of the file
-						WP_DEBUG ? Filesystem::filePutContents( $htaccessFilePath, implode( "", $linesBackup ) ) : @Filesystem::filePutContents( $htaccessFilePath, implode( "", $linesBackup ) );
-						return false;
-					}
-				} catch (\Exception $e) {
-					return false;
-					// Unfortunately we can't be certain whether an issue appeared due to the .htaccess mods
-					// There are no known cases of this happening, so it's fairly safe to assume that all is fine
-					// There are server setups which do not allow loopback requests, which is the more likely reason to end up here
-					// However we can't be certain which one it is, so we are taking the safer approach 
-				}
-			} else {
-				return false;
-			}
-		}
-		return $writeResult;
-	}
-
-	return true;
-}
-
-function nitropack_set_batcache_compat( $status ) {
-	$currentCompatStatus = defined( "NITROPACK_BATCACHE_COMPAT" ) && NITROPACK_BATCACHE_COMPAT;
-	if ( $currentCompatStatus === $status )
-		return true;
-
-	$configFilePath = nitropack_get_wpconfig_path();
-	if ( ! $configFilePath )
-		return false;
-
-	$batCacheFilePath = NITROPACK_PLUGIN_DIR . "batcache-compat.php";
-	$compatInclude = sprintf( "if (file_exists(\"%s\")) { require_once \"%s\"; } // NitroPack compatibility with Batcache\n", $batCacheFilePath, $batCacheFilePath );
-	$lines = file( $configFilePath );
-
-	if ( empty( $lines ) )
-		return false;
-
-	foreach ( $lines as $lineIndex => &$line ) {
-		if ( preg_match( "/nitropack.*?batcache/i", $line ) ) {
-			$line = "//REMOVE AT FILTER";
-		}
-	}
-
-	$newLines = array_filter( $lines, function ( $line ) {
-		return $line != "//REMOVE AT FILTER";
-	} );
-
-	if ( $status ) {
-		$phpOpeningTagLine = false;
-
-		unset( $line );
-		foreach ( $newLines as $lineIndex => $line ) {
-			if ( strpos( $line, "<?php" ) !== false && strpos( $line, "?>" ) === false ) {
-				$phpOpeningTagLine = $lineIndex;
-				break;
-			}
-		}
-
-		if ( $phpOpeningTagLine !== false ) {
-			array_splice( $newLines, $phpOpeningTagLine + 1, 0, [ $compatInclude ] );
-		} else {
-			array_unshift( $newLines, "<?php " . trim( $compatInclude ) . " ?>\n" );
-		}
-	}
-
-	return WP_DEBUG ? Filesystem::filePutContents( $configFilePath, implode( "", $newLines ) ) : @Filesystem::filePutContents( $configFilePath, implode( "", $newLines ) );
-}
-
+/* BEACON */
+/**
+ * Checks if the current request is a valid NitroPack beacon request.
+ *
+ * @return bool True if the request is valid, false otherwise.
+ */
 function is_valid_nitropack_beacon() {
-	if ( ! isset( $_POST["nitroBeaconUrl"] ) || ! isset( $_POST["nitroBeaconHash"] ) )
+	if ( ! isset( $_POST["nitroBeaconUrl"] ) || ! isset( $_POST["nitroBeaconHash"] ) ) {
 		return false;
+	}
 
 	$siteConfig = nitropack_get_site_config();
-	if ( ! $siteConfig || empty( $siteConfig["siteSecret"] ) )
+	if ( ! $siteConfig || empty( $siteConfig["siteSecret"] ) ) {
 		return false;
+	}
 
 
 	if ( function_exists( "hash_hmac" ) && function_exists( "hash_equals" ) ) {
@@ -400,6 +151,10 @@ function is_valid_nitropack_beacon() {
 	}
 }
 
+/**
+ * Beacon - trigger optimizations on organic visit
+ * @return void
+ */
 function nitropack_handle_beacon() {
 	global $np_originalRequestCookies;
 	if ( ! defined( "NITROPACK_BEACON_HANDLED" ) ) {
@@ -422,7 +177,6 @@ function nitropack_handle_beacon() {
 			try {
 
 				$hasLocalCache = $nitro->hasLocalCache( false );
-				$needsHeartbeat = nitropack_is_heartbeat_needed();
 				$proxyPurgeOnly = ! empty( $_POST["proxyPurgeOnly"] );
 				$layout = ! empty( $_POST["layout"] ) ? $_POST["layout"] : "default";
 				$output = "";
@@ -443,7 +197,7 @@ function nitropack_handle_beacon() {
 					}
 				}
 
-				if ( $hasLocalCache || $proxyPurgeOnly/* || $needsHeartbeat*/ ) { // proxyPurgeOnly is set for unsupported browsers, in which case we need to purge the cache regardless of the existence of local NP cache
+				if ( $hasLocalCache || $proxyPurgeOnly ) { // proxyPurgeOnly is set for unsupported browsers, in which case we need to purge the cache regardless of the existence of local NP cache
 					nitropack_header( "X-Nitro-Proxy-Purge: true" );
 					$nitro->purgeProxyCache( $url );
 					do_action( 'nitropack_integration_purge_url', $url );
@@ -462,86 +216,12 @@ function nitropack_handle_beacon() {
 	} );
 }
 
-
-
-function nitropack_sanitize_url_input( $url ) {
-	$result = NULL;
-	if ( ! function_exists( "esc_url" ) ) {
-		$sanitizedUrl = filter_var( $url, FILTER_SANITIZE_URL );
-		if ( $sanitizedUrl !== false && filter_var( $sanitizedUrl, FILTER_VALIDATE_URL ) !== false ) {
-			$result = $sanitizedUrl;
-		}
-	} else if ( $validatedUrl = esc_url( $url, array( "http", "https" ), "notdisplay" ) ) {
-		$result = $validatedUrl;
-	}
-
-	return $result;
-}
-
-function nitropack_is_amp_page() {
-	return ( function_exists( 'amp_is_request' ) && amp_is_request() && ! get_nitropack()->setDisabledReason( "amp page" ) ) ||
-		( function_exists( 'ampforwp_is_amp_endpoint' ) && ampforwp_is_amp_endpoint() && ! get_nitropack()->setDisabledReason( "amp page" ) );
-}
-
-function nitropack_passes_page_requirements( $detectIfNoCachedResult = true ) {
-	static $cachedResult = NULL;
-	$reduceCheckoutChecks = defined( "NITROPACK_REDUCE_CHECKOUT_CHECKS" ) && NITROPACK_REDUCE_CHECKOUT_CHECKS;
-	$reduceCartChecks = defined( "NITROPACK_REDUCE_CART_CHECKS" ) && NITROPACK_REDUCE_CART_CHECKS;
-
-	if ( $cachedResult === NULL && $detectIfNoCachedResult ) {
-
-		$cachedResult = ! (
-			( is_404() && ! get_nitropack()->setDisabledReason( "404" ) ) ||
-			( is_preview() && ! get_nitropack()->setDisabledReason( "preview page" ) ) ||
-			( is_feed() && ! get_nitropack()->setDisabledReason( "feed" ) ) ||
-			( is_comment_feed() && ! get_nitropack()->setDisabledReason( "comment feed" ) ) ||
-			( is_trackback() && ! get_nitropack()->setDisabledReason( "trackback" ) ) ||
-			( nitropack_is_logged_in() && ! get_nitropack()->setDisabledReason( "logged in" ) ) ||
-			( is_search() && ! get_nitropack()->setDisabledReason( "search" ) ) ||
-			( nitropack_is_ajax() && ! get_nitropack()->setDisabledReason( "ajax" ) ) ||
-			( nitropack_is_post() && ! get_nitropack()->setDisabledReason( "post request" ) ) ||
-			( nitropack_is_xmlrpc() && ! get_nitropack()->setDisabledReason( "xmlrpc" ) ) ||
-			( nitropack_is_robots() && ! get_nitropack()->setDisabledReason( "robots" ) ) ||
-			nitropack_is_amp_page() ||
-			! nitropack_is_allowed_request() ||
-			( nitropack_is_wp_cron() && ! get_nitropack()->setDisabledReason( "doing cron" ) ) || // CRON request
-			( nitropack_is_wp_cli() ) || // CLI request
-			( defined( 'WC_PLUGIN_FILE' ) && ( is_page( 'cart' ) || ( ! $reduceCartChecks && is_cart() ) ) && ! get_nitropack()->setDisabledReason( "cart page" ) ) || // WooCommerce
-			( defined( 'WC_PLUGIN_FILE' ) && ( is_page( 'checkout' ) || ( ! $reduceCheckoutChecks && is_checkout() ) ) && ! get_nitropack()->setDisabledReason( "checkout page" ) ) || // WooCommerce
-			( defined( 'WC_PLUGIN_FILE' ) && is_account_page() && ! get_nitropack()->setDisabledReason( "account page" ) ) // WooCommerce
-		);
-	}
-
-	return $cachedResult;
-}
-
-function nitropack_is_home() {
-	if ( 'posts' == get_option( 'show_on_front' ) ) {
-		return is_front_page() || is_home();
-	} else {
-		return is_front_page();
-	}
-}
-
-function nitropack_is_blogindex() {
-	return is_home();
-}
-
-function nitropack_is_archive() {
-	return apply_filters( "nitropack_is_archive_page", is_author() || is_archive() );
-}
-
-/* We have a lot of requests with these GET parameters that we want to ignore */
-function nitropack_get_ignored_get_params() {
-	$urls = [ 'shop_order', 'shop_order_refund', 'revisionPreview' ];
-	return $urls;
-}
 function nitropack_is_allowed_request() {
 	global $np_queriedObj;
 	$CPTOptimization = NitroPack\WordPress\Settings\CPTOptimization::getInstance();
 	$cacheableObjectTypes = $CPTOptimization->nitropack_get_cacheable_object_types();
 	if ( is_array( $cacheableObjectTypes ) ) {
-		if ( nitropack_is_home() ) {
+		if ( Utils::nitropack_is_home() ) {
 			if ( ! in_array( 'home', $cacheableObjectTypes ) ) {
 				get_nitropack()->setDisabledReason( "page type not allowed (home)" );
 				return false;
@@ -554,7 +234,7 @@ function nitropack_is_allowed_request() {
 					return false;
 				}
 			} else {
-				if ( nitropack_is_archive() ) {
+				if ( Utils::nitropack_is_archive() ) {
 					if ( ! in_array( 'archive', $cacheableObjectTypes ) ) {
 						get_nitropack()->setDisabledReason( "page type not allowed (archive)" );
 						return false;
@@ -570,7 +250,7 @@ function nitropack_is_allowed_request() {
 		}
 	}
 
-	$ignoredGETParams = nitropack_get_ignored_get_params();
+	$ignoredGETParams = Utils::get_ignored_get_params();
 	foreach ( $ignoredGETParams as $ignoredGETParam ) {
 		if ( ! empty( $_GET[ $ignoredGETParam ] ) ) {
 			get_nitropack()->setDisabledReason( "ignored url parameter detected ($ignoredGETParam)" );
@@ -592,98 +272,137 @@ function nitropack_is_allowed_request() {
 	return false;
 }
 
-function nitropack_is_ajax() {
-	return ( function_exists( "wp_doing_ajax" ) && wp_doing_ajax() ) ||
-		( defined( 'DOING_AJAX' ) && DOING_AJAX ) ||
-		( ! empty( $_SERVER["HTTP_X_REQUESTED_WITH"] ) && $_SERVER["HTTP_X_REQUESTED_WITH"] == "XMLHttpRequest" ) ||
-		( ! empty( $_SERVER["REQUEST_URI"] ) && basename( $_SERVER["REQUEST_URI"] ) == "admin-ajax.php" ) ||
-		! empty( $_GET["wc-ajax"] );
+function nitropack_print_beacon_script() {
+	if ( defined( "NITROPACK_BEACON_PRINTED" ) || ! nitropack_passes_page_requirements() ) {
+		return;
+	}
+	define( "NITROPACK_BEACON_PRINTED", true );
+	echo apply_filters( "nitro_script_output", nitropack_get_beacon_script() );
 }
 
-/**
- * Checking if the current request is wp-cli request
- *
- * @return bool
- */
-function nitropack_is_wp_cli() {
-	return NitroPack\WordPress\NitroPack::isWpCli();
-}
+function nitropack_get_beacon_script() {
+	$siteConfig = nitropack_get_site_config();
+	if ( $siteConfig && ! empty( $siteConfig["siteId"] ) && ! empty( $siteConfig["siteSecret"] ) ) {
+		if ( null !== $nitro = get_nitropack_sdk( $siteConfig["siteId"], $siteConfig["siteSecret"] ) ) {
+			$url = $nitro->getUrl();
+			$cookiesJson = json_encode( $nitro->supportedCookiesFilter( NitroPack\SDK\NitroPack::getCookies() ) );
+			$layout = Utils::get_page_type();
 
-function nitropack_is_wp_cron() {
-	return defined( 'DOING_CRON' ) && DOING_CRON;
-}
+			if ( function_exists( "hash_hmac" ) && function_exists( "hash_equals" ) ) {
+				$hash = hash_hmac( "sha512", $url . $cookiesJson . $layout, $siteConfig["siteSecret"] );
+			} else {
+				$hash = "";
+			}
+			$url = base64_encode( $url ); // We want only ASCII
+			$cookiesb64 = base64_encode( $cookiesJson );
+			$proxyPurgeOnly = ! $nitro->isAllowedBrowser();
 
-function nitropack_is_rest() {
-	// Source: https://wordpress.stackexchange.com/a/317041
-	$prefix = rest_get_url_prefix();
-	if (
-		defined( 'REST_REQUEST' ) && REST_REQUEST // (#1)
-		|| isset( $_GET['rest_route'] ) // (#2)
-		&& strpos( trim( $_GET['rest_route'], '\\/' ), $prefix, 0 ) === 0
-	)
-		return true;
-	// (#3)
-	global $wp_rewrite;
-	if ( $wp_rewrite === null )
-		$wp_rewrite = new WP_Rewrite();
-
-	// (#4)
-	$rest_url = wp_parse_url( trailingslashit( rest_url() ) );
-	$current_url = wp_parse_url( add_query_arg( array() ) );
-	return strpos( $current_url['path'], $rest_url['path'], 0 ) === 0;
-}
-
-function nitropack_is_post() {
-	return ( ! empty( $_SERVER['REQUEST_METHOD'] ) && $_SERVER['REQUEST_METHOD'] === 'POST' ) || ( empty( $_SERVER['REQUEST_METHOD'] ) && ! empty( $_POST ) );
-}
-
-function nitropack_is_xmlrpc() {
-	return defined( 'XMLRPC_REQUEST' ) && XMLRPC_REQUEST;
-}
-
-function nitropack_is_robots() {
-	return is_robots() || ( ! empty( $_SERVER["REQUEST_URI"] ) && basename( parse_url( $_SERVER["REQUEST_URI"], PHP_URL_PATH ) ) === "robots.txt" );
-}
-
-// IMPORTANT: This function should only be trusted if NitroPack is connected. Otherwise we may not have information about the admin URL in the config file and it may return an incorrect result
-function nitropack_is_admin() {
-	if ( ( nitropack_is_ajax() || nitropack_is_rest() ) && ! empty( $_SERVER["HTTP_REFERER"] ) ) {
-		$adminUrl = NULL;
-		$siteConfig = nitropack_get_site_config();
-		if ( $siteConfig && ! empty( $siteConfig["admin_url"] ) ) {
-			$adminUrl = $siteConfig["admin_url"];
-		} else if ( function_exists( "admin_url" ) ) {
-			$adminUrl = admin_url();
-		} else {
-			return is_admin();
+			return "
+<script nitro-exclude>
+    if (!window.NITROPACK_STATE || window.NITROPACK_STATE != 'FRESH') {
+        var proxyPurgeOnly = " . ( $proxyPurgeOnly ? 1 : 0 ) . ";
+        if (typeof navigator.sendBeacon !== 'undefined') {
+            var nitroData = new FormData(); nitroData.append('nitroBeaconUrl', '$url'); nitroData.append('nitroBeaconCookies', '$cookiesb64'); nitroData.append('nitroBeaconHash', '$hash'); nitroData.append('proxyPurgeOnly', '$proxyPurgeOnly'); nitroData.append('layout', '$layout'); navigator.sendBeacon(location.href, nitroData);
+        } else {
+            var xhr = new XMLHttpRequest(); xhr.open('POST', location.href, true); xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded'); xhr.send('nitroBeaconUrl={$url}&nitroBeaconCookies={$cookiesb64}&nitroBeaconHash={$hash}&proxyPurgeOnly={$proxyPurgeOnly}&layout={$layout}');
+        }
+    }
+</script>";
 		}
-
-		return strpos( $_SERVER["HTTP_REFERER"], $adminUrl ) === 0;
-	} else {
-		return is_admin();
 	}
 }
 
-function nitropack_is_warmup_request() {
-	return ! empty( $_SERVER["HTTP_X_NITRO_WARMUP"] );
+function nitropack_print_generic_nitro_script() {
+	if ( defined( "NITROPACK_GENERIC_NITRO_SCRIPT_PRINTED" ) ) {
+		return;
+	}
+	define( "NITROPACK_GENERIC_NITRO_SCRIPT_PRINTED", true );
+	//echo apply_filters( "nitro_script_output", nitropack_get_telemetry_meta() );
+	echo apply_filters( "nitro_script_output", nitropack_get_generic_nitro_script() );
 }
 
-function nitropack_is_lighthouse_request() {
-	return ! empty( $_SERVER["HTTP_USER_AGENT"] ) && stripos( $_SERVER["HTTP_USER_AGENT"], "lighthouse" ) !== false;
+/**
+ * Generic NitroPack Script - pageview counting and related connection details
+ * @return string
+ */
+function nitropack_get_generic_nitro_script() {
+	$siteConfig = nitropack_get_site_config();
+	if ( $siteConfig && ! empty( $siteConfig["siteId"] ) && ! empty( $siteConfig["siteSecret"] ) ) {
+		if ( null !== $nitro = get_nitropack_sdk( $siteConfig["siteId"], $siteConfig["siteSecret"] ) ) {
+			$config = $nitro->getConfig();
+			if ( ! empty( $config->GenericNitroScript->Script ) ) {
+				return "<script id='nitro-generic' nitro-exclude>" . $config->GenericNitroScript->Script . "</script>";
+			}
+		}
+	}
+
+	return "";
 }
 
-function nitropack_is_gtmetrix_request() {
-	return ! empty( $_SERVER["HTTP_USER_AGENT"] ) && stripos( $_SERVER["HTTP_USER_AGENT"], "gtmetrix" ) !== false;
+function nitropack_print_web_vitals_telemetry_script() {
+	if ( defined( "NITROPACK_WEB_VITALS_TELEMETRY_SCRIPT_PRINTED" ) ) {
+		return;
+	}
+	define( "NITROPACK_WEB_VITALS_TELEMETRY_SCRIPT_PRINTED", true );
+	echo apply_filters( "nitro_script_output", nitropack_get_web_vitals_telemetry_script() );
 }
 
-function nitropack_is_pingdom_request() {
-	return ! empty( $_SERVER["HTTP_USER_AGENT"] ) && stripos( $_SERVER["HTTP_USER_AGENT"], "pingdom" ) !== false;
+/**
+ * Web Vitals - RUM (Real User Monitoring) data gathering
+ * @return string
+ */
+function nitropack_get_web_vitals_telemetry_script() {
+	$siteConfig = nitropack_get_site_config();
+	if ( $siteConfig && ! empty( $siteConfig["siteId"] ) && ! empty( $siteConfig["siteSecret"] ) ) {
+		if ( null !== $nitro = get_nitropack_sdk( $siteConfig["siteId"], $siteConfig["siteSecret"] ) ) {
+			$config = $nitro->getConfig();
+			if ( ! empty( $config->WebVitalsTelemetry->Status ) && ! empty( $config->WebVitalsTelemetry->Script ) ) {
+				return "<script id='nitro-web-vitals-telemetry' nitro-exclude>" . $config->WebVitalsTelemetry->Script . "</script>";
+			}
+		}
+	}
+
+	return "";
 }
 
-function nitropack_is_optimizer_request() {
-	return isset( $_SERVER["HTTP_X_NITROPACK_REQUEST"] );
+/**
+ * Not used at the moment
+ * @return string
+ */
+function nitropack_get_telemetry_meta() {
+	$disabledReason = get_nitropack()->getDisabledReason();
+	$missReason = $disabledReason !== null ? $disabledReason : "cache not found";
+	$pageType = get_nitropack()->getPageType();
+	$isEligibleForOptimization = nitropack_passes_page_requirements();
+	$metaObj = "window.NPTelemetryMetadata={";
+
+	if ( $missReason ) {
+		$metaObj .= "missReason: (!window.NITROPACK_STATE ? '$missReason' : 'hit'),";
+	}
+
+	if ( $pageType ) {
+		$metaObj .= "pageType: '$pageType',";
+	}
+
+	$metaObj .= "isEligibleForOptimization: " . ( $isEligibleForOptimization ? "true" : "false" ) . ",";
+
+	$metaObj .= "}";
+
+	return "<script id='nitro-telemetry-meta' nitro-exclude>$metaObj</script>";
 }
 
+function nitropack_print_element_override() {
+	if ( defined( "NITROPACK_ELEMENT_OVERRIDE_PRINTED" ) ) {
+		return;
+	}
+	define( "NITROPACK_ELEMENT_OVERRIDE_PRINTED", true );
+	echo apply_filters( "nitro_script_output", nitropack_get_element_override_script() );
+}
+
+function nitropack_get_element_override_script() {
+	$nitro = get_nitropack_sdk();
+	return $nitro !== null ? $nitro->getStatefulCacheHandlerScript() : "";
+}
 function nitropack_init() {
 	global $np_queriedObj;
 	nitropack_header( 'X-Nitro-Cache: MISS' );
@@ -702,7 +421,7 @@ function nitropack_init() {
 				$np_queriedObj = get_queried_object();
 				get_nitropack()->setPageType( $np_queriedObj->taxonomy );
 			} else {
-				$layout = nitropack_get_layout();
+				$layout = Utils::get_page_type();
 				get_nitropack()->setPageType( $layout );
 			}
 
@@ -711,7 +430,7 @@ function nitropack_init() {
 				add_action( 'wp_footer', 'nitropack_print_beacon_script' );
 				add_action( 'get_footer', 'nitropack_print_beacon_script' );
 
-				if ( nitropack_is_optimizer_request() ) { // Only care about tags for requests coming from our service. There is no need to do an API request when handling a standard client request.
+				if ( Utils::is_optimizer_nitropack_request() ) { // Only care about tags for requests coming from our service. There is no need to do an API request when handling a standard client request.
 					if ( defined( 'FUSION_BUILDER_VERSION' ) ) {
 						add_filter( 'do_shortcode_tag', 'nitropack_handle_fusion_builder_conatainer_expiration', 10, 3 );
 						add_action( 'wp_footer', 'nitropack_set_custom_expiration' );
@@ -753,7 +472,7 @@ function nitropack_init() {
 					//    }
 					//}, 10, 2);
 
-					add_filter( 'post_link', 'nitropack_post_link_listener', 10, 3 );
+					add_filter( 'post_link', 'nitropack_post_link_listener', 10, 2 );
 					add_action( 'the_post', 'nitropack_handle_the_post' );
 					add_action( 'wp_footer', 'nitropack_log_tags' );
 				}
@@ -765,7 +484,7 @@ function nitropack_init() {
 				}
 			}
 
-			if ( ! nitropack_is_optimizer_request() ) {
+			if ( ! Utils::is_optimizer_nitropack_request() ) {
 				add_action( 'wp_head', 'nitropack_print_generic_nitro_script' );
 				add_action( 'wp_head', 'nitropack_print_web_vitals_telemetry_script' );
 			}
@@ -773,7 +492,15 @@ function nitropack_init() {
 	}
 }
 
-function nitropack_handle_fusion_builder_conatainer_expiration( $output, $tag, $attr ) {
+/**
+ * Handle Fusion Builder container expiration by checking the publish date and status attributes.
+ *
+ * @param string $output The output of the shortcode.
+ * @param string $tag The shortcode tag.
+ * @param array $attr The shortcode attributes.
+ * @return string The output of the shortcode.
+ */
+function nitropack_handle_fusion_builder_conatainer_expiration( string $output, string $tag, array $attr ) {
 	global $np_customExpirationTimes;
 	if ( $tag == "fusion_builder_container" ) {
 		if ( ! empty( $attr["publish_date"] ) && ! empty( $attr["status"] ) && in_array( $attr["status"], array( "published_until", "publish_after" ) ) ) {
@@ -794,13 +521,19 @@ function nitropack_handle_fusion_builder_conatainer_expiration( $output, $tag, $
 	}
 	return $output;
 }
-function nitropack_set_custom_expiration() {
 
+/**
+ * Set custom expiration times for optimized posts based on their scheduled publish dates.
+ * This function checks for optimized custom post types (CPTs) and adds their scheduled publish dates to the expiration times.
+ * @return void
+ */
+function nitropack_set_custom_expiration() {
 	//check which CPTs are marked for optimization
 	$CPTOptimization = NitroPack\WordPress\Settings\CPTOptimization::getInstance();
 	$get_optimized_CPTs = $CPTOptimization->nitropack_get_optimized_CPTs();
-	if ( empty( $get_optimized_CPTs ) )
+	if ( empty( $get_optimized_CPTs ) ) {
 		return;
+	}
 
 	global $np_customExpirationTimes, $wpdb;
 
@@ -838,10 +571,15 @@ function nitropack_set_custom_expiration() {
 	}
 }
 
-// Determine if the current page is related to the scheduled post
-// This is a best-effort approach and may not cover all cases
-function nitropack_is_page_related_to_scheduled_post( $scheduled_post ) {
-	$current_layout = nitropack_get_layout();
+
+/**
+ * Determine if the current page is related to the scheduled post
+ * This is a best-effort approach and may not cover all cases
+ * @param \WP_Post $scheduled_post The scheduled post object.
+ * @return bool True if the current page is related to the scheduled post, false otherwise.
+ */
+function nitropack_is_page_related_to_scheduled_post( \WP_Post $scheduled_post ) {
+	$current_layout = Utils::get_page_type();
 	$postType = $scheduled_post->post_type;
 	$CPTOptimization = NitroPack\WordPress\Settings\CPTOptimization::getInstance();
 	$cacheableObjectTypes = $CPTOptimization->nitropack_get_cacheable_object_types();
@@ -874,184 +612,20 @@ function nitropack_is_page_related_to_scheduled_post( $scheduled_post ) {
 	return false;
 }
 
-function nitropack_print_beacon_script() {
-	if ( defined( "NITROPACK_BEACON_PRINTED" ) || ! nitropack_passes_page_requirements() )
-		return;
-	define( "NITROPACK_BEACON_PRINTED", true );
-	echo apply_filters( "nitro_script_output", nitropack_get_beacon_script() );
-}
-
-function nitropack_get_beacon_script() {
-	$siteConfig = nitropack_get_site_config();
-	if ( $siteConfig && ! empty( $siteConfig["siteId"] ) && ! empty( $siteConfig["siteSecret"] ) ) {
-		if ( null !== $nitro = get_nitropack_sdk( $siteConfig["siteId"], $siteConfig["siteSecret"] ) ) {
-			$url = $nitro->getUrl();
-			$cookiesJson = json_encode( $nitro->supportedCookiesFilter( NitroPack\SDK\NitroPack::getCookies() ) );
-			$layout = nitropack_get_layout();
-
-			if ( function_exists( "hash_hmac" ) && function_exists( "hash_equals" ) ) {
-				$hash = hash_hmac( "sha512", $url . $cookiesJson . $layout, $siteConfig["siteSecret"] );
-			} else {
-				$hash = "";
-			}
-			$url = base64_encode( $url ); // We want only ASCII
-			$cookiesb64 = base64_encode( $cookiesJson );
-			$proxyPurgeOnly = ! $nitro->isAllowedBrowser();
-
-			return "
-<script nitro-exclude>
-    if (!window.NITROPACK_STATE || window.NITROPACK_STATE != 'FRESH') {
-        var proxyPurgeOnly = " . ( $proxyPurgeOnly ? 1 : 0 ) . ";
-        if (typeof navigator.sendBeacon !== 'undefined') {
-            var nitroData = new FormData(); nitroData.append('nitroBeaconUrl', '$url'); nitroData.append('nitroBeaconCookies', '$cookiesb64'); nitroData.append('nitroBeaconHash', '$hash'); nitroData.append('proxyPurgeOnly', '$proxyPurgeOnly'); nitroData.append('layout', '$layout'); navigator.sendBeacon(location.href, nitroData);
-        } else {
-            var xhr = new XMLHttpRequest(); xhr.open('POST', location.href, true); xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded'); xhr.send('nitroBeaconUrl={$url}&nitroBeaconCookies={$cookiesb64}&nitroBeaconHash={$hash}&proxyPurgeOnly={$proxyPurgeOnly}&layout={$layout}');
-        }
-    }
-</script>";
-		}
-	}
-}
-
-function nitropack_print_cookie_handler_script() {
-
-	if ( defined( "NITROPACK_COOKIE_HANDLER_PRINTED" ) )
-		return;
-	define( "NITROPACK_COOKIE_HANDLER_PRINTED", true );
-
-	echo apply_filters( "nitro_script_output", nitropack_get_cookie_handler_script() );
-}
-
-function nitropack_get_cookie_handler_script() {
-	return "
-<script nitro-exclude>
-    document.cookie = 'nitroCachedPage=' + (!window.NITROPACK_STATE ? '0' : '1') + '; path=/; SameSite=Lax';
-</script>";
-}
-
-function nitropack_print_generic_nitro_script() {
-	if ( defined( "NITROPACK_GENERIC_NITRO_SCRIPT_PRINTED" ) )
-		return;
-	define( "NITROPACK_GENERIC_NITRO_SCRIPT_PRINTED", true );
-	echo apply_filters( "nitro_script_output", nitropack_get_telemetry_meta() );
-	echo apply_filters( "nitro_script_output", nitropack_get_generic_nitro_script() );
-}
-
-function nitropack_get_generic_nitro_script() {
-	$siteConfig = nitropack_get_site_config();
-	if ( $siteConfig && ! empty( $siteConfig["siteId"] ) && ! empty( $siteConfig["siteSecret"] ) ) {
-		if ( null !== $nitro = get_nitropack_sdk( $siteConfig["siteId"], $siteConfig["siteSecret"] ) ) {
-			$config = $nitro->getConfig();
-			if ( ! empty( $config->GenericNitroScript->Script ) ) {
-				return "<script id='nitro-generic' nitro-exclude>" . $config->GenericNitroScript->Script . "</script>";
-			}
-		}
-	}
-
-	return "";
-}
-
-function nitropack_print_web_vitals_telemetry_script() {
-	if ( defined( "NITROPACK_WEB_VITALS_TELEMETRY_SCRIPT_PRINTED" ) ) {
-		return;
-	}
-	define( "NITROPACK_WEB_VITALS_TELEMETRY_SCRIPT_PRINTED", true );
-	echo apply_filters( "nitro_script_output", nitropack_get_web_vitals_telemetry_script() );
-}
-
-function nitropack_get_web_vitals_telemetry_script() {
-	$siteConfig = nitropack_get_site_config();
-	if ( $siteConfig && ! empty( $siteConfig["siteId"] ) && ! empty( $siteConfig["siteSecret"] ) ) {
-		if ( null !== $nitro = get_nitropack_sdk( $siteConfig["siteId"], $siteConfig["siteSecret"] ) ) {
-			$config = $nitro->getConfig();
-			if ( ! empty( $config->WebVitalsTelemetry->Status ) && ! empty( $config->WebVitalsTelemetry->Script ) ) {
-				return "<script id='nitro-web-vitals-telemetry' nitro-exclude>" . $config->WebVitalsTelemetry->Script . "</script>";
-			}
-		}
-	}
-
-	return "";
-}
-
-function nitropack_get_telemetry_meta() {
-	$disabledReason = get_nitropack()->getDisabledReason();
-	$missReason = $disabledReason !== NULL ? $disabledReason : "cache not found";
-	$pageType = get_nitropack()->getPageType();
-	$isEligibleForOptimization = nitropack_passes_page_requirements();
-	$metaObj = "window.NPTelemetryMetadata={";
-
-	if ( $missReason ) {
-		$metaObj .= "missReason: (!window.NITROPACK_STATE ? '$missReason' : 'hit'),";
-	}
-
-	if ( $pageType ) {
-		$metaObj .= "pageType: '$pageType',";
-	}
-
-	$metaObj .= "isEligibleForOptimization: " . ( $isEligibleForOptimization ? "true" : "false" ) . ",";
-
-	$metaObj .= "}";
-
-	return "<script id='nitro-telemetry-meta' nitro-exclude>$metaObj</script>";
-}
-
-function nitropack_print_element_override() {
-	if ( defined( "NITROPACK_ELEMENT_OVERRIDE_PRINTED" ) )
-		return;
-	define( "NITROPACK_ELEMENT_OVERRIDE_PRINTED", true );
-	echo apply_filters( "nitro_script_output", nitropack_get_element_override_script() );
-}
-
-function nitropack_get_element_override_script() {
-	$nitro = get_nitropack_sdk();
-	return $nitro !== NULL ? $nitro->getStatefulCacheHandlerScript() : "";
-}
-
-function nitropack_validate_site_id( $siteId ) {
-	return preg_match( "/^([a-zA-Z]{32})$/", trim( $siteId ) );
-}
-
-function nitropack_validate_site_secret( $siteSecret ) {
-	return preg_match( "/^([a-zA-Z0-9]{64})$/", trim( $siteSecret ) );
-}
-
-function nitropack_validate_wc_currency( $cookieValue ) {
-	return preg_match( "/^([a-z]{3})$/", strtolower( $cookieValue ) );
-}
-
-function nitropack_validate_wc_currency_language( $cookieValue ) {
-	return preg_match( "/^([a-z_\\-]{2,})$/", strtolower( $cookieValue ) );
-}
-
-function nitropack_is_advanced_cache_allowed() {
-	if ( nitropack_is_autoscale_environment() ) { // Autoscale environment has a non-persistent file system, so advanced cache cannot be used
-		return false;
-	}
-
-	return ! in_array( nitropack_detect_hosting(), array(
-		"pressable"
-	) );
-}
-
-function nitropack_get_hosting_notice_file() {
-	return nitropack_trailingslashit( NITROPACK_DATA_DIR ) . "hosting_notice";
-}
-
-function nitropack_dismiss_hosting_notice() {
-	nitropack_verify_ajax_nonce( $_REQUEST );
-	$hostingNoticeFile = nitropack_get_hosting_notice_file();
-	if ( WP_DEBUG ) {
-		touch( $hostingNoticeFile );
-	} else {
-		@touch( $hostingNoticeFile );
-	}
-}
-
+/**
+ * Checks if the config.json is up to date.
+ * @return bool True if the configuration is up to date, false otherwise.
+ */
 function nitropack_is_config_up_to_date() {
 	$siteConfig = nitropack_get_site_config();
 	return ! empty( $siteConfig ) && ! empty( $siteConfig["pluginVersion"] ) && $siteConfig["pluginVersion"] == NITROPACK_VERSION;
 }
 
+/**
+ * Filters out cookies that were not present in the original request.
+ *
+ * @param array $cookies The array of cookies to filter.
+ */
 function nitropack_filter_non_original_cookies( &$cookies ) {
 	global $np_originalRequestCookies;
 	$ogNames = is_array( $np_originalRequestCookies ) ? array_keys( $np_originalRequestCookies ) : array();
@@ -1062,11 +636,27 @@ function nitropack_filter_non_original_cookies( &$cookies ) {
 	}
 }
 
-function get_nitropack_sdk( $siteId = null, $siteSecret = null, $urlOverride = NULL, $forwardExceptions = false ) {
+/**
+ * Get the NitroPack SDK instance.
+ *
+ * @param string|null $siteId Optional. The site ID for the NitroPack SDK. If not provided, it will be retrieved from the site configuration.
+ * @param string|null $siteSecret Optional. The site secret for the NitroPack SDK. If not provided, it will be retrieved from the site configuration.
+ * @param string|null $urlOverride Optional. A URL to override the default URL used by the NitroPack SDK.
+ * @param bool $forwardExceptions Optional. Whether to forward exceptions thrown by the NitroPack SDK. Default is false.
+ * @return \NitroPack\SDK\NitroPack|null The NitroPack SDK instance or null if it cannot be created.
+ */
+function get_nitropack_sdk( $siteId = null, $siteSecret = null, $urlOverride = null, $forwardExceptions = false ) {
 	return get_nitropack()->getSdk( $siteId, $siteSecret, $urlOverride, $forwardExceptions );
 }
 
-function get_nitropack_integration_url( $integration, $nitro = null ) {
+/**
+ * Get the integration URL for a specific integration.
+ *
+ * @param string $integration The name of the integration.
+ * @param \NitroPack\SDK\NitroPack|null $nitro Optional. The NitroPack SDK instance. If not provided, it will be retrieved using get_nitropack_sdk().
+ * @return string The integration URL or "#" if the NitroPack SDK is not available.
+ */
+function get_nitropack_integration_url( string $integration, $nitro = null ) {
 	if ( $nitro || ( null !== $nitro = get_nitropack_sdk() ) ) {
 		return $nitro->integrationUrl( $integration );
 	}
@@ -1074,41 +664,15 @@ function get_nitropack_integration_url( $integration, $nitro = null ) {
 	return "#";
 }
 
-function nitropack_get_layout() {
-	$layout = "default";
-
-	if ( nitropack_is_home() ) {
-		$layout = "home";
-	} else if ( nitropack_is_blogindex() ) {
-		$layout = "blogindex";
-	} else if ( is_page() ) {
-		$layout = "page";
-	} else if ( is_attachment() ) {
-		$layout = "attachment";
-	} else if ( is_author() ) {
-		$layout = "author";
-	} else if ( is_search() ) {
-		$layout = "search";
-	} else if ( is_tag() ) {
-		$layout = "tag";
-	} else if ( is_tax() ) {
-		$layout = "taxonomy";
-	} else if ( is_category() ) {
-		$layout = "category";
-	} else if ( nitropack_is_archive() ) {
-		$layout = "archive";
-	} else if ( is_feed() ) {
-		$layout = "feed";
-	} else if ( is_page() ) {
-		$layout = "page";
-	} else if ( is_single() ) {
-		$layout = get_post_type();
-	}
-
-	return $layout;
-}
-
-function nitropack_sdk_invalidate( $url = NULL, $tag = NULL, $reason = NULL ) {
+/**
+ * Invalidate the NitroPack cache for a specific URL or tag.
+ *
+ * @param string|null $url Optional. The URL to invalidate. If not provided, all URLs will be invalidated.
+ * @param string|array|null $tag Optional. The tag(s) to invalidate. If not provided, all tags will be invalidated.
+ * @param string|null $reason Optional. The reason for the invalidation.
+ * @return bool True if the invalidation was successful, false otherwise.
+ */
+function nitropack_sdk_invalidate( ?string $url = null, $tag = null, ?string $reason = null ) {
 
 	$status = false;
 
@@ -1156,41 +720,6 @@ function nitropack_sdk_invalidate( $url = NULL, $tag = NULL, $reason = NULL ) {
 }
 
 /* Start Heartbeat Related Functions */
-function nitropack_is_heartbeat_needed() {
-	return ! nitropack_is_optimizer_request() &&
-		! nitropack_is_amp_page() &&
-		! nitropack_is_heartbeat_running() &&
-		( ! nitropack_is_heartbeat_completed() || time() - nitropack_last_heartbeat() > NITROPACK_HEARTBEAT_INTERVAL );
-}
-
-function nitropack_print_heartbeat_script() {
-	if ( nitropack_is_heartbeat_needed() ) {
-		if ( defined( "NITROPACK_HEARTBEAT_PRINTED" ) )
-			return;
-		define( "NITROPACK_HEARTBEAT_PRINTED", true );
-		echo apply_filters( "nitro_script_output", nitropack_get_heartbeat_script() );
-	}
-}
-
-function nitropack_get_heartbeat_script() {
-	$siteConfig = nitropack_get_site_config();
-	if ( $siteConfig && ! empty( $siteConfig["siteId"] ) && ! empty( $siteConfig["siteSecret"] ) ) {
-		if ( null !== $nitro = get_nitropack_sdk( $siteConfig["siteId"], $siteConfig["siteSecret"] ) ) {
-			if ( is_admin() ) {
-				$credentials = "same-origin";
-			} else {
-				$credentials = "omit";
-			}
-
-			return "
-<script nitro-exclude>
-    var heartbeatData = new FormData(); heartbeatData.append('nitroHeartbeat', '1');
-    fetch(location.href, {method: 'POST', body: heartbeatData, credentials: '$credentials'});
-</script>";
-		}
-	}
-}
-
 function is_valid_nitropack_heartbeat() {
 	return ! empty( $_POST['nitroHeartbeat'] );
 }
@@ -1236,18 +765,22 @@ function nitropack_is_heartbeat_completed() {
 		}
 	}
 }
-
+/**
+ * Heartbeat - trigger service and house keeping tasks
+ * @return bool
+ */
 function nitropack_handle_heartbeat() {
-	// TODO: Lock the file before checking this
-	if ( nitropack_is_heartbeat_running() )
+
+	if ( nitropack_is_heartbeat_running() ) {
 		return;
+	}
 
 	session_write_close();
 	if ( null !== $nitro = get_nitropack_sdk() ) {
 		try {
 			$success = true;
 			\NitroPack\SDK\Filesystem::filePutContents( nitropack_get_heartbeat_file(), 1 );
-			if ( nitropack_healthcheck() ) {
+			if ( Utils::nitropack_health_check() ) {
 				$success &= nitropack_flush_backlog();
 			}
 			$success &= nitropack_cache_cleanup();
@@ -1264,13 +797,6 @@ function nitropack_handle_heartbeat() {
 	exit;
 }
 
-function nitropack_healthcheck() {
-	if ( null !== $nitro = get_nitropack_sdk() ) {
-		return $nitro->getHealthStatus() == \NitroPack\SDK\HealthStatus::HEALTHY || $nitro->checkHealthStatus() == \NitroPack\SDK\HealthStatus::HEALTHY;
-	}
-	return true;
-}
-
 function nitropack_flush_backlog() {
 	if ( null !== $nitro = get_nitropack_sdk() ) {
 		try {
@@ -1279,7 +805,7 @@ function nitropack_flush_backlog() {
 			}
 		} catch (\NitroPack\SDK\BacklogReplayTimeoutException $e) {
 			$nitro->backlog->delete();
-			return nitropack_sdk_purge( NULL, NULL, "Full purge after backlog timeout" );
+			return nitropack_sdk_purge( null, null, "Full purge after backlog timeout" );
 		} catch (\Exception $e) {
 			return false;
 		}
@@ -1295,9 +821,8 @@ function nitropack_cache_cleanup() {
 			if ( strpos( $entry, ".stale." ) !== false ) {
 				$cacheDir = nitropack_trailingslashit( $cacheDirParent ) . $entry;
 				try {
-					\NitroPack\SDK\Filesystem::deleteDir( $cacheDir );
+					Filesystem::deleteDir( $cacheDir );
 				} catch (\Exception $e) {
-					// TODO: Log this
 					return false;
 				}
 			}
@@ -1307,7 +832,16 @@ function nitropack_cache_cleanup() {
 }
 /* End Heartbeat Related Functions */
 
-function nitropack_sdk_purge( $url = NULL, $tag = NULL, $reason = NULL, $type = \NitroPack\SDK\PurgeType::COMPLETE ) {
+/* Start NitroPack SDK Purges and Invalidations */
+
+/**
+ * @param string|null $url URL to purge. If null, all URLs will be purged.
+ * @param string|array|null $tag Related pages (tags) to purge. If null, all tags will be purged.
+ * @param string|null $reason Reason for the purge, for logging purposes.
+ * @param int $type Type of purge, using \NitroPack\SDK\PurgeType constants.
+ * @return bool
+ */
+function nitropack_sdk_purge( $url = null, $tag = null, $reason = null, $type = \NitroPack\SDK\PurgeType::COMPLETE ) {
 
 	$status = false;
 
@@ -1361,7 +895,7 @@ function nitropack_sdk_purge( $url = NULL, $tag = NULL, $reason = NULL, $type = 
  * @param string|null $url
  * @return bool
  */
-function nitropack_sdk_purge_local( $url = NULL ) {
+function nitropack_sdk_purge_local( $url = null ) {
 	if ( null === $nitro = get_nitropack_sdk() ) {
 		return false;
 	}
@@ -1391,7 +925,7 @@ function nitropack_sdk_purge_local( $url = NULL ) {
  * @param string|null $url
  * @return bool
  */
-function nitropack_sdk_invalidate_local( $url = NULL ) {
+function nitropack_sdk_invalidate_local( $url = null ) {
 	if ( null === $nitro = get_nitropack_sdk() ) {
 		return false;
 	}
@@ -1433,7 +967,7 @@ function nitropack_sdk_delete_backlog() {
 	return false;
 }
 
-function nitropack_purge( $url = NULL, $tag = NULL, $reason = NULL ) {
+function nitropack_purge( $url = null, $tag = null, $reason = null ) {
 	if ( $tag != "pageType:home" ) {
 		$siteConfig = nitropack_get_site_config();
 		$homeUrl = $siteConfig && ! empty( $siteConfig["home_url"] ) ? $siteConfig["home_url"] : get_home_url();
@@ -1441,13 +975,13 @@ function nitropack_purge( $url = NULL, $tag = NULL, $reason = NULL ) {
 	}
 
 	if ( $tag != "pageType:archive" ) {
-		nitropack_log_invalidate( NULL, "pageType:archive", $reason );
+		nitropack_log_invalidate( null, "pageType:archive", $reason );
 	}
 
 	nitropack_log_purge( $url, $tag, $reason );
 }
 
-function nitropack_log_purge( $url = NULL, $tag = NULL, $reason = NULL ) {
+function nitropack_log_purge( $url = null, $tag = null, $reason = null ) {
 	global $np_loggedPurges;
 	if ( $tag && is_array( $tag ) ) {
 		foreach ( $tag as $tagSingle ) {
@@ -1479,8 +1013,14 @@ function nitropack_log_purge( $url = NULL, $tag = NULL, $reason = NULL ) {
 		);
 	}
 }
-
-function nitropack_invalidate( $url = NULL, $tag = NULL, $reason = NULL ) {
+/**
+ * Simple global function to invalidate a page
+ * @param string|null $url
+ * @param string|null $tag
+ * @param string|null $reason
+ * @return void
+ */
+function nitropack_invalidate( ?string $url = null, ?string $tag = null, ?string $reason = null ) {
 	if ( $tag != "pageType:home" ) {
 		$siteConfig = nitropack_get_site_config();
 		$homeUrl = $siteConfig && ! empty( $siteConfig["home_url"] ) ? $siteConfig["home_url"] : get_home_url();
@@ -1488,13 +1028,13 @@ function nitropack_invalidate( $url = NULL, $tag = NULL, $reason = NULL ) {
 	}
 
 	if ( $tag != "pageType:archive" ) {
-		nitropack_log_invalidate( NULL, "pageType:archive", $reason );
+		nitropack_log_invalidate( null, "pageType:archive", $reason );
 	}
 
 	nitropack_log_invalidate( $url, $tag, $reason );
 }
 
-function nitropack_log_invalidate( $url = NULL, $tag = NULL, $reason = NULL ) {
+function nitropack_log_invalidate( ?string $url = null, ?string $tag = null, ?string $reason = null ) {
 	global $np_loggedInvalidations;
 	if ( $tag && is_array( $tag ) ) {
 		foreach ( $tag as $tagSingle ) {
@@ -1527,53 +1067,12 @@ function nitropack_log_invalidate( $url = NULL, $tag = NULL, $reason = NULL ) {
 	}
 }
 
-function nitropack_queue_sort( $a, $b ) {
-	if ( $a["priority"] == $b["priority"] ) {
-		return 0;
-	}
-	return ( $a["priority"] < $b["priority"] ) ? -1 : 1;
-}
+/* End NitroPack SDK Purges and Invalidations */
 
-function nitropack_execute_purges() {
-	global $np_loggedPurges;
-
-	if ( ! empty( $np_loggedPurges ) ) {
-		uasort( $np_loggedPurges, "nitropack_queue_sort" );
-		foreach ( $np_loggedPurges as $requestKey => $data ) {
-			nitropack_sdk_purge( $data["url"], $data["tag"], $data["reason"] );
-		}
-	}
-}
-
-function nitropack_execute_invalidations() {
-	global $np_loggedInvalidations;
-
-	if ( ! empty( $np_loggedInvalidations ) ) {
-		uasort( $np_loggedInvalidations, "nitropack_queue_sort" );
-		foreach ( $np_loggedInvalidations as $requestKey => $data ) {
-			nitropack_sdk_invalidate( $data["url"], $data["tag"], $data["reason"] );
-		}
-	}
-}
-
-function nitropack_execute_warmups() {
-	if ( ! empty( $_GET["action"] ) && ( $_GET["action"] === "edit" ) && ! empty( $_GET["meta-box-loader"] ) ) {
-		return;
-	}
-
-	try {
-		if ( ! empty( \NitroPack\WordPress\NitroPack::$np_loggedWarmups ) && ( null !== $nitro = get_nitropack_sdk() ) ) {
-			$warmupStats = $nitro->getApi()->getWarmupStats();
-			if ( ! empty( $warmupStats["status"] ) ) {
-				foreach ( array_unique( \NitroPack\WordPress\NitroPack::$np_loggedWarmups ) as $url ) {
-					$nitro->getApi()->runWarmup( $url );
-				}
-			}
-		}
-	} catch (\Exception $e) {
-	}
-}
-
+/**
+ * Fetch the latest config stored in the cache folder from the NitroPack.
+ * @return void
+ */
 function nitropack_fetch_config() {
 	if ( null !== $nitro = get_nitropack_sdk() ) {
 		try {
@@ -1583,21 +1082,14 @@ function nitropack_fetch_config() {
 	}
 }
 
-function nitropack_theme_handler( $event = NULL ) {
-	if ( ! get_option( "nitropack-autoCachePurge", 1 ) )
-		return;
-
-	$msg = $event ? $event : 'Theme switched';
-
-	try {
-		nitropack_sdk_purge( NULL, NULL, $msg ); // purge entire cache
-	} catch (\Exception $e) {
-	}
-}
-
-function nitropack_json_and_exit( $array ) {
-	if ( nitropack_is_wp_cli() ) {
-		$type = NULL;
+/**
+ * This function is used to send a JSON response and terminate an AJAX request.
+ * @param array $array
+ * @return never
+ */
+function nitropack_json_and_exit( array $array ) {
+	if ( Utils::is_wp_cli() ) {
+		$type = null;
 		if ( array_key_exists( "status", $array ) ) {
 			$type = $array["status"];
 		} else if ( array_key_exists( "type", $array ) ) {
@@ -1616,7 +1108,13 @@ function nitropack_json_and_exit( $array ) {
 	}
 	exit;
 }
-function nitropack_admin_toast_msgs( $type ) {
+
+/**
+ * Returns the toast message for the admin panel based on the type
+ * @param string $type The type of the message (success or error)
+ * @return string The toast message
+ */
+function nitropack_admin_toast_msgs( string $type ) {
 	if ( $type === 'success' ) {
 		$msg = esc_html__( 'Settings updated.', 'nitropack' );
 	} else {
@@ -1624,9 +1122,11 @@ function nitropack_admin_toast_msgs( $type ) {
 	}
 	return $msg;
 }
-/* General verification for AJAX requests
- * @params array $request_data The request data
- * @params array|null $allowed_roles The allowed user roles
+
+/**
+ * General verification for AJAX requests
+ * @param array $request_data The request data
+ * @param array|null $allowed_roles The allowed user roles
  */
 function nitropack_verify_ajax_nonce( $request_data, $allowed_roles = null ) {
 	// If not an ajax request
@@ -1663,13 +1163,28 @@ function nitropack_verify_ajax_nonce( $request_data, $allowed_roles = null ) {
 		}
 	}
 }
+
+/**
+ * Summary of nitropack_has_post_important_change
+ * @param \WP_Post $post
+ * @return bool
+ **/
 function nitropack_has_post_important_change( $post ) {
 	$prevPost = nitropack_get_post_pre_update( $post );
 	return $prevPost && ( $prevPost->post_title != $post->post_title || $prevPost->post_name != $post->post_name || $prevPost->post_excerpt != $post->post_excerpt );
 }
 
-
-function nitropack_clean_post_cache( $post, $taxonomies = NULL, $hasImportantChangeInPost = NULL, $reason = NULL, $usePurge = false ) {
+/**
+ * Main logic of invalidating the cache for a post and its related taxonomies.
+ * Checks if the post type is cacheable, and if so, invalidates the cache for the post and its related taxonomies.
+ * @param \WP_Post $post
+ * @param array | null $taxonomies
+ * @param bool | null $hasImportantChangeInPost
+ * @param string | null $reason
+ * @param bool $usePurge
+ * @return void
+ */
+function nitropack_clean_post_cache( \WP_Post $post, $taxonomies = null, $hasImportantChangeInPost = null, $reason = null, $usePurge = false ) {
 	try {
 		$postID = $post->ID;
 		$postType = isset( $post->post_type ) ? $post->post_type : "post";
@@ -1682,17 +1197,17 @@ function nitropack_clean_post_cache( $post, $taxonomies = NULL, $hasImportantCha
 			if ( $usePurge ) {
 				// We only purge the single pages because they have to immediately stop serving cache
 				// These pages no longer exists and if their URL is requested we must not server cache
-				nitropack_purge( NULL, "single:$postID", $reason );
+				nitropack_purge( null, "single:$postID", $reason );
 			} else {
-				nitropack_invalidate( NULL, "single:$postID", $reason );
+				nitropack_invalidate( null, "single:$postID", $reason );
 			}
 
-			nitropack_invalidate( NULL, "post:$postID", $reason );
+			nitropack_invalidate( null, "post:$postID", $reason );
 
-			if ( $hasImportantChangeInPost === NULL ) {
+			if ( $hasImportantChangeInPost === null ) {
 				$hasImportantChangeInPost = nitropack_has_post_important_change( $post );
 			}
-			if ( $taxonomies === NULL ) {
+			if ( $taxonomies === null ) {
 				if ( $hasImportantChangeInPost ) { // This change should be reflected in all taxonomy pages
 					$taxonomies = array( 'related' => nitropack_get_taxonomies( $post ) );
 				} else { // No important change, so only update taxonomy pages which have been added or removed from the post
@@ -1702,23 +1217,23 @@ function nitropack_clean_post_cache( $post, $taxonomies = NULL, $hasImportantCha
 			if ( $taxonomies ) {
 				if ( ! empty( $taxonomies['added'] ) ) { // taxonomies that the post was just added to, must purge all pages for these taxonomies
 					foreach ( $taxonomies['added'] as $term_taxonomy_id ) {
-						nitropack_invalidate( NULL, "tax:$term_taxonomy_id", $reason );
+						nitropack_invalidate( null, "tax:$term_taxonomy_id", $reason );
 					}
 				}
 				if ( ! empty( $taxonomies['deleted'] ) ) { // taxonomy pages that the post was just removed from (also accounts for paginations via the taxpost: tag instead of only tax:)
 					foreach ( $taxonomies['deleted'] as $term_taxonomy_id ) {
-						nitropack_invalidate( NULL, "taxpost:$term_taxonomy_id:$postID", $reason );
+						nitropack_invalidate( null, "taxpost:$term_taxonomy_id:$postID", $reason );
 					}
 				}
 				if ( ! empty( $taxonomies['related'] ) ) { // taxonomy pages that the post is linked to (also accounts for paginations via the taxpost: tag instead of only tax:)
 					foreach ( $taxonomies['related'] as $term_taxonomy_id ) {
-						nitropack_invalidate( NULL, "taxpost:$term_taxonomy_id:$postID", $reason );
+						nitropack_invalidate( null, "taxpost:$term_taxonomy_id:$postID", $reason );
 					}
 				}
 			}
 		} else {
 			if ( $post->public ) {
-				nitropack_invalidate( NULL, "post:$postID", $reason );
+				nitropack_invalidate( null, "post:$postID", $reason );
 			}
 
 			$posts = get_post_ancestors( $postID );
@@ -1731,7 +1246,11 @@ function nitropack_clean_post_cache( $post, $taxonomies = NULL, $hasImportantCha
 	}
 }
 
-function nitropack_get_nice_post_type_label( $postType ) {
+/**
+ * Formats the post type into a nice label
+ * @param string $postType
+ */
+function nitropack_get_nice_post_type_label( string $postType ) {
 	$postTypes = get_post_types( array(
 		"name" => $postType
 	), "objects" );
@@ -1739,40 +1258,14 @@ function nitropack_get_nice_post_type_label( $postType ) {
 	return ! empty( $postTypes[ $postType ] ) && ! empty( $postTypes[ $postType ]->labels ) ? $postTypes[ $postType ]->labels->singular_name : $postType;
 }
 
-function nitropack_handle_comment_transition( $new, $old, $comment ) {
-	if ( ! get_option( "nitropack-autoCachePurge", 1 ) )
-		return;
-
-	try {
-		$postID = $comment->comment_post_ID;
-		$post = get_post( $postID );
-		$postType = isset( $post->post_type ) ? $post->post_type : "post";
-		$CPTOptimization = NitroPack\WordPress\Settings\CPTOptimization::getInstance();
-		$cacheableObjectTypes = $CPTOptimization->nitropack_get_cacheable_object_types();
-
-		if ( in_array( $postType, $cacheableObjectTypes ) ) {
-			nitropack_invalidate( NULL, "single:" . $postID, sprintf( "Invalidation of '%s' due to changing related comment status", $post->post_title ) );
-		}
-	} catch (\Exception $e) {
-		// TODO: Log the error
-	}
-}
-
-function nitropack_handle_comment_post( $commentID, $isApproved ) {
-	if ( ! get_option( "nitropack-autoCachePurge", 1 ) || $isApproved !== 1 )
-		return;
-
-	try {
-		$comment = get_comment( $commentID );
-		$postID = $comment->comment_post_ID;
-		$post = get_post( $postID );
-		nitropack_invalidate( NULL, "single:" . $postID, sprintf( "Invalidation of '%s' due to posting a new approved comment", $post->post_title ) );
-	} catch (\Exception $e) {
-		// TODO: Log the error
-	}
-}
-
-function nitropack_detect_changes_and_clean_post_cache( $post ) {
+/**
+ * Detects changes in the post and cleans the post cache if necessary.
+ * Compares the post before update and after update, and if there are any changes,
+ * it cleans the cache for the post and its related taxonomies.
+ * @param \WP_Post $post
+ * @return void
+ */
+function nitropack_detect_changes_and_clean_post_cache( \WP_Post $post ) {
 	if ( ! get_option( "nitropack-autoCachePurge", 1 ) ) {
 		return;
 	}
@@ -1807,84 +1300,13 @@ function nitropack_detect_changes_and_clean_post_cache( $post ) {
 	}
 }
 
-
-function nitropack_handle_post_transition( $new, $old, $post ) {
-	if ( wp_is_post_revision( $post ) )
-		return;
-	if ( ! empty( $post->ID ) && in_array( $post->ID, \NitroPack\WordPress\NitroPack::$ignoreUpdatePostIDs ) )
-		return;
-	if ( ! get_option( "nitropack-autoCachePurge", 1 ) )
-		return;
-
-	try {
-		if ( $new === "auto-draft" || ( $new === "draft" && $old === "auto-draft" ) || ( $new === "draft" && $old != "publish" ) || $new === "inherit" ) { // Creating a new post or draft, don't do anything for now. 
-			return;
-		}
-
-		$ignoredPostTypes = array(
-			"revision",
-			"scheduled-action",
-			"flamingo_contact",
-			"carts"/*WooCommerce Cart Reports*/
-		);
-
-		$nicePostTypes = array(
-			"post" => "Post",
-			"page" => "Page",
-			"tribe_events" => "Calendar Event",
-		);
-		$postType = isset( $post->post_type ) ? $post->post_type : "post";
-		$nicePostTypeLabel = nitropack_get_nice_post_type_label( $postType );
-
-		if ( in_array( $postType, $ignoredPostTypes ) )
-			return;
-
-		switch ( $postType ) {
-			case "nav_menu_item":
-				nitropack_invalidate( NULL, NULL, sprintf( "Invalidation of all pages due to modifying menu entries" ) );
-				break;
-			case "customize_changeset":
-				nitropack_invalidate( NULL, NULL, sprintf( "Invalidation of all pages due to applying appearance customization" ) );
-				break;
-			case "custom_css":
-				nitropack_invalidate( NULL, NULL, sprintf( "Invalidation of all pages due to modifying custom CSS" ) );
-				break;
-			default:
-				if ( $new == "future" ) {
-					nitropack_clean_post_cache( $post, array( 'added' => nitropack_get_taxonomies( $post ) ), true, sprintf( "Invalidate related pages due to scheduling %s '%s'", $nicePostTypeLabel, $post->post_title ) );
-				} else if ( $new === 'publish' && $old === 'trash' ) {
-					nitropack_clean_post_cache( $post, array( 'added' => nitropack_get_taxonomies( $post ) ), true, sprintf( "Invalidate related pages due to restoring %s '%s'", $nicePostTypeLabel, $post->post_title ) );
-				} else if ( $new == "publish" && $old != "publish" ) {
-					/* Handle first publish */
-					\NitroPack\WordPress\NitroPack::$np_loggedWarmups[] = get_permalink( $post->ID );
-					if ( ! defined( 'NITROPACK_PURGE_CACHE' ) ) {
-						nitropack_clean_post_cache( $post, array( 'added' => nitropack_get_taxonomies( $post ) ), true, sprintf( "Invalidate related pages due to publishing %s '%s'", $nicePostTypeLabel, $post->post_title ), true );
-					}
-					if ( $post->post_type === 'post' ) {
-						nitropack_invalidate( NULL, "pageType:blogindex", 'Invalidation of blog page due to changing related post status' );
-					}
-				} else if ( $new == "trash" && $old == "publish" ) {
-					nitropack_clean_post_cache( $post, array( 'deleted' => nitropack_get_taxonomies( $post ) ), true, sprintf( "Invalidate related pages due to deleting %s '%s'", $nicePostTypeLabel, $post->post_title ), true );
-				} else if ( $new == "private" && $old == "publish" ) {
-					nitropack_clean_post_cache( $post, array( 'deleted' => nitropack_get_taxonomies( $post ) ), true, sprintf( "Invalidate related pages due to making %s '%s' private", $nicePostTypeLabel, $post->post_title ), true );
-				} else if ( $new == "draft" && $old == "publish" ) {
-					nitropack_clean_post_cache( $post, array( 'deleted' => nitropack_get_taxonomies( $post ) ), true, sprintf( "Invalidate related pages due to making %s '%s' a draft", $nicePostTypeLabel, $post->post_title ), true );
-				} else if ( $new != "trash" ) {
-					if ( ! defined( 'NITROPACK_PURGE_CACHE' ) ) {
-						nitropack_detect_changes_and_clean_post_cache( $post );
-					}
-					if ( $new == 'publish' ) {
-						\NitroPack\WordPress\NitroPack::$np_loggedWarmups[] = get_permalink( $post->ID );
-					}
-				}
-				break;
-		}
-	} catch (\Exception $e) {
-		// TODO: Log the error
-	}
-}
-
-function nitropack_post_link_listener( $permalink, $post, $leavename ) {
+/**
+ * Used only in is_optimizer_nitropack_request(), we handle the post and add the tags for the post and its author.
+ * @param string $permalink
+ * @param \WP_Post $post
+ * @return string
+ */
+function nitropack_post_link_listener( string $permalink, \WP_Post $post ) {
 	if ( is_object( $post ) ) {
 		nitropack_handle_the_post( $post );
 	}
@@ -1892,7 +1314,12 @@ function nitropack_post_link_listener( $permalink, $post, $leavename ) {
 	return $permalink;
 }
 
-function nitropack_handle_the_post( $post ) {
+/**
+ * Used only in is_optimizer_nitropack_request()
+ * @param \WP_Post $post
+ * @return void
+ */
+function nitropack_handle_the_post( \WP_Post $post ) {
 	global $np_customExpirationTimes, $np_queriedObj;
 	if ( defined( 'POSTEXPIRATOR_VERSION' ) ) {
 		$postExpiryDate = get_post_meta( $post->ID, "_expiration-date", true );
@@ -1906,7 +1333,7 @@ function nitropack_handle_the_post( $post ) {
 		$portfolioEndDate = get_post_meta( $post->ID, "end_date", true );
 		if ( ! empty( $portfolioStartDate ) && strtotime( $portfolioStartDate ) > time() ) { // We only need to look at future dates
 			$np_customExpirationTimes[] = strtotime( $portfolioStartDate );
-		} else if ( ! empty( $portfolioEndDate ) && strtotime( $portfolioEndDate ) > time() ) { // We only need to look at future dates
+		} elseif ( ! empty( $portfolioEndDate ) && strtotime( $portfolioEndDate ) > time() ) { // We only need to look at future dates
 			$np_customExpirationTimes[] = strtotime( $portfolioEndDate );
 		}
 	}
@@ -1918,11 +1345,12 @@ function nitropack_handle_the_post( $post ) {
 	}
 }
 
-function nitropack_ignore_post_updates( $postID ) {
-	\NitroPack\WordPress\NitroPack::$ignoreUpdatePostIDs[] = $postID;
-}
-
-function nitropack_get_taxonomies( $post ) {
+/**
+ * Grabs the taxonomies for a given post and returns an array of term_taxonomy_ids
+ * @param WP_Post $post
+ * @return array of term_taxonomy_ids
+ */
+function nitropack_get_taxonomies( \WP_Post $post ) {
 	$term_taxonomy_ids = array();
 	$taxonomies = get_object_taxonomies( $post->post_type );
 	foreach ( $taxonomies as $taxonomy ) {
@@ -1936,7 +1364,12 @@ function nitropack_get_taxonomies( $post ) {
 	return $term_taxonomy_ids;
 }
 
-function nitropack_get_taxonomies_for_update( $post ) {
+/**
+ * Grabs the taxonomies for a given post and returns an array of term_taxonomy_ids that have been added or deleted since the last update
+ * @param WP_Post $post
+ * @return array{added: array, deleted: array}
+ */
+function nitropack_get_taxonomies_for_update( \WP_Post $post ) {
 	$prevTaxonomies = nitropack_get_taxonomies_pre_update( $post );
 	$newTaxonomies = nitropack_get_taxonomies( $post );
 	$intersection = array_intersect( $newTaxonomies, $prevTaxonomies );
@@ -1948,50 +1381,42 @@ function nitropack_get_taxonomies_for_update( $post ) {
 	);
 }
 
-function nitropack_get_post_pre_update( $post ) {
-	return ! empty( \NitroPack\WordPress\NitroPack::$preUpdatePosts[ $post->ID ] ) ? \NitroPack\WordPress\NitroPack::$preUpdatePosts[ $post->ID ] : NULL;
+/**
+ * Returns the post before it was updated, or null if it wasn't logged.
+ * @param WP_Post $post
+ * @return WP_Post|null
+ */
+function nitropack_get_post_pre_update( \WP_Post $post ) {
+	return ! empty( \NitroPack\WordPress\NitroPack::$preUpdatePosts[ $post->ID ] ) ? \NitroPack\WordPress\NitroPack::$preUpdatePosts[ $post->ID ] : null;
 }
 
-function nitropack_get_taxonomies_pre_update( $post ) {
+/**
+ * Returns the taxonomies for a given post before it was updated, or an empty array if they weren't logged.
+ * @param WP_Post $post
+ * @return array of term_taxonomy_ids
+ */
+function nitropack_get_taxonomies_pre_update( \WP_Post $post ) {
 	return ! empty( \NitroPack\WordPress\NitroPack::$preUpdateTaxonomies[ $post->ID ] ) ? \NitroPack\WordPress\NitroPack::$preUpdateTaxonomies[ $post->ID ] : array();
 }
 
-function nitropack_get_meta_pre_update( $post ) {
+/**
+ * Returns the post meta for a given post before it was updated, or an empty array if it wasn't logged.
+ * @param WP_Post $post
+ * @return array of post meta
+ */
+function nitropack_get_meta_pre_update( \WP_Post $post ) {
 	return ! empty( \NitroPack\WordPress\NitroPack::$preUpdateMeta[ $post->ID ] ) ? \NitroPack\WordPress\NitroPack::$preUpdateMeta[ $post->ID ] : array();
 }
 
-function nitropack_log_post_pre_update( $postID ) {
-	if ( in_array( $postID, \NitroPack\WordPress\NitroPack::$ignoreUpdatePostIDs ) )
-		return;
-
-
-	$post = get_post( $postID );
-	\NitroPack\WordPress\NitroPack::$preUpdatePosts[ $postID ] = $post;
-	\NitroPack\WordPress\NitroPack::$preUpdateTaxonomies[ $postID ] = nitropack_get_taxonomies( $post );
-	//Is post meta updated at this point? Or maybe this block should be moved to a different action?
-	\NitroPack\WordPress\NitroPack::$preUpdateMeta[ $postID ] = get_post_meta( $postID );
-}
-
-function nitropack_log_product_pre_api_update( $product, $request, $creating ) {
-
-	if ( ! $creating ) {
-
-		$postID = $product->get_id();
-		if ( in_array( $postID, \NitroPack\WordPress\NitroPack::$ignoreUpdatePostIDs ) )
-			return;
-
-
-		$post = get_post( $postID );
-		\NitroPack\WordPress\NitroPack::$preUpdatePosts[ $postID ] = $post;
-		\NitroPack\WordPress\NitroPack::$preUpdateTaxonomies[ $postID ] = nitropack_get_taxonomies( $post );
-		//Is post meta updated at this point? Or maybe this block should be moved to a different action?
-		\NitroPack\WordPress\NitroPack::$preUpdateMeta[ $postID ] = get_post_meta( $postID );
-	}
-
-	return $product;
-}
-
-function nitropack_compare_posts( array $p1, array $p2, $ignoredKeys = null ) {
+/**
+ * Compare two posts or one post and its associated data - post_meta or taxonomies
+ * Return true if they are equal, false otherwise.
+ * @param array $p1
+ * @param array $p2
+ * @param array|null $ignoredKeys
+ * @return bool
+ */
+function nitropack_compare_posts( array $p1, array $p2, ?array $ignoredKeys = null ) {
 	$p1keys = array_keys( $p1 );
 	$p2keys = array_keys( $p2 );
 	if ( count( $p1keys ) !== count( $p2keys ) ) {
@@ -2035,7 +1460,7 @@ function nitropack_compare_posts( array $p1, array $p2, $ignoredKeys = null ) {
 		$checkpoint01 = is_array( $poVal );
 		$checkpoint02 = is_array( $p2[ $poKey ] );
 		if ( $checkpoint01 && $checkpoint02 ) {
-			if ( ! nitropack_compare_posts( $poVal, $p2[ $poKey ], $ignoredKeys, 'Re:' ) ) { //'Re:' left for debug purpose to destinguish between main and recursive call
+			if ( ! nitropack_compare_posts( $poVal, $p2[ $poKey ], $ignoredKeys ) ) {
 				return false;
 			}
 		} elseif ( ! $checkpoint01 && ! $checkpoint02 ) {
@@ -2049,14 +1474,23 @@ function nitropack_compare_posts( array $p1, array $p2, $ignoredKeys = null ) {
 	return true;
 }
 
-function nitropack_filter_tag( $tag ) {
+/**
+ * Filters a NitroPack tag.
+ * @param string $tag
+ * @return array|string|null
+ */
+function nitropack_filter_tag( string $tag ) {
 	return preg_replace( "/[^a-zA-Z0-9:]/", ":", $tag );
 }
 
+/**
+ * Logs the NitroPack tags for the current request.
+ * @return void
+ */
 function nitropack_log_tags() {
 	if ( ! empty( $GLOBALS["NitroPack.instance"] ) && ! empty( $GLOBALS["NitroPack.tags"] ) ) {
 		$nitro = $GLOBALS["NitroPack.instance"];
-		$layout = nitropack_get_layout();
+		$layout = Utils::get_page_type();
 		try {
 			$config = $nitro->getConfig();
 			$useHeader = ! empty( $config->TagsViaHeader );
@@ -2067,7 +1501,7 @@ function nitropack_log_tags() {
 				} else {
 					$nitro->getApi()->tagUrl( $nitro->getUrl(), "pageType:home" );
 				}
-			} else if ( $layout == "archive" ) {
+			} elseif ( $layout == "archive" ) {
 				if ( $useHeader ) {
 					nitropack_header( "x-nitro-tags:pageType:archive" );
 				} else {
@@ -2085,8 +1519,14 @@ function nitropack_log_tags() {
 	}
 }
 
+/**
+ * Extends the life of a nonce based on NitroPack setting -> Page Cache -> Expire Time.
+ * Special exception for REST requests that are not cacheable, in which case we do not extend the nonce life.
+ * @param int $life The current nonce life.
+ * @return int The extended nonce life.
+ */
 function nitropack_extend_nonce_life( $life ) {
-	if ( nitropack_is_rest() && isset( $_COOKIE["nitroCachedPage"] ) && $_COOKIE["nitroCachedPage"] == "0" ) {
+	if ( Utils::is_rest() && isset( $_COOKIE["nitroCachedPage"] ) && $_COOKIE["nitroCachedPage"] == "0" ) {
 		return $life;
 	}
 
@@ -2115,33 +1555,10 @@ function nitropack_extend_nonce_life( $life ) {
 	return $life;
 }
 
-
-
-function nitropack_check_func_availability( $func_name ) {
-	if ( function_exists( 'ini_get' ) ) {
-		$existsResult = stripos( ini_get( 'disable_functions' ), $func_name ) === false;
-	} else {
-		$existsResult = function_exists( $func_name );
-	}
-	return $existsResult;
-}
-
-function nitropack_prevent_connecting( $nitroSDK ) {
-	$remoteUrl = $nitroSDK->getApi()->getWebhook( "config" );
-	if ( empty( $remoteUrl ) ) {
-		return false;
-	}
-	$siteConfig = nitropack_get_site_config();
-	$localUrl = new \NitroPack\Url\Url( $siteConfig && ! empty( $siteConfig["home_url"] ) ? $siteConfig["home_url"] : get_home_url() );
-	$localHome = strtolower( $localUrl->getHost() . $localUrl->getPath() );
-	$storedUrl = new \NitroPack\Url\Url( $remoteUrl );
-	$remoteHome = strtolower( $storedUrl->getHost() . $storedUrl->getPath() );
-	if ( $localHome === $remoteHome ) {
-		return false;
-	}
-	return array( 'local' => $localHome, 'remote' => $remoteHome );
-}
-
+/**
+ * Checks if the cart cache is active and available.
+ * @return bool True if the cart cache is active and available, false otherwise.
+ */
 function nitropack_is_cart_cache_active() {
 	$nitro = get_nitropack()->getSdk();
 	if ( $nitro ) {
@@ -2153,6 +1570,10 @@ function nitropack_is_cart_cache_active() {
 	return false;
 }
 
+/**
+ * Checks if the cart cache is available.
+ * @return bool True if the cart cache is available, false otherwise.
+ */
 function nitropack_is_cart_cache_available() {
 	$nitro = get_nitropack()->getSdk();
 	if ( $nitro ) {
@@ -2162,21 +1583,6 @@ function nitropack_is_cart_cache_available() {
 		}
 	}
 	return false;
-}
-
-function nitropack_handle_compression_toggle( $old_value, $new_value ) {
-	nitropack_update_blog_compression( $new_value == 1 );
-}
-
-function nitropack_update_blog_compression( $enableCompression = false ) {
-	if ( get_nitropack()->isConnected() ) {
-		$siteConfig = nitropack_get_site_config();
-		$siteId = $siteConfig["siteId"];
-		$siteSecret = $siteConfig["siteSecret"];
-		$blogId = get_current_blog_id();
-		NitroPack\WordPress\NitroPack::getInstance()->getLogger()->notice( 'update_blog_compression' );
-		get_nitropack()->updateCurrentBlogConfig( $siteId, $siteSecret, $blogId, $enableCompression );
-	}
 }
 
 function nitropack_get_site_config() {
@@ -2196,7 +1602,13 @@ function get_nitropack() {
 	return \NitroPack\WordPress\NitroPack::getInstance();
 }
 
-function nitropack_event( $event, $nitro = null, $additional_meta_data = null ) {
+/**
+ * Sends an event to the NitroPack integration server.
+ * @param string $event The event name.
+ * @param \NitroPack\SDK\NitroPack|null $nitro The NitroPack SDK instance.
+ * @param array|null $additional_meta_data Additional metadata to send with the event.
+ */
+function nitropack_event( string $event, $nitro = null, $additional_meta_data = null ) {
 	global $wp_version;
 
 	try {
@@ -2226,83 +1638,12 @@ function nitropack_event( $event, $nitro = null, $additional_meta_data = null ) 
 	}
 }
 
-function nitropack_get_wpconfig_path() {
-	$configFilePath = nitropack_trailingslashit( ABSPATH ) . "wp-config.php";
-	if ( ! file_exists( $configFilePath ) ) {
-		$configFilePath = nitropack_trailingslashit( dirname( ABSPATH ) ) . "wp-config.php";
-		$settingsFilePath = nitropack_trailingslashit( dirname( ABSPATH ) ) . "wp-settings.php"; // We need to check for this file to avoid confusion if the current installation is a nested directory of another WP installation. Refer to wp-load.php for more information.
-		if ( ! file_exists( $configFilePath ) || file_exists( $settingsFilePath ) ) {
-			return false;
-		}
-	}
-
-	if ( defined("WPE_PLATFORM_NAME") && WPE_PLATFORM_NAME == "autoscale" ) { // Not writable in autoscale environment
-		return $configFilePath;
-	}
-
-	if ( ! is_writable( $configFilePath ) ) {
-		return false;
-	}
-
-	return $configFilePath;
-}
-
-function nitropack_get_htaccess_path() {
-	$configFilePath = nitropack_trailingslashit( ABSPATH ) . ".htaccess";
-	if ( ! file_exists( $configFilePath ) ) {
-		return false;
-	}
-
-	if ( defined("WPE_PLATFORM_NAME") && WPE_PLATFORM_NAME == "autoscale" ) { // Not writable in autoscale environment, but we can still return the path as we have write access to it during plugin installation when the environment is being set up
-		return $configFilePath;
-	}
-
-	if ( ! is_writable( $configFilePath ) ) {
-		return false;
-	}
-
-	return $configFilePath;
-}
-
-function nitropack_detect_hosting() {
-	if ( \NitroPack\Integration\Hosting\Flywheel::detect() ) {
-		return "flywheel";
-	} else if ( \NitroPack\Integration\Hosting\Cloudways::detect() ) {
-		return "cloudways";
-	} else if ( \NitroPack\Integration\Hosting\WPEngine::detect() ) {
-		return "wpengine";
-	} else if ( \NitroPack\Integration\Hosting\SiteGround::detect() ) {
-		return "siteground";
-	} else if ( \NitroPack\Integration\Hosting\GoDaddyWPaaS::detect() ) {
-		return "godaddy_wpaas";
-	} else if ( \NitroPack\Integration\Hosting\GridPane::detect() ) {
-		return "gridpane";
-	} else if ( \NitroPack\Integration\Hosting\Kinsta::detect() ) {
-		return "kinsta";
-	} else if ( \NitroPack\Integration\Hosting\Closte::detect() ) {
-		return "closte";
-	} else if ( \NitroPack\Integration\Hosting\Pagely::detect() ) {
-		return "pagely";
-	} else if ( \NitroPack\Integration\Hosting\WPX::detect() ) {
-		return "wpx";
-	} else if ( \NitroPack\Integration\Hosting\Vimexx::detect() ) {
-		return "vimexx";
-	} else if ( \NitroPack\Integration\Hosting\Pressable::detect() ) {
-		return "pressable";
-	} else if ( \NitroPack\Integration\Hosting\RocketNet::detect() ) {
-		return "rocketnet";
-	} else if ( \NitroPack\Integration\Hosting\Savvii::detect() ) {
-		return "savvii";
-	} else if ( \NitroPack\Integration\Hosting\DreamHost::detect() ) {
-		return "dreamhost";
-	} else if ( \NitroPack\Integration\Hosting\Raidboxes::detect() ) {
-		return "raidboxes";
-	} else {
-		return "unknown";
-	}
-}
-
-function nitropack_removeCacheBustParam( $content ) {
+/**
+ * Removes the NitroPack cache-busting parameter from the given content $_SERVER['REQUEST_URI'].
+ * @param string $content The content from which to remove the cache-busting parameter.
+ * @return string The content with the cache-busting parameter removed.
+ */
+function nitropack_removeCacheBustParam( string $content ) {
 	$content = preg_replace( "/(\?|%26|&#0?38;|&#x0?26;|&(amp;)?)ignorenitro(%3D|=)[a-fA-F0-9]{32}(?!%26|&#0?38;|&#x0?26;|&(amp;)?)\/?/mu", "", $content );
 	return preg_replace( "/(\?|%26|&#0?38;|&#x0?26;|&(amp;)?)ignorenitro(%3D|=)[a-fA-F0-9]{32}(%26|&#0?38;|&#x0?26;|&(amp;)?)/mu", "$1", $content );
 }
@@ -2322,7 +1663,7 @@ function nitropack_handle_request( $servedFrom = "unknown" ) {
 	nitropack_header( 'Cache-Control: no-cache' );
 	do_action( "nitropack_early_cache_headers" ); // Overrides the Cache-Control header on supported platforms
 	$isManageWpRequest = ! empty( $_GET["mwprid"] );
-	$isWpCli = nitropack_is_wp_cli();
+	$isWpCli = Utils::is_wp_cli();
 
 	if ( Filesystem::fileExists( NITROPACK_CONFIG_FILE ) && ! empty( $_SERVER["HTTP_HOST"] ) && ! empty( $_SERVER["REQUEST_URI"] ) && ! $isManageWpRequest && ! $isWpCli ) {
 		try {
@@ -2331,18 +1672,18 @@ function nitropack_handle_request( $servedFrom = "unknown" ) {
 				$webhooks = new \NitroPack\WordPress\Webhooks();
 				if ( $webhooks->is_valid_webhook() ) {
 					$webhooks->handle_webhook();
-				} else if ( is_valid_nitropack_beacon() ) {
+				} elseif ( is_valid_nitropack_beacon() ) {
 					nitropack_handle_beacon();
 				} else if ( is_valid_nitropack_heartbeat() ) {
 					nitropack_handle_heartbeat();
 				} else {
 					$GLOBALS["NitroPack.instance"] = $nitro;
 
-					if ( nitropack_passes_cookie_requirements() || ( nitropack_is_ajax() && ! empty( $_COOKIE["nitroCachedPage"] ) ) ) {
+					if ( nitropack_passes_cookie_requirements() || ( Utils::is_ajax() && ! empty( $_COOKIE["nitroCachedPage"] ) ) ) {
 						// Check whether the current URL is cacheable
 						// If this is an AJAX request, check whether the referer is cachable - this is needed for cases when NitroPack's "Enabled URLs" option is being used to whitelist certain URLs. 
 						// If we are not checking the referer, the AJAX requests on these pages can fail.
-						$urlToCheck = nitropack_is_ajax() && ! empty( $_SERVER["HTTP_REFERER"] ) ? $_SERVER["HTTP_REFERER"] : $nitro->getUrl();
+						$urlToCheck = Utils::is_ajax() && ! empty( $_SERVER["HTTP_REFERER"] ) ? $_SERVER["HTTP_REFERER"] : $nitro->getUrl();
 						if ( $nitro->isAllowedUrl( $urlToCheck ) ) {
 							add_filter( 'nonce_life', 'nitropack_extend_nonce_life' );
 						}
@@ -2350,7 +1691,7 @@ function nitropack_handle_request( $servedFrom = "unknown" ) {
 
 					if ( nitropack_passes_cookie_requirements() && apply_filters( "nitropack_can_serve_cache", true ) ) {
 						if ( $nitro->isCacheAllowed() ) {
-							if ( ! nitropack_is_ajax() ) {
+							if ( ! Utils::is_ajax() ) {
 								do_action( "nitropack_cacheable_cache_headers" );
 							}
 
@@ -2369,7 +1710,7 @@ function nitropack_handle_request( $servedFrom = "unknown" ) {
 							if ( $nitro->hasLocalCache() ) {
 								// TODO: Make this work so we can provide the reverse proxies with this information $remainingTtl = $nitr->pageCache->getRemainingTtl();
 								do_action( "nitropack_cachehit_cache_headers" ); // TODO: Pass the remaining TTL here
-								$cacheControlOverride = defined( "NITROPACK_CACHE_CONTROL_OVERRIDE" ) ? NITROPACK_CACHE_CONTROL_OVERRIDE : NULL;
+								$cacheControlOverride = defined( "NITROPACK_CACHE_CONTROL_OVERRIDE" ) ? NITROPACK_CACHE_CONTROL_OVERRIDE : null;
 								if ( $cacheControlOverride ) {
 									nitropack_header( 'Cache-Control: ' . $cacheControlOverride );
 								}
@@ -2382,7 +1723,7 @@ function nitropack_handle_request( $servedFrom = "unknown" ) {
 								exit;
 							} else {
 								// We need the following if..else block to handle bot requests which will not be firing our beacon
-								if ( nitropack_is_warmup_request() ) {
+								if ( Utils::is_warmup_nitropack_request() ) {
 									if ( ! empty( $_SERVER["HTTP_ACCEPT_LANGUAGE"] ) ) {
 										add_action( "init", function () use ($nitro) {
 											$nitro->hasRemoteCache( "default" ); // Only ping the API letting our service know that this page must be cached.
@@ -2393,7 +1734,7 @@ function nitropack_handle_request( $servedFrom = "unknown" ) {
 										$nitro->hasRemoteCache( "default" ); // Only ping the API letting our service know that this page must be cached.
 										exit; // No need to continue handling this request. The response is not important.
 									}
-								} else if ( nitropack_is_lighthouse_request() || nitropack_is_gtmetrix_request() || nitropack_is_pingdom_request() ) {
+								} else if ( Utils::is_lighthouse_request() || Utils::is_gtmetrix_request() || Utils::is_pingdom_request() ) {
 									$nitro->hasRemoteCache( "default" ); // Ping the API letting our service know that this page must be cached.
 								}
 
@@ -2424,85 +1765,16 @@ function nitropack_is_dropin_cache_allowed() {
 	return $siteConfig && empty( $siteConfig["isEzoicActive"] );
 }
 
-function nitropack_cookiepath() {
-	$siteConfig = nitropack_get_site_config();
-	$homeUrl = $siteConfig && ! empty( $siteConfig["home_url"] ) ? $siteConfig["home_url"] : get_home_url();
-	$url = new \NitroPack\Url\Url( $homeUrl );
-	return $url ? $url->getPath() : "/";
-}
-
-function nitropack_cookie_path_ajax() {
-	nitropack_verify_ajax_nonce( $_REQUEST );
-	nitropack_json_and_exit( array(
-		'cookie_path' => nitropack_cookiepath()
-	) );
-}
-add_action( 'wp_ajax_nitropack_cookie_path_ajax', 'nitropack_cookie_path_ajax' );
-
-function nitropack_setcookie( $name, $value, $expires = NULL, $options = [] ) {
-	if ( headers_sent() )
-		return;
-	$cookie_options = '';
-	$cookie_path = nitropack_cookiepath();
-
-	if ( $expires && is_numeric( $expires ) ) {
-		$options["Expires"] = date( "D, d M Y H:i:s", (int) $expires ) . ' GMT';
-	}
-
-	if ( empty( $options["SameSite"] ) ) {
-		$options["SameSite"] = "Lax";
-	}
-
-	foreach ( $options as $optName => $optValue ) {
-		$cookie_options .= "$optName=$optValue; ";
-	}
-	nitropack_header( "set-cookie: $name=$value; Path=$cookie_path; " . $cookie_options, false );
-}
-
-function nitropack_header( $header, $replace = true, $response_code = 0 ) {
-	if ( ! nitropack_is_wp_cron() && ! nitropack_is_wp_cli() ) {
-		header( $header, $replace, $response_code );
-	}
-}
-
-function nitropack_upgrade_handler( $entity ) {
-	$np = 'nitropack/main.php';
-	$trigger = $entity;
-	if ( $entity instanceof Plugin_Upgrader ) {
-		$trigger = $entity->plugin_info();
-		if ( ! is_plugin_active( $trigger ) ) {
-			return;
-		}
-	}
-
-	if ( $entity instanceof Theme_Upgrader ) {
-		if ( $entity->theme_info()->Name === wp_get_theme()->Name ) {
-			nitropack_theme_handler( 'Theme updated' );
-		}
-		return;
-	}
-
-	if ( $trigger !== $np ) {
-		$cookie_expires = date( "D, d M Y H:i:s", time() + 600 ) . ' GMT';
-		nitropack_setcookie( 'nitropack_apwarning', "1", time() + 600 );
-	}
-}
 /**
- * Caches some options in the config so that we can access them before get_option() is defined
- * which is in advanced_cache.php, functions.php and Integrations
+ * Sends an HTTP header if not running in WP Cron or WP CLI.
+ * @param string $header The header string to send.
+ * @param bool $replace Whether to replace a previous similar header.
+ * @param int $response_code The HTTP response code.
+ * @return void
  */
-function nitropack_updated_option( $option, $oldValue, $value ) {
-	$neededOptions = \NitroPack\WordPress\NitroPack::$optionsToCache;
-	if ( ! in_array( $option, $neededOptions ) )
-		return;
-
-	$np = get_nitropack();
-	$siteConfig = $np->Config->get();
-
-	if ( function_exists( 'get_home_url' ) ) {
-		$configKey = \NitroPack\WordPress\NitroPack::getConfigKey();
-		$siteConfig[ $configKey ]['options_cache'][ $option ] = $value;
-		$np->Config->set( $siteConfig );
+function nitropack_header( string $header, bool $replace = true, int $response_code = 0 ) {
+	if ( ! Utils::is_wp_cron() && ! Utils::is_wp_cli() ) {
+		header( $header, $replace, $response_code );
 	}
 }
 
@@ -2510,119 +1782,11 @@ function nitropack_is_late_integration_init_required() {
 	return \NitroPack\Integration\Plugin\NginxHelper::isActive() || \NitroPack\Integration\Plugin\Cloudflare::isApoActive();
 }
 
-function nitropack_get_notice_id( $message ) {
-	return md5( $message );
-}
-
-
-function get_date_midpoint( $endDate ) {
-	return ( time() + strtotime( $endDate ) ) / 2;
-}
-
-function initVariationCookies( $customVariationCookies ) {
-	$api = get_nitropack_sdk()->getApi();
-	try {
-		$variationCookies = $api->getVariationCookies();
-		foreach ( $variationCookies as $cookie ) {
-			$index = array_search( $cookie["name"], $customVariationCookies );
-			if ( $index !== false ) {
-				array_splice( $customVariationCookies, $index, 1 );
-			}
-		}
-
-		foreach ( $customVariationCookies as $cookieName ) {
-			$api->setVariationCookie( $cookieName );
-		}
-	} catch (\Exception $e) {
-		// what to do here? possible reason for exception is the API not responding
-		return false;
-	}
-}
-
-function removeVariationCookies( $cookiesToRemove ) {
-	$api = get_nitropack_sdk()->getApi();
-	try {
-		$variationCookies = $api->getVariationCookies();
-		foreach ( $variationCookies as $cookie ) {
-			if ( in_array( $cookie["name"], $cookiesToRemove ) ) {
-				$api->unsetVariationCookie( $cookie["name"] );
-			}
-		}
-	} catch (\Exception $e) {
-		// what to do here? possible reason for exception is the API not responding
-		return false;
-	}
-}
-
-function getNewCookie( $name ) {
-	$cookies = getNewCookies();
-	return ! empty( $cookies[ $name ] ) ? $cookies[ $name ] : null;
-}
-
-/**
- * Returns an array of newly set cookies (not in $_COOKIE), that will be sent along with the headers of the current response.
- */
-function getNewCookies() {
-	$cookies = [];
-	$headers = headers_list();
-	foreach ( $headers as $header ) {
-		if ( strpos( $header, 'Set-Cookie: ' ) === 0 ) {
-			$value = str_replace( '&', urlencode( '&' ), substr( $header, 12 ) );
-			parse_str( current( explode( ';', $value ) ), $pair );
-			$cookies = array_merge_recursive( $cookies, $pair );
-		}
-	}
-
-	return array_filter( array_map( function ( $val ) {
-		if ( is_array( $val ) ) {
-			$lastEl = end( $val );
-			if ( is_array( $lastEl ) ) {
-				return NULL;
-			}
-			return $lastEl;
-		}
-
-		return $val;
-	}, $cookies ) );
-}
-
 //to be removed when the mu-file is removed
-function nitropack_verify_connect(string $siteId, string $siteSecret) {
+function nitropack_verify_connect( string $siteId, string $siteSecret ) {
 	$nitropack_connect = new \NitroPack\WordPress\Connect();
-	$nitropack_connect->nitropack_verify_connect($siteId, $siteSecret);
+	$nitropack_connect->nitropack_verify_connect( $siteId, $siteSecret );
 }
-
-function nitropack_is_autoscale_environment() {
-	return defined("WPE_PLATFORM_NAME") && WPE_PLATFORM_NAME == "autoscale";
-}
-
-add_action( 'permalink_structure_changed', 'nitropack_permalink_structure_changed_handler', 10, 2 );
-
-/**
- * Purge entire cache when front page is changed.
- *
- * @param array $old_value An array of previous settings values.
- * @param array $value An array of submitted settings values.
- *
- * @return void
- */
-function nitropack_frontpage_changed_handler( $old_value, $value ) {
-
-	if ( $old_value !== $value ) {
-		$msg = 'The front page is changed';
-		$url = get_home_url();
-
-		try {
-			nitropack_sdk_purge( $url, NULL, $msg ); // purge entire cache
-		} catch (\Exception $e) {
-		}
-	}
-}
-
-add_action( 'update_option_show_on_front', 'nitropack_frontpage_changed_handler', 10, 2 );
-add_action( 'update_option_page_on_front', 'nitropack_frontpage_changed_handler', 10, 2 );
-add_action( 'update_option_page_for_posts', 'nitropack_frontpage_changed_handler', 10, 2 );
-
 // Init integration action handlers
 $modHandler = NitroPack\ModuleHandler::getInstance();
 $modHandler->init();

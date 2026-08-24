@@ -4,12 +4,17 @@ namespace NitroPack\WordPress\Settings;
 use NitroPack\WordPress\NitroPack;
 
 class TestMode {
-	private static $instance = NULL;
+
+	/**
+	 * Instance of the class when initialized repeatedly. Used to implement singleton pattern.
+	 * @var TestMode $instance
+	 */
+	private static $instance = null;
+
 	public function __construct() {
 		add_action( 'wp_ajax_nitropack_safemode_status', [ $this, 'nitropack_safemode_status' ] );
 		add_action( 'wp_ajax_nitropack_enable_safemode', [ $this, 'nitropack_enable_safemode' ] );
 		add_action( 'wp_ajax_nitropack_disable_safemode', [ $this, 'nitropack_disable_safemode' ] );
-		add_action( 'plugins_loaded', [ $this, 'nitropack_offer_safemode' ] );
 	}
 	public static function getInstance() {
 		if ( ! self::$instance ) {
@@ -18,19 +23,7 @@ class TestMode {
 
 		return self::$instance;
 	}
-	/* Offer test mode instead of disabling NitroPack from Plugins page */
-	public function nitropack_offer_safemode() {
-		global $pagenow;
-		if ( $pagenow == 'plugins.php' && ! $this->is_test_mode_enabled() ) {
-			add_action( 'admin_enqueue_scripts', function () {
-				wp_enqueue_script( 'np_safemode', NITROPACK_PLUGIN_DIR_URL . 'assets/js/np_safemode.min.js', array( 'jquery' ) );
-				wp_enqueue_style( 'np_safemode', NITROPACK_PLUGIN_DIR_URL . 'assets/css/safemode.min.css' );
-			} );
-			add_action( 'admin_footer', function () {
-				require_once NITROPACK_PLUGIN_DIR . 'view/modals/modal-safemode.php';
-			} );
-		}
-	}
+
 	/* Checks test mode in Settings page every visit */
 	public function nitropack_safemode_status( $dontExit = false ) {
 		nitropack_verify_ajax_nonce( $_REQUEST );
@@ -45,7 +38,7 @@ class TestMode {
 						"message" => nitropack_admin_toast_msgs( 'success' )
 					) );
 				}
-				return NULL;
+				return null;
 			}
 
 			if ( ! $dontExit ) {
@@ -64,7 +57,7 @@ class TestMode {
 				"message" => __( 'Error! There was an SDK error while fetching status of safe mode!', 'nitropack' )
 			) );
 		}
-		return NULL;
+		return null;
 	}
 
 	/**
@@ -161,5 +154,41 @@ class TestMode {
 			<?php require_once NITROPACK_PLUGIN_DIR . 'view/modals/modal-test-mode.php'; ?>
 		</div>
 		<?php
+	}
+	/**
+	 * Used in Admin.php to localize the translations for np_settings.js, used in modal-test-mode.php
+	 * @return array{disable_test_mode_action_btn: mixed, disable_test_mode_close_btn: mixed, disable_test_mode_heading: mixed, disable_test_mode_text: mixed, enable_test_mode_action_btn: mixed, enable_test_mode_cancel_btn: mixed, enable_test_mode_footer_text: mixed, enable_test_mode_heading: mixed, enable_test_mode_highlight_text: mixed, enable_test_mode_text: mixed}
+	 */
+	public static function modal_ajax_translations() {
+		return array(
+			//enable
+			'enable_test_mode_heading' => esc_html__( 'Enable Test Mode', 'nitropack' ),
+			'enable_test_mode_text' => esc_html__( 'When you enable Test Mode, we disable all NitroPack’s optimizations and your site visitors are accessing your regular, unoptimized URLs.', 'nitropack' ),
+			'enable_test_mode_highlight_text' => esc_html__( 'To view how a NitroPack optimised page will load and behave simply append <b>?testnitro=1</b> to any URL (e.g. https://yourwebsite.com/?testnitro=1)', 'nitropack' ),
+			'enable_test_mode_footer_text' => esc_html__( 'This allows you to assess and fine-tune NitroPack’s performance before implementing optimizations site-wide.', 'nitropack' ),
+			'enable_test_mode_cancel_btn' => esc_html__( 'Cancel', 'nitropack' ),
+			'enable_test_mode_action_btn' => esc_html__( 'Enable', 'nitropack' ),
+			//disable testmode
+			'disable_test_mode_heading' => esc_html__( 'Purge cache after disabling Test Mode', 'nitropack' ),
+			'disable_test_mode_text' => esc_html__( 'If you have made changes to NitroPack configuration or your website while you were using test mode, we recommend you to purge your cache. In this way we will update NitroPack cache with your recent changes.', 'nitropack' ),
+			'disable_test_mode_close_btn' => esc_html__( 'I will do it later', 'nitropack' ),
+			'disable_test_mode_action_btn' => esc_html__( 'Purge cache now', 'nitropack' ),
+			// Disconnect/Deactivate modal - Test Mode texts
+			'disconnect_modal_layout_issue_testmode' => esc_html__( 'Test Mode is already on so your visitors are browsing without NitroPack\'s optimizations. Open a private window to see what they see. If the issue is no longer reproducible, reach out to support', 'nitropack' ),
+			'disconnect_modal_broken_website_testmode' => esc_html__( 'Test Mode is already on so your visitors are browsing without NitroPack\'s optimizations. Open a private window to see what they see. If the issue is no longer reproducible, reach out to support', 'nitropack' ),
+			'disconnect_modal_site_maintenance_testmode' => esc_html__( 'Test Mode is already active. Your visitors are seeing your site without NitroPack\'s optimizations, so you can make changes safely.', 'nitropack' ),
+			// Disconnect/Deactivate modal - Standard texts
+			'disconnect_modal_layout_issue_standard' => esc_html__( 'Enable Test Mode to check if NitroPack is causing it. If it is, our team can help.', 'nitropack' ),
+			'disconnect_modal_broken_website_standard' => esc_html__( 'Enable Test Mode to check if NitroPack is causing it. If it is, our team can help.', 'nitropack' ),
+			'disconnect_modal_speed_issue_standard' => esc_html__( 'Your site may need a different configuration. Our team can take a look and optimize it for you.', 'nitropack' ),
+			'disconnect_modal_site_maintenance_standard' => esc_html__( 'Enable Test Mode to serve your original site to visitors while you do maintenance. You can switch back with one click.', 'nitropack' ),
+			'disconnect_modal_just_deactivate_standard' => esc_html__( 'No problem. You can %s anytime from the plugin settings.', 'nitropack' ),
+			'disconnect_modal_different_plugin_standard' => esc_html__( 'We\'d love to learn from this. Which plugin are you switching to?', 'nitropack' ),
+			'disconnect_modal_something_else_standard' => esc_html__( 'Is there anything we can improve?', 'nitropack' ),
+			// Disconnect modal - disconnected texts
+			'disconnect_modal_layout_issue_disconnected' => esc_html__( 'NitroPack is disconnected so Test Mode is not available. If you think NitroPack was causing this, our support team can help you get back up and running with a working configuration.', 'nitropack' ),
+			'disconnect_modal_broken_website_disconnected' => esc_html__( 'NitroPack is disconnected so Test Mode is not available. If you think NitroPack was causing this, our support team can help you get back up and running with a working configuration.', 'nitropack' ),
+			'disconnect_modal_site_maintenance_disconnected' => esc_html__( 'NitroPack is already disconnected so your visitors are seeing your site without optimizations. You can make your changes safely.', 'nitropack' ),
+		);
 	}
 }

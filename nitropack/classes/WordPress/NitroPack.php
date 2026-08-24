@@ -8,14 +8,15 @@
 
 namespace NitroPack\WordPress;
 
-use \NitroPack\SDK\Filesystem;
-use \NitroPack\Feature\Logger\Logger as Logger;
-use \NitroPack\Feature\Logger\LoggingEvents as LoggingEvents;
+use NitroPack\SDK\Filesystem;
+use NitroPack\Feature\Logger\Logger as Logger;
+use NitroPack\Feature\Logger\LoggingEvents as LoggingEvents;
 use NitroPack\WordPress\Connect;
 use NitroPack\WordPress\AdvancedCache\AdvancedCache;
+use NitroPack\WordPress\Notifications\Dismiss;
 
 class NitroPack {
-	private static $instance = NULL;
+	private static $instance = null;
 	public static $nitroDirMigrated = false;
 	public static $nitroConfigMigrated = false;
 	public static $preUpdatePosts = array();
@@ -27,7 +28,8 @@ class NitroPack {
 		'cache_handler_cache_handler',
 		'woocommerce_default_customer_address',
 		[ 'ajaxShortcodes' => [ 'enabled' => false, 'shortcodes' => [] ] ],
-		[ "wc_aelia_currency_switcher" => "ipgeolocation_enabled" ]
+		[ "wc_aelia_currency_switcher" => "ipgeolocation_enabled" ],
+		[ "wc_aelia_currency_switcher" => "enabled_currencies" ],
 	];
 
 	public static function getInstance() {
@@ -99,16 +101,22 @@ class NitroPack {
 	public function __construct() {
 		$this->Config = new Config();
 		$this->Notifications = Notifications\Notifications::getInstance();
+		Dismiss::getInstance();
 		$this->settings = new Settings( $this->Config );
 		$this->logger = new Logger( $this );
 		$this->connect = new Connect();
 		$this->advancedCache = new AdvancedCache();
 		$this->loggingEvents = new LoggingEvents( $this->logger );
 		$this->sdkObjects = array();
-		$this->disabledReason = NULL;
-		$this->pageType = NULL;
+		$this->disabledReason = null;
+		$this->pageType = null;
 	}
 
+	/**
+	 * The wp-content/cache/[hash]-nitropack dir. It is used to store the cache files and the other config file from the app.
+	 *
+	 * @return string The path to the NitroPack data directory.
+	 */
 	public static function getDataDir() {
 		$isRaidBoxes = \NitroPack\Integration\Hosting\Raidboxes::detect();
 		$isPantheon = \NitroPack\Integration\Hosting\Pantheon::detect();
@@ -174,7 +182,12 @@ class NitroPack {
 
 		return $nitroDir;
 	}
-
+	/**
+	 * The wp-content/config-[hash]-nitropack dir is used to store the config.json file.
+	 *
+	 * @param string $path The path to resolve.
+	 * @return string The resolved path.
+	 */
 	public static function getPluginDataDir() {
 		$isPantheon = \NitroPack\Integration\Hosting\Pantheon::detect();
 		$isWpe = \NitroPack\Integration\Hosting\WPEngine::detect();
@@ -225,17 +238,13 @@ class NitroPack {
 
 		return $nitroDir;
 	}
-
-	public static function isWpCli() {
-		return defined( "WP_CLI" ) && WP_CLI;
-	}
 	public function getDistribution() {
 		$dist = "regular";
-		$dbDist = NULL;
+		$dbDist = null;
 
 		try {
 			if ( function_exists( "get_option" ) ) {
-				$dbDist = get_option( "nitropack-distribution", NULL );
+				$dbDist = get_option( "nitropack-distribution", null );
 			}
 
 			if ( $this->isConnected() ) {
@@ -247,7 +256,7 @@ class NitroPack {
 				if ( $config ) {
 					$dist = $config->Distribution;
 				}
-			} else if ( $dbDist !== NULL ) {
+			} else if ( $dbDist !== null ) {
 				$dist = $dbDist;
 			}
 
@@ -302,12 +311,12 @@ class NitroPack {
 
 	public function getSiteId() {
 		$siteConfig = $this->getSiteConfig();
-		return $siteConfig ? $siteConfig["siteId"] : NULL;
+		return $siteConfig ? $siteConfig["siteId"] : null;
 	}
 
 	public function getSiteSecret() {
 		$siteConfig = $this->getSiteConfig();
-		return $siteConfig ? $siteConfig["siteSecret"] : NULL;
+		return $siteConfig ? $siteConfig["siteSecret"] : null;
 	}
 
 	/**
@@ -334,13 +343,14 @@ class NitroPack {
 		return ! empty( $this->getSiteId() ) && ! empty( $this->getSiteSecret() );
 	}
 
-	public function updateCurrentBlogConfig( $siteId, $siteSecret, $blogId, $enableCompression = null ) {
+
+	public function updateCurrentBlogConfig( string $siteId, string $siteSecret, int $blogId, ?bool $enableCompression = null ) {
 		if ( $enableCompression === null ) {
 			$enableCompression = ( get_option( 'nitropack-enableCompression' ) == 1 );
 		}
 
 		$webhookToken = get_option( 'nitropack-webhookToken' );
-		$hosting = nitropack_detect_hosting();
+		$hosting = \NitroPack\Util\Utils::detect_hosting();
 
 		$home_url = get_home_url();
 		$admin_url = admin_url();
@@ -351,7 +361,7 @@ class NitroPack {
 		if ( isset( $staticConfig[ $configKey ]['options_cache']['ajaxShortcodes'] ) ) {
 			$ajaxShortcodes_settings = $staticConfig[ $configKey ]['options_cache']['ajaxShortcodes'];
 		}
-		//default value is null, stored is int       
+		//default value is null, stored is int
 		$minimumLogLevel = (int) get_option( 'nitropack-minimumLogLevel', null );
 		if ( ! $minimumLogLevel ) {
 			$minimumLogLevel = null;
@@ -375,8 +385,8 @@ class NitroPack {
 			"isWoocommerceActive" => \NitroPack\Integration\Plugin\WooCommerce::isActive(),
 			"isAeliaCurrencySwitcherActive" => \NitroPack\Integration\Plugin\AeliaCurrencySwitcher::isActive(),
 			"isGeoTargetingWPActive" => \NitroPack\Integration\Plugin\GeoTargetingWP::isActive(),
-			"dlm_downloading_url" => \NitroPack\Integration\Plugin\DownloadManager::isActive() ? \NitroPack\Integration\Plugin\DownloadManager::downloadingUrl() : NULL,
-			"dlm_download_endpoint" => \NitroPack\Integration\Plugin\DownloadManager::isActive() ? \NitroPack\Integration\Plugin\DownloadManager::downloadEndpoint() : NULL,
+			"dlm_downloading_url" => \NitroPack\Integration\Plugin\DownloadManager::isActive() ? \NitroPack\Integration\Plugin\DownloadManager::downloadingUrl() : null,
+			"dlm_download_endpoint" => \NitroPack\Integration\Plugin\DownloadManager::isActive() ? \NitroPack\Integration\Plugin\DownloadManager::downloadEndpoint() : null,
 			"pluginVersion" => NITROPACK_VERSION,
 			"options_cache" => [],
 			"additional_domains" => $this->getAdditionalDomains( $siteId, $siteSecret ),
@@ -434,6 +444,13 @@ class NitroPack {
 				$this->getLogger()->error( $e->getMessage() );
 			}
 		}
+		if ( \NitroPack\Integration\Plugin\AeliaCurrencySwitcher::isActive() ) {
+			try {
+				get_nitropack_sdk()->getApi()->setVariationCookie( "aelia_cs_selected_currency", $staticConfig[ $configKey ]['options_cache']['wc_aelia_currency_switcher']['enabled_currencies'] );
+			} catch (\Exception $e) {
+				$this->getLogger()->error( $e->getMessage() );
+			}
+		}
 
 		return $configSetResult;
 	}
@@ -453,15 +470,15 @@ class NitroPack {
 		$this->sdkObjects = [];
 	}
 
-	public function getSdk( $siteId = null, $siteSecret = null, $urlOverride = NULL, $forwardExceptions = false ) {
+	public function getSdk( $siteId = null, $siteSecret = null, $urlOverride = null, $forwardExceptions = false ) {
 		$siteConfig = $this->getSiteConfig();
 
-		$siteId = $siteId ?: ( ! empty( $siteConfig ) ? $siteConfig['siteId'] : NULL );
-		$siteSecret = $siteSecret ?: ( ! empty( $siteConfig ) ? $siteConfig['siteSecret'] : NULL );
+		$siteId = $siteId ?: ( ! empty( $siteConfig ) ? $siteConfig['siteId'] : null );
+		$siteSecret = $siteSecret ?: ( ! empty( $siteConfig ) ? $siteConfig['siteSecret'] : null );
 
 		if ( $siteId && $siteSecret ) {
 			try {
-				$userAgent = NULL; // It will be automatically detected by the SDK
+				$userAgent = null; // It will be automatically detected by the SDK
 				$dataDir = nitropack_trailingslashit( NITROPACK_DATA_DIR ) . $siteId; // dir without a trailing slash, because this is how the SDK expects it
 				$cacheKey = "{$siteId}:{$siteSecret}:{$dataDir}";
 
@@ -506,15 +523,14 @@ class NitroPack {
 				if ( $forwardExceptions ) {
 					throw $e;
 				}
-				return NULL;
+				return null;
 			}
 
 			return $nitro;
 		}
 
-		return NULL;
+		return null;
 	}
-
 	/**
 	 * Check if the data directory exists
 	 *

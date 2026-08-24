@@ -15,7 +15,7 @@
                 </button>
             </div>
             <!-- Modal body based on modal-header height we need to substract -->
-            <div class="modal-body scrollable" style="height: calc(100% - 65px);">
+            <div class="modal-body scrollable">
                 <div class="scrollbar-default overflow-auto">
                     <ul class="list-items">
                         <?php foreach ($notOptimizedCPTs as $cpt_slug => $notOptimizedCPT) { ?>

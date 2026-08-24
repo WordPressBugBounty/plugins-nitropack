@@ -26,7 +26,7 @@ class CLI {
 	}
 	public function register_hooks() {
 
-		$is_wp_cli = nitropack_is_wp_cli();
+		$is_wp_cli = \NitroPack\Util\Utils::is_wp_cli();
 
 		if ( ! is_admin() && ! $is_wp_cli && ! is_user_logged_in() )
 			return;

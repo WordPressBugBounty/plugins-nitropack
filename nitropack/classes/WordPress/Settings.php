@@ -110,7 +110,15 @@ class Settings {
 	 * @var Shortcodes
 	 */
 	public $shortcodes;
+	/**
+	 * Grabs Logger class
+	 * @var Logger
+	 */
 	public $logger;
+	/**
+	 * Grabs SystemReport class
+	 * @var SystemReport
+	 */
 	public $system_report;
 	/**
 	 * Settings constructor.

@@ -19,11 +19,9 @@
                 <p><?php esc_html_e( 'Powered by NitroPack by WP Engine', 'nitropack'); ?></p>                
             </div>
             <div class="cta-container">
-                <form class="w-full" action="options.php" method="post" id="api-details-form">
-                    <?php settings_fields(NITROPACK_OPTION_GROUP);
-                    do_settings_sections(NITROPACK_OPTION_GROUP); ?>
+                <form class="w-full" action="options.php" method="post" id="api-details-form">                 
                     <?php if ($oneClickConnectUrl) : ?>
-                    <a class="btn btn-primary btn-xl w-100" href="<?php esc_attr_e($oneClickConnectUrl); ?>">
+                    <a class="btn btn-primary btn-xl w-100" href="<?php echo esc_url( $oneClickConnectUrl ); ?>">
                         <img src="<?php echo NITROPACK_PLUGIN_DIR_URL . 'assets/img/loading.svg'; ?>" alt="loading" class="icon-left hidden">
                         <?php esc_html_e('Connect to NitroPack', 'nitropack'); ?>
                     </a>

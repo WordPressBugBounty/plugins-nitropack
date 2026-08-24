@@ -7,6 +7,10 @@ defined( 'ABSPATH' ) || die( 'No script kiddies please!' );
 
 /* Optimizations class to handle optimization related functionalities */
 class Optimizations {
+	/**
+	 * Instance of the Optimizations class
+	 * @var Optimizations $instance
+	 */
 	private static $instance = null;
 	public function __construct() {
 		add_action( 'wp_ajax_nitropack_fetch_optimizations', [ $this, 'nitropack_fetch_optimizations' ] );
@@ -25,8 +29,7 @@ class Optimizations {
 		$quickSetupHTTP = new HttpClient( $planDetailsUrl );
 		$quickSetupHTTP->timeout = 30;
 		$quickSetupHTTP->fetch( true, "GET" );
-		$resp = $quickSetupHTTP->getStatusCode() == 200 ? json_decode( $quickSetupHTTP->getBody(), true ) : false;
-		return $resp;
+		return $quickSetupHTTP->getStatusCode() == 200 ? json_decode( $quickSetupHTTP->getBody(), true ) : false;
 	}
 	/**
 	 * AJAX handler to fetch optimizations data 
@@ -79,9 +82,9 @@ class Optimizations {
 								data-purge-reason><?php echo esc_html( $purge_reason ); ?></span></div>
 					</div>
 					<?php $components = new Components();
-					echo $components->render_button( ['text' => 'Purge cache', 'classes' => 'btn btn-secondary', 'type' => 'button', 'attributes' => ['id' => 'optimizations-purge-cache', 'data-modal-target' => 'modal-purge-cache', 'data-modal-toggle' => 'modal-purge-cache' ] ] );					
+					echo $components->render_button( [ 'text' => 'Purge cache', 'classes' => 'btn btn-secondary', 'type' => 'button', 'attributes' => [ 'id' => 'optimizations-purge-cache', 'data-modal-target' => 'modal-purge-cache', 'data-modal-toggle' => 'modal-purge-cache' ] ] );
 					?>
-				
+
 				</div>
 			</div>
 			<?php require_once NITROPACK_PLUGIN_DIR . 'view/modals/modal-purge-cache.php'; ?>

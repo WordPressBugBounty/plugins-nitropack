@@ -1,6 +1,6 @@
 <?php
 
-namespace Nitropack\WordPress\AdvancedCache;
+namespace NitroPack\WordPress\AdvancedCache;
 
 /**
  * Here we handle the installation and uninstallation of the advanced_cache.php file stored in wp-content folder.
@@ -20,13 +20,9 @@ class AdvancedCache {
 	 * @description Installs the advanced-cache.php file in the WP_CONTENT_DIR directory. This file is required for NitroPack to work properly. If the file cannot be created, the function returns
 	 */
 	public function install_advanced_cache() {
-		if ( nitropack_is_autoscale_environment() ) { // Autoscale environment has a non-persistent file system, so advanced cache cannot be used
-			return false;
-		}
-
 		$conflictingPlugins = \NitroPack\WordPress\ConflictingPlugins::getInstance();
 		$nitropack_is_conflicting_plugin_active = $conflictingPlugins->nitropack_is_conflicting_plugin_active();
-		if ( $nitropack_is_conflicting_plugin_active || ! nitropack_is_advanced_cache_allowed() ) {
+		if ( $nitropack_is_conflicting_plugin_active || ! $this->is_advanced_cache_allowed() ) {
 			return false;
 		}
 
@@ -50,7 +46,7 @@ class AdvancedCache {
 	 * @description Uninstalls the advanced-cache.php file in the WP_CONTENT_DIR directory.
 	 */
 	public function uninstall_advanced_cache() {
-		if ( nitropack_is_autoscale_environment() ) { // Autoscale environment has a non-persistent file system, so advanced cache cannot be used
+		if ( $this->is_autoscale_environment() ) { // Autoscale environment has a non-persistent file system, so advanced cache cannot be used
 			return false;
 		}
 
@@ -70,5 +66,25 @@ class AdvancedCache {
 	 */
 	public function has_advanced_cache() {
 		return defined( 'NITROPACK_ADVANCED_CACHE' );
+	}
+	/**
+	 * @return bool
+	 * @description Checks whether the advanced-cache.php is allowed on the server.
+	 */
+	public function is_advanced_cache_allowed() {
+		if ( $this->is_autoscale_environment() ) { // Autoscale environment has a non-persistent file system, so advanced cache cannot be used
+			return false;
+		}
+
+		return ! in_array( \NitroPack\Util\Utils::detect_hosting(), array(
+			"pressable"
+		) );
+	}
+	/**
+	 * @description Checks whether we are on an Autoscale environment
+	 * @return bool
+	 */
+	private function is_autoscale_environment() {
+		return defined( "WPE_PLATFORM_NAME" ) && WPE_PLATFORM_NAME == "autoscale";
 	}
 }

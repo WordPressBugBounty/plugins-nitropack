@@ -5,7 +5,16 @@ use NitroPack\WordPress\NitroPack;
 use NitroPack\HttpClient\HttpClient;
 
 class HTMLCompression {
+	/**
+	 * Instance of the HTMLCompression class
+	 * @var HTMLCompression $instance
+	 */
 	private static $instance = null;
+
+	/**
+	 * Option name for HTML compression setting
+	 * @var string $option_name
+	 */
 	public $option_name;
 	/**
 	 * Get the singleton instance of the HTMLCompression class
@@ -34,7 +43,7 @@ class HTMLCompression {
 		nitropack_verify_ajax_nonce( $_REQUEST );
 		$option = (int) ! empty( $_POST["data"]["compressionStatus"] );
 		$updated = update_option( $this->option_name, $option );
-
+		$this->update_html_compression_in_config( $option == 1 ? true : false );
 		if ( $updated ) {
 			NitroPack::getInstance()->getLogger()->notice( 'HTML Compression is ' . ( $option === 1 ? 'enabled' : 'disabled' ) );
 			nitropack_json_and_exit( array( "type" => "success", "message" => nitropack_admin_toast_msgs( 'success' ), "hasCompression" => $option ) );
@@ -46,7 +55,20 @@ class HTMLCompression {
 			) );
 		}
 	}
-
+	/**
+	 * Update HTML compression value in static config
+	 * @param bool $enableCompression
+	 * @return void
+	 */
+	private function update_html_compression_in_config( bool $enableCompression = false ) {
+		if ( get_nitropack()->isConnected() ) {
+			$siteConfig = nitropack_get_site_config();
+			$siteId = $siteConfig["siteId"];
+			$siteSecret = $siteConfig["siteSecret"];
+			$blogId = get_current_blog_id();
+			get_nitropack()->updateCurrentBlogConfig( $siteId, $siteSecret, $blogId, $enableCompression );
+		}
+	}
 	/**
 	 * AJAX handler when testing the compression on page load.
 	 * Most servers have compression enabled by default - br or gzip.
@@ -61,11 +83,12 @@ class HTMLCompression {
 			if ( $hostingsWithCompression ) {
 				$hasCompression = true;
 				update_option( $this->option_name, 0 );
+				$this->update_html_compression_in_config( false );
 				nitropack_json_and_exit( array( "type" => "success", "hasCompression" => $hasCompression ) );
 			} else {
 				/* Reset setting each time when testing */
 				update_option( $this->option_name, 0 );
-
+				$this->update_html_compression_in_config( false );
 				require_once plugin_dir_path( NITROPACK_FILE ) . nitropack_trailingslashit( 'nitropack-sdk' ) . 'autoload.php';
 				$http = new HTTPClient( get_site_url() );
 				$http->setHeader( "X-NitroPack-Request", 1 );
@@ -84,14 +107,19 @@ class HTMLCompression {
 					/* If not found, we enable NitroPack GZIP compression */
 					$hasCompression = false;
 					update_option( $this->option_name, 1 );
+					$this->update_html_compression_in_config( true );
 					nitropack_json_and_exit( array( "type" => "success", "hasCompression" => $hasCompression ) );
 				}
+
 			}
 		} catch (\Exception $e) {
 			nitropack_json_and_exit( array( "type" => "error", "message" => nitropack_admin_toast_msgs( 'error' ) ) );
 		}
 	}
-
+	/**
+	 * HTML render in our Dashboard
+	 * @return void
+	 */
 	public function render() {
 		$enableCompression = get_option( $this->option_name );
 		?>

@@ -310,7 +310,7 @@ class Pagecache
 
                 // Calculate current variation hash
                 $currentVariationPrefix = $this->getVariationCookiePrefix();
-                $currentVariationHash = md5($currentVariationPrefix);
+                $currentVariationHash = $currentVariationPrefix === '' ? '' : md5($currentVariationPrefix);
 
                 // Get last served variation from tracking cookie
                 $lastVariationHash = isset($_COOKIE['np_cache_variation'])

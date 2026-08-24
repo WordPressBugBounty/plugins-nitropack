@@ -7,6 +7,10 @@ defined( 'ABSPATH' ) || die( 'No script kiddies please!' );
 
 /* Subscription class to handle subscription related functionalities */
 class Subscription {
+	/**
+	 * Instance of the Subscription class
+	 * @var Subscription $instance
+	 */
 	private static $instance = null;
 
 	/**
@@ -17,8 +21,7 @@ class Subscription {
 		$quickSetupHTTP = new HttpClient( $planDetailsUrl );
 		$quickSetupHTTP->timeout = 30;
 		$quickSetupHTTP->fetch();
-		$resp = $quickSetupHTTP->getStatusCode() == 200 ? json_decode( $quickSetupHTTP->getBody(), true ) : false;
-		return $resp;
+		return $quickSetupHTTP->getStatusCode() == 200 ? json_decode( $quickSetupHTTP->getBody(), true ) : false;
 	}
 	public static function getInstance() {
 		if ( null === self::$instance ) {
@@ -51,7 +54,7 @@ class Subscription {
 			</div>
 			<div class="card-body">
 				<div class="flex flex-row items-center">
-				<div class="plan-name"><?php echo esc_html( $plan_title ); ?></div>
+					<div class="plan-name"><?php echo esc_html( $plan_title ); ?></div>
 					<?php $components = new Components();
 					echo $components->render_button( [ 'text' => 'Manage subscription', 'type' => null, 'classes' => 'btn btn-secondary ml-auto', 'href' => 'https://app.nitropack.io/account/billing', 'attributes' => [ 'id' => 'btn-manage-subscription', 'target' => '_blank' ] ] );
 					?>
@@ -61,11 +64,11 @@ class Subscription {
 						<tbody>
 							<tr>
 								<td class="key"><?php esc_html_e( 'Next reset', 'nitropack' ); ?></td>
-							<td class="value" data-next-reset><?php echo esc_html( $next_reset ); ?></td>
+								<td class="value" data-next-reset><?php echo esc_html( $next_reset ); ?></td>
 							</tr>
 							<tr>
 								<td class="key"><?php esc_html_e( 'Next billing', 'nitropack' ); ?></td>
-							<td class="value" data-next-billing><?php echo esc_html( $next_billing ); ?></td>
+								<td class="value" data-next-billing><?php echo esc_html( $next_billing ); ?></td>
 							</tr>
 							<tr>
 								<td class="key"><?php esc_html_e( 'Page views', 'nitropack' ); ?></td>

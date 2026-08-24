@@ -24,7 +24,7 @@ class WooCommerce {
 		add_action( 'transition_post_status', [ $this, 'update_product_from_transient' ], 10, 3 );
 		//delete transient on post delete
 		add_action( 'delete_post', [ $this, 'remove_deleted_product_from_transient' ] );
-		if ( nitropack_is_optimizer_request() ) {
+		if ( \NitroPack\Util\Utils::is_optimizer_nitropack_request() ) {
 			add_action( 'template_redirect', [ $this, 'purge_site_cache_on_sale_start_and_end' ] );
 		}
 		add_filter( 'wc_product_post_type_link_product_cat', [ $this, 'uppercase_product_cat_links' ] );

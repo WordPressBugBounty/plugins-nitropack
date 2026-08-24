@@ -122,6 +122,7 @@ class Logger {
 						<p><?php printf( esc_html__( 'Download usage for %1$s - %2$s', 'nitropack' ), esc_html( $earliestDate ),
 							esc_html( $latestDate )
 						); ?>
+						<!-- translators: %1$s: earliest date, %2$s: latest date -->
 						</p>
 					</div>
 					<?php if ( class_exists( 'ZipArchive' ) ) {

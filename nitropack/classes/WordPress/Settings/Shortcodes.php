@@ -1,12 +1,8 @@
 <?php
-
 namespace NitroPack\WordPress\Settings;
 
 /**
- * Class Shortcodes
- *
  * The shortcode settings are stored in config.json!
- *
  */
 class Shortcodes {
 	public function __construct() {

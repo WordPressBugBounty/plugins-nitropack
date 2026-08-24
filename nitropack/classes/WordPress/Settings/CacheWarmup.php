@@ -40,8 +40,9 @@ class CacheWarmup {
 	public function nitropack_enable_warmup() {
 		nitropack_verify_ajax_nonce( $_REQUEST );
 		$prepend = '';
-		if ( nitropack_is_wp_cli() )
+		if ( \NitroPack\Util\Utils::is_wp_cli() ) {
 			$prepend = '[CLI] ';
+		}
 		if ( null !== $nitro = get_nitropack_sdk() ) {
 			try {
 				$nitro->getApi()->enableWarmup();
@@ -69,8 +70,9 @@ class CacheWarmup {
 	public function nitropack_disable_warmup() {
 		nitropack_verify_ajax_nonce( $_REQUEST );
 		$prepend = '';
-		if ( nitropack_is_wp_cli() )
+		if ( \NitroPack\Util\Utils::is_wp_cli() ) {
 			$prepend = '[CLI] ';
+		}
 		if ( null !== $nitro = get_nitropack_sdk() ) {
 			try {
 				$nitro->getApi()->disableWarmup();

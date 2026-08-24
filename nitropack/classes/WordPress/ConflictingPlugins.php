@@ -8,7 +8,7 @@ namespace NitroPack\WordPress;
  * It provides methods to retrieve a list of known conflicting plugins and check if any are active.
  */
 class ConflictingPlugins {
-	private static $instance = NULL;
+	private static $instance = null;
 	public static function getInstance() {
 		if ( ! self::$instance ) {
 			self::$instance = new ConflictingPlugins();

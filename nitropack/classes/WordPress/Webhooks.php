@@ -1,7 +1,7 @@
 <?php
 
 namespace NitroPack\WordPress;
-
+use NitroPack\Util\Utils;
 /**
  * Handle NitroPack webhooks
  */
@@ -67,7 +67,7 @@ class Webhooks {
 				case "config":
 					nitropack_fetch_config();
 					get_nitropack()->resetSdkInstances(); // This is needed in order to obtain a new SDK instance with the fresh config
-					nitropack_set_htaccess_rules( true );
+					\NitroPack\WordPress\CoreFiles::set_htaccess_rules( true );
 					if ( null !== $nitro = get_nitropack_sdk() ) {
 						$nitro->purgeProxyCache();
 					}
@@ -84,7 +84,7 @@ class Webhooks {
 					if ( ! empty( $urls ) ) {
 						$readyUrls = [];
 						foreach ( $urls as $url ) {
-							$readyUrl = nitropack_sanitize_url_input( $url );
+							$readyUrl = Utils::sanitize_url( $url );
 							if ( $readyUrl ) {
 								$readyUrls[] = $readyUrl;
 							}
@@ -118,7 +118,7 @@ class Webhooks {
 					if ( ! empty( $_POST["url"] ) ) {
 						$urls = is_array( $_POST["url"] ) ? $_POST["url"] : array( $_POST["url"] );
 						foreach ( $urls as $url ) {
-							$sanitizedUrl = nitropack_sanitize_url_input( $url );
+							$sanitizedUrl = Utils::sanitize_url( $url );
 							if ( $proxyPurgeOnly ) {
 								if ( null !== $nitro = get_nitropack_sdk( $siteConfig["siteId"], $siteConfig["siteSecret"] ) ) {
 									$nitro->purgeProxyCache( $sanitizedUrl );

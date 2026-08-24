@@ -34,7 +34,7 @@ class Cloudways extends Hosting {
             if(!empty($siteConfig['home_url'])) {
                 $homepage = nitropack_trailingslashit($siteConfig['home_url']) . '.*';
             }
-            $purger = new \NitroPack\SDK\Integrations\Varnish(array("127.0.0.1"), "PURGE");
+            $purger = new \NitroPack\SDK\Integrations\Varnish(array("127.0.0.1:8080"), "PURGE");
             $purger->purge($homepage);
         } catch (\Exception $e) {
             // Exception

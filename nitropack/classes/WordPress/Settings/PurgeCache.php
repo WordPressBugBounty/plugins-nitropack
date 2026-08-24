@@ -3,6 +3,7 @@
 namespace NitroPack\WordPress\Settings;
 use NitroPack\WordPress\NitroPack;
 use NitroPack\Integration\Plugin\RC as ResidualCache;
+use NitroPack\Util\Utils;
 
 /**
  * Ajax handlers when purging or invalidating the NitroPack cache
@@ -26,10 +27,14 @@ class PurgeCache {
 		//metaboxes
 		add_action( 'add_meta_boxes', [ $this, 'nitropack_meta_box' ] );
 		//purge/invalidate entire cache when permalink structure or front page is changed
-		add_action( 'permalink_structure_changed', [ $this, 'nitropack_permalink_structure_changed_handler' ], 10, 2 );
-		add_action( 'update_option_show_on_front', [ $this, 'nitropack_frontpage_changed_handler' ], 10, 2 );
-		add_action( 'update_option_page_on_front', [ $this, 'nitropack_frontpage_changed_handler' ], 10, 2 );
-		add_action( 'update_option_page_for_posts', [ $this, 'nitropack_frontpage_changed_handler' ], 10, 2 );
+		add_action( 'permalink_structure_changed', [ $this, 'purge_on_change_in_permalink_structure' ], 10, 2 );
+		add_action( 'update_option_show_on_front', [ $this, 'purge_on_frontpage_change' ], 10, 2 );
+		add_action( 'update_option_page_on_front', [ $this, 'purge_on_frontpage_change' ], 10, 2 );
+		add_action( 'update_option_page_for_posts', [ $this, 'purge_on_frontpage_change' ], 10, 2 );
+		//purge cache on theme switch
+		add_action( 'switch_theme', [ $this, 'purge_on_switch_theme' ] );
+		//purge cache on theme update
+		add_action( 'upgrader_process_complete', [ $this, 'purge_cache_on_theme_update' ], 10, 2 );
 	}
 
 	/**
@@ -135,10 +140,10 @@ class PurgeCache {
 			if ( $postUrl ) {
 				if ( is_array( $postUrl ) ) {
 					foreach ( $postUrl as &$url ) {
-						$url = nitropack_sanitize_url_input( $url );
+						$url = Utils::sanitize_url( $url );
 					}
 				} else {
-					$postUrl = nitropack_sanitize_url_input( $postUrl );
+					$postUrl = Utils::sanitize_url( $postUrl );
 					$reason = "Manual purge of " . $postUrl;
 				}
 			}
@@ -180,10 +185,10 @@ class PurgeCache {
 			if ( $postUrl ) {
 				if ( is_array( $postUrl ) ) {
 					foreach ( $postUrl as &$url ) {
-						$url = nitropack_sanitize_url_input( $url );
+						$url = Utils::sanitize_url( $url );
 					}
 				} else {
-					$postUrl = nitropack_sanitize_url_input( $postUrl );
+					$postUrl = Utils::sanitize_url( $postUrl );
 					$reason = "Manual invalidation of " . $postUrl;
 				}
 			}
@@ -272,8 +277,8 @@ class PurgeCache {
 	 */
 	public function purge_invalidate_post_links( $actions, $post ) {
 		//chgeck if the CPT is cacheable
-		$CPTOptimization = CPTOptimization::getInstance();
-		$cacheableObjectTypes = $CPTOptimization->nitropack_get_cacheable_object_types();
+		$cpt_optimization = CPTOptimization::getInstance();
+		$cacheableObjectTypes = $cpt_optimization->nitropack_get_cacheable_object_types();
 		if ( ! in_array( $post->post_type, $cacheableObjectTypes ) ) {
 			return $actions;
 		}
@@ -301,7 +306,7 @@ class PurgeCache {
 	 *
 	 * @return void
 	 */
-	public function nitropack_permalink_structure_changed_handler( $old_permalink_structure, $permalink_structure ) {
+	public function purge_on_change_in_permalink_structure( $old_permalink_structure, $permalink_structure ) {
 
 		if ( $old_permalink_structure != $permalink_structure && get_option( "nitropack-autoCachePurge", 1 ) ) {
 			$msg = 'The permalink structure is changed. Purging the cache for the home page.';
@@ -323,16 +328,46 @@ class PurgeCache {
 	 *
 	 * @return void
 	 */
-	public function nitropack_frontpage_changed_handler( $old_value, $value ) {
-
+	public function purge_on_frontpage_change( $old_value, $value ) {
 		if ( $old_value !== $value ) {
 			$msg = 'The front page is changed';
 			$url = get_home_url();
 
 			nitropack_sdk_purge( $url, null, $msg ); // purge entire cache
-		
 		}
 	}
 
+	/**
+	 * Purge entire cache when theme is switched.
+	 * @param mixed $event
+	 * @return void
+	 */
+	public function purge_on_switch_theme( $event ) {
+		if ( ! get_option( "nitropack-autoCachePurge", 1 ) ) {
+			return;
+		}
 
+		if ( $event ) {
+			$msg = $event;
+		} else {
+			$msg = 'Theme switched to ' . wp_get_theme()->Name;
+		}
+		nitropack_sdk_purge( null, null, $msg ); // purge entire cache
+	}
+
+	/**
+	 * Purge cache when the active theme is updated.
+	 *
+	 * @param \WP_Upgrader $upgrader The upgrader instance.
+	 * @param array $options The options for the upgrade.
+	 * @return void
+	 */
+	public function purge_cache_on_theme_update( $upgrader, $options = null ) {
+		if ( $options['type'] == 'theme' && $options['action'] == 'update' ) {
+			$theme_name = $upgrader->theme_info()->Name;
+			if ( $theme_name === wp_get_theme()->Name ) {
+				$this->purge_on_switch_theme( 'Theme ' . wp_get_theme()->Name . ' updated' );
+			}
+		}
+	}
 }

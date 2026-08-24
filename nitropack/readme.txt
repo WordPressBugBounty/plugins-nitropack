@@ -2,9 +2,9 @@
 Contributors: nitropack
 Tags: cache, performance, page speed, website speed, core web vitals
 Requires at least: 4.7
-Tested up to: 7.0.2
+Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.19.9
+Stable tag: 1.20.0
 License: GNU General Public License, version 2
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -269,6 +269,12 @@ Yes, the plugin uses the [Intercom Chat Widget](https://widget.intercom.io), whi
 5. The only solution you will ever need
 
 == Changelog ==
+= 1.20.0 =
+2026-08-24
+
+* New: Disconnect/Deactivate modal flow
+* Improvement: Larger plugin refactoring
+
 = 1.19.9 =
 2026-07-22
 

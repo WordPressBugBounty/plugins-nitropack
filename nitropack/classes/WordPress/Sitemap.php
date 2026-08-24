@@ -1,7 +1,7 @@
 <?php
 
 namespace NitroPack\WordPress;
-
+use NitroPack\Integration\Plugin;
 /**
  * Sitemap is only used in CacheWarmup.php when the user switches it ON. Checks if we have SEO plugin with sitemap and if so, uses that one instead.
  * For example, if Yoast plugin is present - it will use Yoast sitemap.xml and it will display a tooltip message in Cache Warmup setting.
@@ -14,17 +14,17 @@ class Sitemap {
 	 */
 	public function active_sitemap_plugins() {
 		return
-			\NitroPack\Integration\Plugin\YoastSEO::isActive() ||
-			\NitroPack\Integration\Plugin\JetPackNP::isActive() ||
-			\NitroPack\Integration\Plugin\SquirrlySEO::isActive() ||
-			\NitroPack\Integration\Plugin\RankMathNP::isActive();
+			Plugin\YoastSEO::isActive() ||
+			Plugin\JetPackNP::isActive() ||
+			Plugin\SquirrlySEO::isActive() ||
+			Plugin\RankMathNP::isActive();
 	}
 
 	public function get_site_maps() {
-		$sitemapUrls['YoastSEO'] = \NitroPack\Integration\Plugin\YoastSEO::getSitemapURL();
-		$sitemapUrls['JetPack'] = \NitroPack\Integration\Plugin\JetPackNP::getSitemapURL();
-		$sitemapUrls['SquirrlySEO'] = \NitroPack\Integration\Plugin\SquirrlySEO::getSitemapURL();
-		$sitemapUrls['RankMath'] = \NitroPack\Integration\Plugin\RankMathNP::getSitemapURL();
+		$sitemapUrls['YoastSEO'] = Plugin\YoastSEO::getSitemapURL();
+		$sitemapUrls['JetPack'] = Plugin\JetPackNP::getSitemapURL();
+		$sitemapUrls['SquirrlySEO'] = Plugin\SquirrlySEO::getSitemapURL();
+		$sitemapUrls['RankMath'] = Plugin\RankMathNP::getSitemapURL();
 
 		return $sitemapUrls;
 	}
@@ -35,7 +35,7 @@ class Sitemap {
 	 */
 	public function get_default_sitemap() {
 
-		$defaultSiteMap = \NitroPack\Integration\Plugin\WPCacheHelper::getSitemapURL();
+		$defaultSiteMap = Plugin\WPCacheHelper::getSitemapURL();
 		if ( $defaultSiteMap ) {
 			$this->set_sitemap_indication_msg( 'WordPress', $defaultSiteMap );
 			return $defaultSiteMap;

@@ -166,11 +166,13 @@ $table_cells = array(
 						<?php endforeach; ?>
 					</div>
 				</div>
-				<!-- Modal footer -->
-				<div class="modal-footer" style="margin-bottom: 0">
-					<button data-modal-hide="modal-modes" type="button"
-						class="btn btn-secondary ml-auto"><?php esc_html_e( 'Close', 'nitropack' ); ?></button>
-				</div>
+
+			</div>
+			<!-- Modal footer -->
+			<div class="modal-footer" style="margin-bottom: 0">
+				<button data-modal-hide="modal-modes" type="button" class="btn btn-secondary ml-auto">
+					<?php esc_html_e( 'Close', 'nitropack' ); ?>
+				</button>
 			</div>
 		</div>
 	</div>

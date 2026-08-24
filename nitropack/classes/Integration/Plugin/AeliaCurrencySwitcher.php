@@ -39,6 +39,7 @@ class AeliaCurrencySwitcher {
 				if ( ! $this->isAeliaActive() ) {
 					return;
 				}
+
 				if ( ! $this->isAeliaGeolocationEnabled() ) {
 					return;
 				}
@@ -48,17 +49,18 @@ class AeliaCurrencySwitcher {
 				// 		\NitroPack\SDK\NitroPack::addCustomCachePrefix( $_SERVER["HTTP_CF_IPCOUNTRY"] );
 				// 	} );
 				// 	return;
-				// }			
+				// }
 				add_filter( "nitropack_passes_cookie_requirements", [ $this, "can_serve_cache" ] );
 				return true;
 			case "late":
 				if ( ! self::isAeliaActive() ) {
 					return;
 				}
-
+				
 				add_action( 'woocommerce_init', [ $this, 'set_custom_currency_cookie' ] );
+				add_action( 'wc_aelia_currencyswitcher_settings_saved', [ $this, 'on_aelia_settings_saved' ] );
 
-				if ( nitropack_is_optimizer_request() ) {
+				if ( \NitroPack\Util\Utils::is_optimizer_nitropack_request() ) {
 					add_filter( 'wc_aelia_cs_selected_currency', [ $this, 'modify_cookie_currency' ] );
 				}
 				return true;
@@ -129,6 +131,70 @@ class AeliaCurrencySwitcher {
 		}
 		return $currency;
 	}
+	/**
+	 * Returns the enabled currency codes from the NitroPack config cache.
+	 *
+	 * @return array<string> Array of currency codes (e.g. ['EUR', 'GBP']), empty array if unavailable.
+	 * @since 1.18.2
+	 */
+	public function get_enabled_currencies() {
+		try {
+			$nitropack = get_nitropack();
+			if ( ! $nitropack ) {
+				return [];
+			}
+			$siteConfig = $nitropack->getSiteConfig();
+			$currencies = $siteConfig['options_cache']['wc_aelia_currency_switcher']['enabled_currencies'] ?? [];
+			return is_array( $currencies ) ? array_values( array_filter( $currencies ) ) : [];
+		} catch (\Exception $e) {
+			return [];
+		}
+	}
+	/**
+	 * Grab the updated currencies from Aelia and populate them in the NitroPack config cache and app (Cache Settings -> Cache -> Cookies).
+	 * Hook 'wc_aelia_currencyswitcher_settings_saved'
+	 * @return void
+	 */
+	public function on_aelia_settings_saved() {
+		try {
+			$enabled_currencies = $this->get_enabled_currencies_from_option();
+
+			// Update the local NitroPack config cache so get_enabled_currencies() stays in sync.
+			$nitropack = get_nitropack();
+			if ( $nitropack ) {
+				$config = $nitropack->Config->get();
+				$configKey = \NitroPack\WordPress\NitroPack::getConfigKey();
+
+				if ( ! isset( $config[ $configKey ]['options_cache']['wc_aelia_currency_switcher'] ) || ! is_array( $config[ $configKey ]['options_cache']['wc_aelia_currency_switcher'] ) ) {
+					$config[ $configKey ]['options_cache']['wc_aelia_currency_switcher'] = [];
+				}
+				$config[ $configKey ]['options_cache']['wc_aelia_currency_switcher']['enabled_currencies'] = $enabled_currencies;
+				$nitropack->Config->set( $config );
+			}
+
+			// Sync the updated currency list to the NitroPack app.
+			get_nitropack_sdk()->getApi()->setVariationCookie( 'aelia_cs_selected_currency', $enabled_currencies );
+
+		} catch (\Exception $e) {
+			// Silently fail — config update is best-effort.
+		}
+	}
+
+	/**
+	 * Reads enabled currency codes directly from the Aelia WP option.
+	 * Safe to call before the NitroPack config cache is built.
+	 *
+	 * @return array<string>
+	 * @since 1.18.2
+	 */
+	private function get_enabled_currencies_from_option() {
+		$aelia_settings = get_option( 'wc_aelia_currency_switcher', [] );
+		if ( isset( $aelia_settings['enabled_currencies'] ) && is_array( $aelia_settings['enabled_currencies'] ) ) {
+			return array_values( array_filter( $aelia_settings['enabled_currencies'] ) );
+		}
+		return [];
+	}
+
 	/**
 	 * Check if the Aelia Currency Switcher geolocation is enabled.
 	 *
