@@ -171,7 +171,7 @@ class Filesystem {
                 foreach ($lines as $line) {
                     $parts = explode(":", $line);
                     $name = strtolower(array_shift($parts));
-                    $value = trim(implode(":", $parts));
+                    $value = trim(implode(":", $parts), " \n\r\t\v\x00");
                     if (!empty($headers[$name])) {
                         if (!is_array($headers[$name])) {
                             $headers[$name] = array($headers[$name]);

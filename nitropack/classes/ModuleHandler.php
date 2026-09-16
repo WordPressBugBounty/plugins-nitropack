@@ -55,7 +55,7 @@ class ModuleHandler {
         "NitroPack/Integration/Plugin/SquirrlySEO",
         "NitroPack/Integration/Plugin/RankMathNP",
         "NitroPack/Integration/Plugin/WPBakeryNP",
-        //"NitroPack/Integration/Plugin/GravityForms",
+        "NitroPack/Integration/Plugin/GravityForms",
         "NitroPack/Integration/Plugin/Elementor",
         "NitroPack/Integration/Plugin/WPForms",
         "NitroPack/Integration/Plugin/GeoTargetingWP",

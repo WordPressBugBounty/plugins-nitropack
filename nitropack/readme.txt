@@ -4,7 +4,7 @@ Tags: cache, performance, page speed, website speed, core web vitals
 Requires at least: 4.7
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.20.0
+Stable tag: 1.20.1
 License: GNU General Public License, version 2
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -269,6 +269,12 @@ Yes, the plugin uses the [Intercom Chat Widget](https://widget.intercom.io), whi
 5. The only solution you will ever need
 
 == Changelog ==
+= 1.20.1 =
+2026-09-16
+
+* New Feature: Gravity Forms Honeypot compatiblity
+* Improvement: Don't display deactivate modal when NitroPack is disconnected
+
 = 1.20.0 =
 2026-08-24
 

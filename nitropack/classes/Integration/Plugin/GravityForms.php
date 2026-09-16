@@ -7,18 +7,17 @@
 
 namespace NitroPack\Integration\Plugin;
 
-use WP_Block_Type_Registry;
-use WP_block;
-
 /**
  * GravityForms Class
  */
 class GravityForms {
-
 	const STAGE = 'late';
-	const BLOCK_AJAX_NONCE_ACTION = 'nitropack_gf_block_output_ajax';
-	const SHORTCODE_AJAX_NONCE_ACTION = 'nitropack_gf_shortcode_output_ajax';
+	const AJAX_ACTION = 'nitropack_gravity_form_ajax';
+	const SHORTCODE_AJAX_NONCE_ACTION = 'nitropack_gravity_form_shortcode_output';
+	const HONEYPOT_FORMS_OPTION = 'nitropack-gf_honeypot_forms';
+	const CACHE_TAG = 'gravityforms';
 
+	private $original_gf_shortcode = null;
 
 	/**
 	 * Check if plugin "Gravity Forms" is active
@@ -26,8 +25,7 @@ class GravityForms {
 	 * @return bool
 	 */
 	public static function isActive() {     //phpcs:ignore WordPress.NamingConventions.ValidFunctionName.MethodNameInvalid
-
-		return class_exists( '\GFForms' ) ;
+		return class_exists( '\GFForms' );
 	}
 
 	/**
@@ -37,261 +35,122 @@ class GravityForms {
 	 *
 	 * @return void
 	 */
-	public function init( $stage ) {  //phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found
-
-		if ($this -> isActive()) {
-
-			add_filter( 'template_redirect', [$this, 'output_filter']);
-
-			if (!wp_doing_ajax() && !wp_is_json_request()) {
-				add_filter( 'register_block_type_args', [$this, 'gf_block_type_args'], 999 ,2 );
-
-				add_action( 'init', function() {
-					remove_shortcode('gravityform');
-					remove_shortcode('gravityforms');
-					add_shortcode('gravityform', [$this, 'modify_gf_shortcode']);
-					add_shortcode('gravityforms', [$this, 'modify_gf_shortcode']);
-				}, 99);
-			} else {
-				add_action( 'wp_ajax_nitropack_gf_block_output_ajax', [$this, 'block_output_ajax'] );
-				add_action( 'wp_ajax_nopriv_nitropack_gf_block_output_ajax', [$this, 'block_output_ajax'] );
-				add_action( 'wp_ajax_nitropack_gf_shortcode_output_ajax', [$this, 'shortcode_output_ajax'] );
-				add_action( 'wp_ajax_nopriv_nitropack_gf_shortcode_output_ajax', [$this, 'shortcode_output_ajax'] );
+	public function init( string $stage ) {  //phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found
+		if ( $this->isActive() ) {
+			//update nitropack-gf_honeypot_forms option if honeypot is enabled/disabled for a form and invalidate the page
+			foreach ( [ 'gform_after_save_form', 'gform_post_update_form_meta', 'gform_post_form_duplicated', 'gform_post_form_trashed', 'gform_post_form_restored', 'gform_post_form_deleted' ] as $gf_form_change ) {
+				add_action( $gf_form_change, [ $this, 'refresh_honeypot_forms' ] );
 			}
+			
+			//No Honeypot forms at all - bail early.
+			if ( ! $this->get_honeypot_form_ids() ) {
+				return;
+			}
+
+			add_filter( 'gform_pre_render', function ( $form ) {
+				$this->tag_current_page();
+				return $form;
+			} );
+
+			if ( ! wp_doing_ajax() ) {
+				add_action( 'init', [$this, 'override_gravityform_shortcode'], 20 );
+			}
+
+            add_action( 'wp_ajax_' . self::AJAX_ACTION, [ $this, 'gravity_form_output_ajax' ] );
+			add_action( 'wp_ajax_nopriv_' . self::AJAX_ACTION, [ $this, 'gravity_form_output_ajax' ] );
 		}
 	}
 
+    /**
+     * Override their shortcode, so it runs async (AJAX) and loads freshly Honeypot-protected forms.
+     */
+    public function override_gravityform_shortcode() {
+        global $shortcode_tags;
+        $this->original_gf_shortcode = isset( $shortcode_tags['gravityform'] ) ? $shortcode_tags['gravityform'] : null;
+        add_shortcode( 'gravityform', [ $this, 'modify_gf_shortcode' ] );
+        add_shortcode( 'gravityforms', [ $this, 'modify_gf_shortcode' ] );
+    }
 	/**
-	 * Filter for output content.
+	 * Register, localize, and enqueue GF + NitroPack scripts on demand when a honeypot form is on the page.
+	 */
+	private function enqueue_gf_assets( int $form_id ) {
+
+        //IMPORTANT: We must enqueue Gravity Forms scripts for all forms, otherwise forms which are added somewhere in the very end of the page are not found in the DOM initially and GF scripts are not loaded.
+		if ( function_exists( 'gravity_form_enqueue_scripts' ) && ! wp_script_is( 'gform_gravityforms', 'enqueued' ) ) {
+			gravity_form_enqueue_scripts( $form_id, true );
+		}
+
+		wp_register_script( 'nitropack-gf-ajax-script', NITROPACK_PLUGIN_DIR_URL . 'assets/js/gravity_forms.min.js', array( 'jquery' ), NITROPACK_VERSION, true );
+		wp_localize_script( 'nitropack-gf-ajax-script', 'nitropack_gf_ajax', array(
+			'ajax_url' => admin_url( 'admin-ajax.php' ),
+			'action' => self::AJAX_ACTION,
+		) );
+
+		wp_enqueue_script( 'nitropack-gf-ajax-script' );
+	}
+
+	/**
+	 * Get the IDs of the forms which have Honeypot anti-spam enabled.
+	 * Uses cache for the results.
+	 *
+	 * @return array
+	 */
+	private function get_honeypot_form_ids() {
+		$cached = get_option( self::HONEYPOT_FORMS_OPTION, null );
+
+		if ( is_array( $cached ) ) {
+			return $cached;
+		}
+
+		$form_ids = [];
+
+		foreach ( (array) \GFAPI::get_forms() as $form ) {
+			if ( ! empty( $form['enableHoneypot'] ) ) {
+				$form_ids[] = (int) $form['id'];
+			}
+		}
+
+		update_option( self::HONEYPOT_FORMS_OPTION, $form_ids, true );
+
+		return $form_ids;
+	}
+
+	/**
+	 * Recalculate the cached Honeypot form IDs after a form has changed.
 	 *
 	 * @return void
 	 */
-	public function output_filter() {
+	public function refresh_honeypot_forms() {
+		$previous = get_option( self::HONEYPOT_FORMS_OPTION, null );
 
-		global $post;
-
-		// Running only for single posts (any type) and pages.
-		if ( ! is_singular() ) {
+		if ( ! is_array( $previous ) ) {
 			return;
 		}
 
-		// Gravity Forms form detected? Enqueue scripts and exit.
-		if ( false !== $this->check_gf( $post ) ) {
-
-			wp_enqueue_script( 'nitropack-gf-ajax-script', NITROPACK_PLUGIN_DIR_URL . 'assets/js/gravity_forms.min.js?np_v=' . NITROPACK_VERSION, array('jquery'), NITROPACK_VERSION, true );
-			wp_localize_script( 'nitropack-gf-ajax-script', 'nitropack_gf_ajax', array( 'ajax_url' => admin_url( 'admin-ajax.php' ) ) );
-
-			return;
-		}
-	}
-
-	/**
-	 * Check if post/page has a GF shortcode or block.
-	 *
-	 * @param object $post Post Object.
-	 */
-	public function check_gf( $post ) {
-
-		// Check for GF shortcode.
-		if ( true === $this->find_gf_shortcode( $post->post_content ) ) {
-			return true;
-		}
-
-		// Check for a GF block or GF form in a reusable block.
-		if ( function_exists( 'has_block' ) && true === has_blocks( $post->ID ) ) {
-
-			// Check for GF blocks.
-			if ( true === $this->find_gf_block( $post->post_content ) ) {
-				return true;
-			}
-
-			// Additional check for GF forms in reusable blocks.
-			$blocks = parse_blocks( $post->post_content );
-
-			foreach ( $blocks as $block ) {
-
-				// Skip block if empty or not a core/block.
-				if ( empty( $block['blockName'] ) || 'core/block' !== $block['blockName'] || empty( $block['attrs']['ref'] ) ) {
-					continue;
-				}
-
-				// Check core/block found.
-				$reusable_block = get_post( $block['attrs']['ref'] );
-
-				if ( empty( $reusable_block ) || 'wp_block' !== $reusable_block->post_type ) {
-					continue;
-				}
-
-				if ( true === $this->find_gf_shortcode( $reusable_block->post_content ) || true === $this->find_gf_block( $reusable_block->post_content ) ) {
-					return true;
-				}
+		$form_ids = [];
+		foreach ( (array) \GFAPI::get_forms() as $form ) {
+			if ( ! empty( $form['enableHoneypot'] ) ) {
+				$form_ids[] = (int) $form['id'];
 			}
 		}
 
-		// If we're here, no form was detected.
-		return false;
+		$updated = update_option( self::HONEYPOT_FORMS_OPTION, $form_ids, true );
+        
+        if ($updated) {
+            nitropack_invalidate( NULL, self::CACHE_TAG, 'Change in Gravity Form Honeypot anti-spam settings.' );
+        }
 	}
 
 	/**
-	 * Check post content provided for a GF shortcode.
-	 *
-	 * @param string $post_content      Post content.
-	 */
-	public function find_gf_shortcode( $post_content ) {
-
-		// Check for a GF shortcode.
-		if ( has_shortcode( $post_content, 'gravityform' ) || has_shortcode( $post_content, 'gravityforms')) {
-			// Shortcode found!
-			return true;
-		}
-		// If we're here, there's no GF shortcode.
-		return false;
-	}
-
-	/**
-	 * Check post content provided for a GF block.
-	 *
-	 * @param string $post_content      Post content.
-	 */
-	public function find_gf_block( $post_content ) {
-
-		// Get GF blocks registered.
-		$gf_blocks = $this -> get_block_registered_names_list();
-
-		// Checking for GF blocks.
-		foreach ( $gf_blocks as $gf_block ) {
-
-			if ( has_block( $gf_block, $post_content ) ) {
-				// Block found!
-				return true;
-			}
-		}
-		// If we're here, there's no GF block.
-		return false;
-	}
-
-	/**
-	 * Override gravity forms block render callback
-	 *
-	 * @param array $args Arguments for block.
-	 * @param string $name Name of block.
-	 *
-	 * @return mixed
-	 */
-	public function gf_block_type_args( $args, $name ) {
-
-		if ( strpos( $name, 'gravityforms/' ) !== false) {
-
-			$args['render_callback'] = [$this, 'modify_gf_block'];
-		}
-		return $args;
-	}
-
-	/**
-	 * Modify gravity forms block render callback
-	 *
-	 * @param array    $attributes The block attrbutes.
-	 * @param string   $content    The block content.
-	 * @param WP_Block $block      The block object.
-	 *
-	 * @return mixed
-	 */
-	public function modify_gf_block($attributes, $content, $block = null) {
-
-		$block_name = ! empty( $block->name ) ? $block->name : '';
-		$block_attributes = wp_json_encode( $attributes );
-
-		if ( false === $block_attributes ) {
-			$block_attributes = '{}';
-		}
-
-		$block_nonce = wp_create_nonce( $this->get_block_nonce_action( $block_name, $block_attributes ) );
-
-		return '<div class="nitropack-gravityforms-block" data-block-name="' . esc_attr( $block_name ) . '" data-block-attributes="' . esc_attr( $block_attributes ) . '" data-block-nonce="' . esc_attr( $block_nonce ) . '"><img src="' . esc_url( NITROPACK_PLUGIN_DIR_URL . 'assets/img/loading.gif' ) . '" alt="loading" /></div>';
-	}
-
-	/**
-	 * Build nonce action for Gravity Forms block output.
-	 *
-	 * @param string $block_name       The block name.
-	 * @param string $block_attributes The block attributes as JSON.
-	 *
-	 * @return string
-	 */
-	private function get_block_nonce_action( $block_name, $block_attributes ) {
-		return self::BLOCK_AJAX_NONCE_ACTION . '|' . $block_name . '|' . wp_hash( $block_attributes, 'nonce' );
-	}
-
-	/**
-	 * Get an array of the names of all registered blocks of Gravity Forms
-	 *
-	 * @return array $pattern_names
-	 */
-	private function get_block_registered_names_list() {
-
-		$get_patterns  = WP_Block_Type_Registry::get_instance()->get_all_registered();
-
-		$pattern_names = [];
-
-		if ($get_patterns) {
-			foreach ($get_patterns as $pattern) {
-				$pattern    = (array) $pattern;
-				$block_name = $pattern['name'];
-
-				if (strpos($block_name, 'gravityforms/') !== false) {
-					$pattern_names[] = $block_name;
-				}
-			}
-		}
-
-		return $pattern_names;
-	}
-
-	/**
-	 * Output ajax for Gravity Forms block
+	 * Tag the page being built as one which holds a Gravity Form.
 	 *
 	 * @return void
 	 */
-	public function block_output_ajax(){
-
-		$block_name = isset( $_GET['block_name'] ) ? sanitize_text_field( wp_unslash( $_GET['block_name'] ) ) : '';
-		$block_attributes = isset( $_GET['block_attributes'] ) && is_string( $_GET['block_attributes'] ) ? wp_unslash( $_GET['block_attributes'] ) : '';
-		$block_nonce = isset( $_GET['block_nonce'] ) ? sanitize_text_field( wp_unslash( $_GET['block_nonce'] ) ) : '';
-
-		if (
-			empty( $block_name ) ||
-			empty( $block_attributes ) ||
-			empty( $block_nonce ) ||
-			0 !== strpos( $block_name, 'gravityforms/' ) ||
-			! wp_verify_nonce( $block_nonce, $this->get_block_nonce_action( $block_name, $block_attributes ) )
-		) {
-			wp_die();
+	private function tag_current_page() {
+		if ( isset( $GLOBALS['NitroPack.tags'] ) && is_array( $GLOBALS['NitroPack.tags'] ) ) {
+			$GLOBALS['NitroPack.tags'][ self::CACHE_TAG ] = 1;
 		}
-
-		if (!empty($block_name) && !empty($block_attributes)) {
-
-			$block_type = WP_Block_Type_Registry::get_instance()->get_registered( $block_name );
-
-			if ( $block_type && !empty( $block_type ) ) {
-
-				$block_attributes = json_decode($block_attributes, true);
-
-				if ( ! is_array( $block_attributes ) ) {
-					wp_die();
-				}
-
-				$block_attributes['ajax'] = 'true';
-
-				$block_shortcode = $block_type -> render($block_attributes, '');
-
-				echo do_shortcode( $block_shortcode);
-
-			}
-		}
-
-		wp_die();
 	}
-
 
 	/**
 	 * Override gravity forms shortcode render callback
@@ -301,7 +160,18 @@ class GravityForms {
 	 *
 	 * @return string
 	 */
-	public function modify_gf_shortcode($atts, $content = null ) {
+	public function modify_gf_shortcode( array $atts, $content = null ) {
+		$form_id = isset( $atts['id'] ) ? (int) $atts['id'] : 0;
+
+		if ( ! in_array( $form_id, $this->get_honeypot_form_ids(), true ) ) {
+			if ( $this->original_gf_shortcode ) {
+				return call_user_func( $this->original_gf_shortcode, $atts, $content );
+			}
+			return '';
+		}
+
+		$this->tag_current_page();
+		$this->enqueue_gf_assets( $form_id );
 
 		$shortcode_attributes = wp_json_encode( $atts );
 
@@ -311,7 +181,7 @@ class GravityForms {
 
 		$shortcode_nonce = wp_create_nonce( $this->get_shortcode_nonce_action( $shortcode_attributes ) );
 
-		return '<div class="nitropack-gravityforms-shortcode" data-shortcode-attributes="' . esc_attr( $shortcode_attributes ) . '" data-shortcode-nonce="' . esc_attr( $shortcode_nonce ) . '"><img src="' . esc_url( NITROPACK_PLUGIN_DIR_URL . 'assets/img/loading.gif' ) . '" alt="loading" /></div>';
+		return '<div class="nitropack-gravityforms-shortcode" data-shortcode-attributes="' . esc_attr( $shortcode_attributes ) . '" data-shortcode-nonce="' . esc_attr( $shortcode_nonce ) . '"><img src="' . esc_url( NITROPACK_PLUGIN_DIR_URL . 'assets/img/loading.svg' ) . '" alt="loading" /></div>';
 	}
 
 	/**
@@ -321,38 +191,65 @@ class GravityForms {
 	 *
 	 * @return string
 	 */
-	private function get_shortcode_nonce_action( $shortcode_attributes ) {
+	private function get_shortcode_nonce_action( string $shortcode_attributes ) {
 		return self::SHORTCODE_AJAX_NONCE_ACTION . '|' . wp_hash( $shortcode_attributes, 'nonce' );
 	}
 
 	/**
-	 * Output ajax for Gravity Forms shortcode
+	 * AJAX entry point: validate request, then render the form.
 	 *
 	 * @return void
 	 */
-	public function shortcode_output_ajax(){
+	public function gravity_form_output_ajax() {
+		//nonce security
+		$shortcode_attributes = $this->verify_ajax_request();
+		//ouput html
+		$this->render_shortcode_ajax( $shortcode_attributes );
+	}
 
-		$shortcode_attributes = isset( $_GET['shortcode-attributes'] ) && is_string( $_GET['shortcode-attributes'] ) ? wp_unslash( $_GET['shortcode-attributes'] ) : '';
-		$shortcode_nonce = isset( $_GET['shortcode_nonce'] ) ? sanitize_text_field( wp_unslash( $_GET['shortcode_nonce'] ) ) : '';
-
-		if (
-			empty( $shortcode_attributes ) ||
-			empty( $shortcode_nonce ) ||
-			! wp_verify_nonce( $shortcode_nonce, $this->get_shortcode_nonce_action( $shortcode_attributes ) )
-		) {
+	/**
+	 * Extract and verify the shortcode AJAX payload. Dies on failure.
+	 *
+	 * @return array Validated shortcode attributes.
+	 */
+	private function verify_ajax_request() {
+		if ( isset( $_REQUEST['shortcode_attributes'] ) && is_string( $_REQUEST['shortcode_attributes'] ) ) {
+			$raw_attributes = wp_unslash( $_REQUEST['shortcode_attributes'] );
+		} elseif ( isset( $_REQUEST['shortcode-attributes'] ) && is_string( $_REQUEST['shortcode-attributes'] ) ) {
+			$raw_attributes = wp_unslash( $_REQUEST['shortcode-attributes'] );
+		} else {
 			wp_die();
 		}
 
-		$shortcode_attributes = json_decode($shortcode_attributes, true);
+		$nonce = isset( $_REQUEST['shortcode_nonce'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['shortcode_nonce'] ) ) : '';
 
-		if (!empty($shortcode_attributes)) {
-
-			$shortcode_attributes['ajax'] = 'true';
-
-			$shortcode_attribute_string = implode(' ', array_map(static function ($k, $v) { return "$k=\"$v\""; }, array_keys($shortcode_attributes), $shortcode_attributes));
-
-			echo do_shortcode( '[gravityform '.$shortcode_attribute_string.']');
+		if ( empty( $nonce ) || ! wp_verify_nonce( $nonce, $this->get_shortcode_nonce_action( $raw_attributes ) ) ) {
+			wp_die();
 		}
+
+		$attributes = json_decode( $raw_attributes, true );
+
+		if ( empty( $attributes ) || ! is_array( $attributes ) ) {
+			wp_die();
+		}
+
+		return $attributes;
+	}
+
+	/**
+	 * Render the Gravity Forms shortcode and output the result.
+	 *
+	 * @param array $attributes Verified shortcode attributes.
+	 * @return void
+	 */
+	private function render_shortcode_ajax( $attributes ) {
+		$attributes['ajax'] = 'true';
+
+		$attribute_string = implode( ' ', array_map( static function ( $k, $v ) {
+			return "$k=\"$v\"";
+		}, array_keys( $attributes ), $attributes ) );
+
+		echo do_shortcode( '[gravityform ' . $attribute_string . ']' );
 
 		wp_die();
 	}

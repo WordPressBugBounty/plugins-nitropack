@@ -32,7 +32,7 @@ class HttpClientMulti {
      */
     public function push($client) {
         $this->clients[] = $client;
-        $this->clientRegistrationTimes->attach($client, time());
+        $this->clientRegistrationTimes->offsetSet($client, time());
     }
 
     /**
@@ -229,7 +229,8 @@ class HttpClientMulti {
         }
 
         if ($this->clientRegistrationTimes->offsetExists($client)) { // Offset may not exist if the client has been evicted earlier
-            $this->clientRegistrationTimes->detach($client);
+            $this->clientRegistrationTimes->offsetUnset($client);
         }
-    }
+}
+
 }

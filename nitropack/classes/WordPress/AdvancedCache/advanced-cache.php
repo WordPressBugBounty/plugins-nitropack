@@ -34,7 +34,7 @@ if ( defined( "NITROPACK_VERSION" ) && defined( "NITROPACK_ADVANCED_CACHE_VERSIO
 				$respHeaders = headers_list();
 				$contentType = null;
 				foreach ( $respHeaders as $respHeader ) {
-					if ( stripos( trim( $respHeader ), 'Content-Type:' ) === 0 ) {
+					if ( stripos( trim( $respHeader, " \n\r\t\v\x00" ), 'Content-Type:' ) === 0 ) {
 						$contentType = $respHeader;
 					}
 				}

@@ -7,6 +7,8 @@ use NitroPack\WordPress\Webhooks;
  * Here we handle the connection and disconnection of the plugin to NitroPack.
  */
 class Connect {
+	const TRIM_CHARACTERS = " \n\r\t\v\x00";
+
 	private $nitropack;
 	public function __construct() {
 		add_action( 'wp_ajax_nitropack_connect', [ $this, 'nitropack_connect' ] );
@@ -103,8 +105,8 @@ class Connect {
 			nitropack_json_and_exit( array( "status" => "error", "message" => __( 'Invalid API key or API secret key value', 'nitropack' ) ) );
 		}
 
-		$siteId = trim( esc_attr( $siteId ) );
-		$siteSecret = trim( esc_attr( $siteSecret ) );
+		$siteId = trim( esc_attr( $siteId ), self::TRIM_CHARACTERS );
+		$siteSecret = trim( esc_attr( $siteSecret ), self::TRIM_CHARACTERS );
 
 		if ( ! $this->validate_site_id( $siteId ) || ! $this->validate_site_secret( $siteSecret ) ) {
 			$this->nitropack->getLogger()->error( 'Invalid API key or API secret key value' . $multisite_reason );
@@ -183,7 +185,7 @@ class Connect {
 	 * @return bool|int
 	 */
 	private function validate_site_id( $siteId ) {
-		return preg_match( "/^([a-zA-Z]{32})$/", trim( $siteId ) );
+		return preg_match( "/^([a-zA-Z]{32})$/", trim( $siteId, self::TRIM_CHARACTERS ) );
 	}
 	/**
 	 * Validation of the site secret
@@ -191,7 +193,7 @@ class Connect {
 	 * @return bool|int
 	 */
 	private function validate_site_secret( $siteSecret ) {
-		return preg_match( "/^([a-zA-Z0-9]{64})$/", trim( $siteSecret ) );
+		return preg_match( "/^([a-zA-Z0-9]{64})$/", trim( $siteSecret, self::TRIM_CHARACTERS ) );
 	}
 
 	/**

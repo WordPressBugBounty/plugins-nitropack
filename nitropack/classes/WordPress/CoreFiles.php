@@ -14,6 +14,7 @@ class CoreFiles {
 	 * PHP opening tag constant used throughout file operations
 	 */
 	const PHP_OPENING_TAG = "<?php";
+	const TRIM_CHARACTERS = " \n\r\t\v\x00";
 
 	private static function get_htaccess_path() {
 		$config_file_path = nitropack_trailingslashit( ABSPATH ) . ".htaccess";
@@ -81,11 +82,11 @@ class CoreFiles {
 		$nitro_ls_close_line = false;
 
 		foreach ( $lines as $line_index => $line ) {
-			if ( trim( $line ) == "# BEGIN LSCACHE" ) {
+			if ( trim( $line, self::TRIM_CHARACTERS ) == "# BEGIN LSCACHE" ) {
 				$nitro_ls_open_line = $line_index;
 			}
 
-			if ( trim( $line ) == "# END LSCACHE" ) {
+			if ( trim( $line, self::TRIM_CHARACTERS ) == "# END LSCACHE" ) {
 				$nitro_ls_close_line = $line_index;
 			}
 		}
@@ -107,11 +108,11 @@ class CoreFiles {
 		$nitro_close_line = false;
 
 		foreach ( $lines as $line_index => $line ) {
-			if ( trim( $line ) == "# BEGIN NITROPACK" ) {
+			if ( trim( $line, self::TRIM_CHARACTERS ) == "# BEGIN NITROPACK" ) {
 				$nitro_open_line = $line_index;
 			}
 
-			if ( trim( $line ) == "# END NITROPACK" ) {
+			if ( trim( $line, self::TRIM_CHARACTERS ) == "# END NITROPACK" ) {
 				$nitro_close_line = $line_index;
 			}
 		}
@@ -162,7 +163,7 @@ class CoreFiles {
 		$nitro_lines[] = "# END NITROPACK";
 
 		return array_map( function ( $line ) {
-			return trim( $line ) . "\n";
+			return trim( $line, self::TRIM_CHARACTERS ) . "\n";
 		}, $nitro_lines );
 	}
 
@@ -313,7 +314,7 @@ class CoreFiles {
 		if ( $php_opening_tag_line !== false ) {
 			array_splice( $lines, $php_opening_tag_line + 1, 0, [ $new_val ] );
 		} else {
-			array_unshift( $lines, self::PHP_OPENING_TAG . " " . trim( $new_val ) . " ?>\n" );
+			array_unshift( $lines, self::PHP_OPENING_TAG . " " . trim( $new_val, self::TRIM_CHARACTERS ) . " ?>\n" );
 		}
 
 		return true;
@@ -407,7 +408,7 @@ class CoreFiles {
 		if ( $php_opening_tag_line !== false ) {
 			array_splice( $new_lines, $php_opening_tag_line + 1, 0, [ $compat_include ] );
 		} else {
-			array_unshift( $new_lines, self::PHP_OPENING_TAG . " " . trim( $compat_include ) . " ?>\n" );
+			array_unshift( $new_lines, self::PHP_OPENING_TAG . " " . trim( $compat_include, self::TRIM_CHARACTERS ) . " ?>\n" );
 		}
 
 		return $new_lines;

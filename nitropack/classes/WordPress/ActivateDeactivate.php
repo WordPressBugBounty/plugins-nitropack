@@ -116,6 +116,8 @@ class ActivateDeactivate {
 
 		if ( get_nitropack()->isConnected() ) {
 			nitropack_event( "disable_extension", null, self::get_disconnect_deactivation_metadata() );
+		} else {
+			nitropack_event( "plugin_deactivated_and_already_disconnected" );
 		}
 
 		if ( function_exists( "opcache_reset" ) ) {

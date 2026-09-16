@@ -28,7 +28,7 @@ if ( ! $nitro ) {
 		</div>
 		<div class="card-footer disconnect-container">
 			<a class="btn btn-primary" id="disconnect-btn"><?php esc_html_e( 'Disconnect NitroPack', 'nitropack' ); ?></a>
-			<?php require_once NITROPACK_PLUGIN_DIR . 'view/modals/modal-deactivate-disconnect.php'; ?>
+			<?php require_once NITROPACK_PLUGIN_DIR . 'view/modals/modal-disconnect-deactivate-plugin.php'; ?>
 		</div>
 	</div>
 	<?php

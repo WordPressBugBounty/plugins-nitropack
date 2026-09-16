@@ -607,7 +607,7 @@ class NitroPack {
 		$uri = ! empty( $_SERVER["REQUEST_URI"] ) ? $_SERVER["REQUEST_URI"] : "";
 		$currentUrl = $host . $uri;
 
-		if ( empty( $currentUrl ) || ( defined( 'WP_CLI' ) && WP_CLI && trim( $currentUrl ) == "localhost" ) ) {
+		if ( empty( $currentUrl ) || ( defined( 'WP_CLI' ) && WP_CLI && trim( $currentUrl, " \n\r\t\v\x00" ) == "localhost" ) ) {
 
 			if ( function_exists( 'get_site_url' ) ) {
 				$host = apply_filters( 'nitropack_current_host', get_site_url() );

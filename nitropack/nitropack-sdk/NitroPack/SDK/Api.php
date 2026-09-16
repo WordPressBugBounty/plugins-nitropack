@@ -259,7 +259,7 @@ class Api
             }
         }
 
-        if (!is_string($name) || trim($name) == "") {
+        if (!is_string($name) || trim($name, " \n\r\t\v\x00") == "") {
             throw new VariationCookieException("The provided cookie name is not a string or is empty.");
         }
 
@@ -276,7 +276,7 @@ class Api
 
     public function unsetVariationCookie($name)
     {
-        if (!is_string($name) || trim($name) == "") {
+        if (!is_string($name) || trim($name, " \n\r\t\v\x00") == "") {
             throw new VariationCookieException("The provided cookie name is not a string or is empty.");
         }
 

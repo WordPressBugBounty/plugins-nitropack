@@ -461,15 +461,17 @@ class Admin {
 			wp_enqueue_style( 'topbar_admin_menu_stylesheet', plugin_dir_url( NITROPACK_FILE ) . 'assets/css/admin_bar_menu.min.css?np_v=' . NITROPACK_VERSION );
 		}
 	}
-	/* Deactivate modal */
+	/* Add Deactivate Modal when NitroPack is connected. */
 	public function deactivate_plugin_assets() {
+		if ( ! get_nitropack()->isConnected() ) {
+			return;
+		}
+		
 		global $pagenow;
-		$test_mode = Settings\TestMode::getInstance();
 		if ( $pagenow == 'plugins.php' ) {
 			add_action( 'admin_enqueue_scripts', function () {
 				wp_enqueue_script( 'nitropack_deactivate_plugin', NITROPACK_PLUGIN_DIR_URL . 'assets/js/disconnect_deactivate_plugin.min.js', array( 'jquery' ) );
 				wp_enqueue_style( 'nitropack_deactivate_plugin', NITROPACK_PLUGIN_DIR_URL . 'assets/css/disconnect-deactivate-plugin.min.css' );
-				wp_add_inline_style( 'nitropack_deactivate_plugin', '#disconnect-deactivate-plugin-modal .modal-container{max-height:min(80vh,calc(100vh - 2rem));max-height:min(80dvh,calc(100dvh - 2rem));background-color:#fff;border-radius:8px;overflow:hidden}#disconnect-deactivate-plugin-modal .modal-inner{display:flex;flex-direction:column;height:auto;max-height:inherit;min-height:0;background-color:#fff}#disconnect-deactivate-plugin-modal .modal-body{padding:0;height:auto;flex:0 1 auto;min-height:0;overflow-y:auto;overflow-x:hidden}#disconnect-deactivate-plugin-modal #enable-test-mode,#disconnect-deactivate-plugin-modal #deactivate-np{display:inline-flex;align-items:center;justify-content:center;gap:.5rem}#disconnect-deactivate-plugin-modal .modal-action-status-icon{width:14px;height:14px}' );
 				wp_localize_script(
 					'nitropack_deactivate_plugin',
 					'nitropackDisconnectModalTexts',

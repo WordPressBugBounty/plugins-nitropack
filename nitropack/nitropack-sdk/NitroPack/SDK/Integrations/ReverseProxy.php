@@ -46,9 +46,11 @@ class ReverseProxy {
         $httpMulti = new HttpClientMulti();
         foreach ($this->serverList as $server) {
             $client = new HttpClient($url);
+            $publicHost = $client->host;
             $client->hostOverride($client->host, $server);
+            $client->hostHeaderOverride = $publicHost;
             $client->doNotDownload = true;
-            
+
             if (strpos($server, '127.0.0.1') !== false || strpos($server, 'localhost') !== false) {
                 $client->scheme = 'http';
             }

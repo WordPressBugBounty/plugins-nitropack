@@ -2,14 +2,14 @@
 # This file is distributed under the GPL2.
 msgid ""
 msgstr ""
-"Project-Id-Version: NitroPack 1.19.9\n"
+"Project-Id-Version: NitroPack 1.20.1\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/nitropack\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-08-19T08:52:07+00:00\n"
+"POT-Creation-Date: 2026-09-09T08:09:19+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: nitropack\n"
@@ -151,37 +151,37 @@ msgstr ""
 msgid "Invalidate Current Page"
 msgstr ""
 
-#: classes/WordPress/Connect.php:65
+#: classes/WordPress/Connect.php:67
 msgid "Connected"
 msgstr ""
 
-#: classes/WordPress/Connect.php:72
+#: classes/WordPress/Connect.php:74
 msgid "Permission Error: "
 msgstr ""
 
-#: classes/WordPress/Connect.php:75
+#: classes/WordPress/Connect.php:77
 msgid "Error while fetching remote config: "
 msgstr ""
 
-#: classes/WordPress/Connect.php:78
+#: classes/WordPress/Connect.php:80
 msgid "Can't establish connection with NitroPack's servers"
 msgstr ""
 
-#: classes/WordPress/Connect.php:81
+#: classes/WordPress/Connect.php:83
 msgid "Incorrect API credentials. Please make sure that you copied them correctly and try again."
 msgstr ""
 
-#: classes/WordPress/Connect.php:103
-#: classes/WordPress/Connect.php:111
+#: classes/WordPress/Connect.php:105
+#: classes/WordPress/Connect.php:113
 msgid "Invalid API key or API secret key value"
 msgstr ""
 
-#: classes/WordPress/Connect.php:122
+#: classes/WordPress/Connect.php:124
 msgid "Error when trying to communicate with NitroPack's servers. Please try again in a few minutes. If the issue persists, please"
 msgstr ""
 
-#: classes/WordPress/Connect.php:269
-#: view/modals/modal-disconnect-deactivate-plugin.php:159
+#: classes/WordPress/Connect.php:271
+#: view/modals/modal-disconnect-deactivate-plugin.php:162
 msgid "Disconnected"
 msgstr ""
 
@@ -998,17 +998,17 @@ msgstr ""
 
 #: classes/WordPress/Settings/TestMode.php:181
 #: classes/WordPress/Settings/TestMode.php:182
-#: view/modals/modal-disconnect-deactivate-plugin.php:10
+#: view/modals/modal-disconnect-deactivate-plugin.php:13
 msgid "Enable Test Mode to check if NitroPack is causing it. If it is, our team can help."
 msgstr ""
 
 #: classes/WordPress/Settings/TestMode.php:183
-#: view/modals/modal-disconnect-deactivate-plugin.php:33
+#: view/modals/modal-disconnect-deactivate-plugin.php:36
 msgid "Your site may need a different configuration. Our team can take a look and optimize it for you."
 msgstr ""
 
 #: classes/WordPress/Settings/TestMode.php:184
-#: view/modals/modal-disconnect-deactivate-plugin.php:13
+#: view/modals/modal-disconnect-deactivate-plugin.php:16
 msgid "Enable Test Mode to serve your original site to visitors while you do maintenance. You can switch back with one click."
 msgstr ""
 
@@ -1018,23 +1018,23 @@ msgid "No problem. You can %s anytime from the plugin settings."
 msgstr ""
 
 #: classes/WordPress/Settings/TestMode.php:186
-#: view/modals/modal-disconnect-deactivate-plugin.php:49
+#: view/modals/modal-disconnect-deactivate-plugin.php:52
 msgid "We'd love to learn from this. Which plugin are you switching to?"
 msgstr ""
 
 #: classes/WordPress/Settings/TestMode.php:187
-#: view/modals/modal-disconnect-deactivate-plugin.php:65
+#: view/modals/modal-disconnect-deactivate-plugin.php:68
 msgid "Is there anything we can improve?"
 msgstr ""
 
 #: classes/WordPress/Settings/TestMode.php:189
 #: classes/WordPress/Settings/TestMode.php:190
-#: view/modals/modal-disconnect-deactivate-plugin.php:11
+#: view/modals/modal-disconnect-deactivate-plugin.php:14
 msgid "NitroPack is disconnected so Test Mode is not available. If you think NitroPack was causing this, our support team can help you get back up and running with a working configuration."
 msgstr ""
 
 #: classes/WordPress/Settings/TestMode.php:191
-#: view/modals/modal-disconnect-deactivate-plugin.php:14
+#: view/modals/modal-disconnect-deactivate-plugin.php:17
 msgid "NitroPack is already disconnected so your visitors are seeing your site without optimizations. You can make your changes safely."
 msgstr ""
 
@@ -1234,103 +1234,103 @@ msgstr ""
 msgid "Automatically re-optimizes purged/invalidated pages."
 msgstr ""
 
-#: view/modals/modal-disconnect-deactivate-plugin.php:16
+#: view/modals/modal-disconnect-deactivate-plugin.php:19
 msgid "I just want to deactivate"
 msgstr ""
 
-#: view/modals/modal-disconnect-deactivate-plugin.php:17
+#: view/modals/modal-disconnect-deactivate-plugin.php:20
 msgid "I just want to disconnect"
 msgstr ""
 
-#: view/modals/modal-disconnect-deactivate-plugin.php:20
+#: view/modals/modal-disconnect-deactivate-plugin.php:23
 msgid "My site doesn't look right"
 msgstr ""
 
-#: view/modals/modal-disconnect-deactivate-plugin.php:26
+#: view/modals/modal-disconnect-deactivate-plugin.php:29
 msgid "Something on my site stopped working"
 msgstr ""
 
-#: view/modals/modal-disconnect-deactivate-plugin.php:32
+#: view/modals/modal-disconnect-deactivate-plugin.php:35
 msgid "I don't see a difference in speed"
 msgstr ""
 
-#: view/modals/modal-disconnect-deactivate-plugin.php:38
+#: view/modals/modal-disconnect-deactivate-plugin.php:41
 msgid "I'm doing site maintenance"
 msgstr ""
 
-#: view/modals/modal-disconnect-deactivate-plugin.php:44
+#: view/modals/modal-disconnect-deactivate-plugin.php:47
 #, php-format
 msgid "No problem. You can %s anytime from the Plugins page."
 msgstr ""
 
-#: view/modals/modal-disconnect-deactivate-plugin.php:44
+#: view/modals/modal-disconnect-deactivate-plugin.php:47
 msgid "reactivate"
 msgstr ""
 
-#: view/modals/modal-disconnect-deactivate-plugin.php:44
+#: view/modals/modal-disconnect-deactivate-plugin.php:47
 msgid "reconnect"
 msgstr ""
 
-#: view/modals/modal-disconnect-deactivate-plugin.php:48
+#: view/modals/modal-disconnect-deactivate-plugin.php:51
 msgid "I'm moving to a different plugin"
 msgstr ""
 
-#: view/modals/modal-disconnect-deactivate-plugin.php:54
+#: view/modals/modal-disconnect-deactivate-plugin.php:57
 msgid "Plugin name (optional)"
 msgstr ""
 
-#: view/modals/modal-disconnect-deactivate-plugin.php:59
-#: view/modals/modal-disconnect-deactivate-plugin.php:70
+#: view/modals/modal-disconnect-deactivate-plugin.php:62
+#: view/modals/modal-disconnect-deactivate-plugin.php:73
 msgid "Anything we could have done better (optional)"
 msgstr ""
 
-#: view/modals/modal-disconnect-deactivate-plugin.php:64
+#: view/modals/modal-disconnect-deactivate-plugin.php:67
 msgid "Something else"
 msgstr ""
 
-#: view/modals/modal-disconnect-deactivate-plugin.php:76
+#: view/modals/modal-disconnect-deactivate-plugin.php:79
 msgid "Are you sure you want to deactivate NitroPack?"
 msgstr ""
 
-#: view/modals/modal-disconnect-deactivate-plugin.php:76
+#: view/modals/modal-disconnect-deactivate-plugin.php:79
 msgid "Are you sure you want to disconnect NitroPack?"
 msgstr ""
 
-#: view/modals/modal-disconnect-deactivate-plugin.php:77
+#: view/modals/modal-disconnect-deactivate-plugin.php:80
 msgid "Deactivating NitroPack will pause your optimizations and speed gains. Please let us know why you're deactivating."
 msgstr ""
 
-#: view/modals/modal-disconnect-deactivate-plugin.php:77
+#: view/modals/modal-disconnect-deactivate-plugin.php:80
 msgid "Disconnecting NitroPack will delete your page optimizations, potentially slowing down your website and worsening the user experience."
 msgstr ""
 
-#: view/modals/modal-disconnect-deactivate-plugin.php:143
-#: view/modals/modal-disconnect-deactivate-plugin.php:147
+#: view/modals/modal-disconnect-deactivate-plugin.php:146
+#: view/modals/modal-disconnect-deactivate-plugin.php:150
 msgid "Enable test mode"
 msgstr ""
 
-#: view/modals/modal-disconnect-deactivate-plugin.php:144
+#: view/modals/modal-disconnect-deactivate-plugin.php:147
 msgid "Enabling Test mode..."
 msgstr ""
 
-#: view/modals/modal-disconnect-deactivate-plugin.php:145
+#: view/modals/modal-disconnect-deactivate-plugin.php:148
 msgid "Test Mode enabled"
 msgstr ""
 
-#: view/modals/modal-disconnect-deactivate-plugin.php:151
+#: view/modals/modal-disconnect-deactivate-plugin.php:154
 #: view/modals/modal-processing-html-error.php:35
 msgid "Contact Support"
 msgstr ""
 
-#: view/modals/modal-disconnect-deactivate-plugin.php:158
+#: view/modals/modal-disconnect-deactivate-plugin.php:161
 msgid "Deactivating..."
 msgstr ""
 
-#: view/modals/modal-disconnect-deactivate-plugin.php:158
+#: view/modals/modal-disconnect-deactivate-plugin.php:161
 msgid "Disconnecting..."
 msgstr ""
 
-#: view/modals/modal-disconnect-deactivate-plugin.php:159
+#: view/modals/modal-disconnect-deactivate-plugin.php:162
 msgid "Deactivated"
 msgstr ""
 

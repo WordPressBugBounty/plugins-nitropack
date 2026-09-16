@@ -2,8 +2,11 @@
 
 namespace NitroPack\Integration\Hosting;
 
+use \NitroPack\SDK\Integrations\Varnish;
+
 class Cloudways extends Hosting {
     const STAGE = "very_early";
+    const VARNISH_SERVER = "127.0.0.1:8080";
 
     public static function detect() {
         return array_key_exists("cw_allowed_ip", $_SERVER) || preg_match("~/home/.*?cloudways.*~", __FILE__);
@@ -21,8 +24,7 @@ class Cloudways extends Hosting {
 
     public function purgeUrl($url) {
         try {
-            $purger = new \NitroPack\SDK\Integrations\Varnish(array("127.0.0.1:8080"), "PURGE");
-            $purger->purge($url);
+            $this->getPurger()->purge($url);
         } catch (\Exception $e) {
             // Exception
         }
@@ -31,14 +33,23 @@ class Cloudways extends Hosting {
     public function purgeAll() {
         try {
             $siteConfig = nitropack_get_site_config();
-            if(!empty($siteConfig['home_url'])) {
-                $homepage = nitropack_trailingslashit($siteConfig['home_url']) . '.*';
+            $homeUrl = !empty($siteConfig['home_url']) ? $siteConfig['home_url'] : get_home_url();
+            if (empty($homeUrl)) {
+                return;
             }
-            $purger = new \NitroPack\SDK\Integrations\Varnish(array("127.0.0.1:8080"), "PURGE");
-            $purger->purge($homepage);
+            $homepage = nitropack_trailingslashit($homeUrl) . '.*';
+            $this->getPurger("regex")->purge($homepage);
         } catch (\Exception $e) {
             // Exception
         }
+    }
+
+    private function getPurger($purgeMethod = "default") {
+        return new Varnish(
+            array(self::VARNISH_SERVER),
+            "PURGE",
+            array("X-Purge-Method" => $purgeMethod)
+        );
     }
 
     public function setCacheControl() {

@@ -421,7 +421,7 @@ if ( null !== $nitro = nitropack_get_instance() ) {
             $respHeaders = headers_list();
             $contentType = NULL;
             foreach ($respHeaders as $respHeader) {
-                if (stripos(trim($respHeader), 'Content-Type:') === 0) {
+                if (stripos(trim($respHeader, " \n\r\t\v\x00"), 'Content-Type:') === 0) {
                     $contentType = $respHeader;
                 }
             }

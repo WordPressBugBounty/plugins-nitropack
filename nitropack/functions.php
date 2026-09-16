@@ -1184,7 +1184,11 @@ function nitropack_has_post_important_change( $post ) {
  * @param bool $usePurge
  * @return void
  */
-function nitropack_clean_post_cache( \WP_Post $post, $taxonomies = null, $hasImportantChangeInPost = null, $reason = null, $usePurge = false ) {
+function nitropack_clean_post_cache( ?\WP_Post $post, $taxonomies = null, $hasImportantChangeInPost = null, $reason = null, $usePurge = false ) {
+	if ( ! $post ) {
+		return;
+	}
+
 	try {
 		$postID = $post->ID;
 		$postType = isset( $post->post_type ) ? $post->post_type : "post";

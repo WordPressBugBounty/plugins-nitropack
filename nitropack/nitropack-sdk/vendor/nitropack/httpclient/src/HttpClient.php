@@ -184,6 +184,7 @@ class HttpClient {
     public $port;
     public $path;
     public $scheme;
+    public $hostHeaderOverride = null;
     /** @var string */
     public $http_method;
     public $URL;
@@ -1609,7 +1610,11 @@ class HttpClient {
     public function getRequestHeaders() {
         $headers = array();
         $headers[] = $this->http_method . " " . $this->path . " HTTP/1.1";
-        $headers[] = "host: " . $this->host . ($this->port != self::$scheme_port_map[$this->scheme] ? ":{$this->port}" : '');
+        if ($this->hostHeaderOverride !== null) {
+            $headers[] = "host: " . $this->hostHeaderOverride;
+        } else {
+            $headers[] = "host: " . $this->host . ($this->port != self::$scheme_port_map[$this->scheme] ? ":{$this->port}" : '');
+        }
 
         if ($this->connection_reuse) {
             $headers[] = "connection: keep-alive";
