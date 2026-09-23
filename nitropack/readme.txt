@@ -2,9 +2,9 @@
 Contributors: nitropack
 Tags: cache, performance, page speed, website speed, core web vitals
 Requires at least: 4.7
-Tested up to: 7.1
+Tested up to: 7.1.2
 Requires PHP: 7.4
-Stable tag: 1.20.1
+Stable tag: 1.20.2
 License: GNU General Public License, version 2
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -269,6 +269,11 @@ Yes, the plugin uses the [Intercom Chat Widget](https://widget.intercom.io), whi
 5. The only solution you will ever need
 
 == Changelog ==
+= 1.20.2 =
+2026-09-23
+
+* Improvement: Make Gravity Forms Honeypot optional as toggle, which is enabled by default. Skips GF AJAX forms.
+
 = 1.20.1 =
 2026-09-16
 

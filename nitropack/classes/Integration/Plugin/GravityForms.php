@@ -30,18 +30,25 @@ class GravityForms {
 
 	/**
 	 * Initialize the integration
-	 *
+	 * Works when nitropack-gravity-forms-honeypot is 1 (enabled) and honeypot is also enabled per form.
+	 * Skips AJAX forms.
 	 * @param string $stage Stage.
 	 *
 	 * @return void
 	 */
 	public function init( string $stage ) {  //phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found
 		if ( $this->isActive() ) {
+
+			$option = get_option( "nitropack-gravity-forms-honeypot" );
+
+			if ( ! $option ) {
+				return;
+			}
 			//update nitropack-gf_honeypot_forms option if honeypot is enabled/disabled for a form and invalidate the page
 			foreach ( [ 'gform_after_save_form', 'gform_post_update_form_meta', 'gform_post_form_duplicated', 'gform_post_form_trashed', 'gform_post_form_restored', 'gform_post_form_deleted' ] as $gf_form_change ) {
 				add_action( $gf_form_change, [ $this, 'refresh_honeypot_forms' ] );
 			}
-			
+
 			//No Honeypot forms at all - bail early.
 			if ( ! $this->get_honeypot_form_ids() ) {
 				return;
@@ -53,29 +60,29 @@ class GravityForms {
 			} );
 
 			if ( ! wp_doing_ajax() ) {
-				add_action( 'init', [$this, 'override_gravityform_shortcode'], 20 );
+				add_action( 'init', [ $this, 'override_gravityform_shortcode' ], 20 );
 			}
 
-            add_action( 'wp_ajax_' . self::AJAX_ACTION, [ $this, 'gravity_form_output_ajax' ] );
+			add_action( 'wp_ajax_' . self::AJAX_ACTION, [ $this, 'gravity_form_output_ajax' ] );
 			add_action( 'wp_ajax_nopriv_' . self::AJAX_ACTION, [ $this, 'gravity_form_output_ajax' ] );
 		}
 	}
 
-    /**
-     * Override their shortcode, so it runs async (AJAX) and loads freshly Honeypot-protected forms.
-     */
-    public function override_gravityform_shortcode() {
-        global $shortcode_tags;
-        $this->original_gf_shortcode = isset( $shortcode_tags['gravityform'] ) ? $shortcode_tags['gravityform'] : null;
-        add_shortcode( 'gravityform', [ $this, 'modify_gf_shortcode' ] );
-        add_shortcode( 'gravityforms', [ $this, 'modify_gf_shortcode' ] );
-    }
+	/**
+	 * Override their shortcode, so it runs async (AJAX) and loads freshly Honeypot-protected forms.
+	 */
+	public function override_gravityform_shortcode() {
+		global $shortcode_tags;
+		$this->original_gf_shortcode = isset( $shortcode_tags['gravityform'] ) ? $shortcode_tags['gravityform'] : null;
+		add_shortcode( 'gravityform', [ $this, 'modify_gf_shortcode' ] );
+		add_shortcode( 'gravityforms', [ $this, 'modify_gf_shortcode' ] );
+	}
 	/**
 	 * Register, localize, and enqueue GF + NitroPack scripts on demand when a honeypot form is on the page.
 	 */
 	private function enqueue_gf_assets( int $form_id ) {
 
-        //IMPORTANT: We must enqueue Gravity Forms scripts for all forms, otherwise forms which are added somewhere in the very end of the page are not found in the DOM initially and GF scripts are not loaded.
+		//IMPORTANT: We must enqueue Gravity Forms scripts for all forms, otherwise forms which are added somewhere in the very end of the page are not found in the DOM initially and GF scripts are not loaded.
 		if ( function_exists( 'gravity_form_enqueue_scripts' ) && ! wp_script_is( 'gform_gravityforms', 'enqueued' ) ) {
 			gravity_form_enqueue_scripts( $form_id, true );
 		}
@@ -135,10 +142,10 @@ class GravityForms {
 		}
 
 		$updated = update_option( self::HONEYPOT_FORMS_OPTION, $form_ids, true );
-        
-        if ($updated) {
-            nitropack_invalidate( NULL, self::CACHE_TAG, 'Change in Gravity Form Honeypot anti-spam settings.' );
-        }
+
+		if ( $updated ) {
+			nitropack_invalidate( NULL, self::CACHE_TAG, 'Change in Gravity Form Honeypot anti-spam settings.' );
+		}
 	}
 
 	/**
@@ -154,7 +161,7 @@ class GravityForms {
 
 	/**
 	 * Override gravity forms shortcode render callback
-	 *
+	 * Skip AJAX forms.
 	 * @param array $atts Attributes for shortcode.
 	 * @param string $content Content of shortcode.
 	 *
@@ -168,6 +175,12 @@ class GravityForms {
 				return call_user_func( $this->original_gf_shortcode, $atts, $content );
 			}
 			return '';
+		}
+
+		//Skip AJAX forms
+		if ( isset( $atts['ajax'] ) && $atts['ajax'] === 'true' ) {
+			return call_user_func( $this->original_gf_shortcode, $atts, $content );
+
 		}
 
 		$this->tag_current_page();

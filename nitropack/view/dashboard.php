@@ -148,7 +148,11 @@ if ( empty( $dismissed_notices['skip_cache_warmup'] ) && ! $cache_warmup_enabled
 					if ( class_exists( 'WooCommerce' ) ) { ?>
 						<?php $settings->cart_cache->render(); ?>
 						<?php $settings->stock_refresh->render();
-					} ?>
+					}
+					if ( isset( $settings->gravity_forms ) ) {
+						$settings->gravity_forms->render();
+					}
+					?>
 				</div>
 			</div>
 			<div class="card-footer disconnect-container">

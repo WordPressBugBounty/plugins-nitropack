@@ -13,6 +13,7 @@ use NitroPack\WordPress\Settings\GeneratePreview;
 use NitroPack\WordPress\Settings\TestMode;
 use NitroPack\WordPress\Settings\HTMLCompression;
 use NitroPack\WordPress\Settings\BeaverBuilder;
+use NitroPack\WordPress\Settings\GravityForms;
 use NitroPack\WordPress\Settings\CartCache;
 use NitroPack\WordPress\Settings\StockRefresh;
 use NitroPack\WordPress\Settings\EditorClearCache;
@@ -90,6 +91,11 @@ class Settings {
 	 */
 	public $beaver_builder;
 	/**
+	 * Grabs GravityForms class
+	 * @var GravityForms
+	 */
+	public $gravity_forms;
+	/**
 	 * Grabs CartCache class
 	 * @var CartCache
 	 */
@@ -137,6 +143,7 @@ class Settings {
 		$this->auto_purge = new AutoPurge();
 		$this->cpt_optimization = CPTOptimization::getInstance();
 		$this->shortcodes = new Shortcodes();
+		$this->gravity_forms = GravityForms::getInstance();
 		$this->cache_warmup = CacheWarmup::getInstance();
 		$this->test_mode = TestMode::getInstance();
 		$this->html_compression = HTMLCompression::getInstance();
