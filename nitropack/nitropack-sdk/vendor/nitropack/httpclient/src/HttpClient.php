@@ -1772,7 +1772,6 @@ class HttpClient {
     
             case E_NOTICE:
             case E_USER_NOTICE:
-            case E_STRICT:
                 $errorLevel = E_USER_NOTICE;
                 break;
     

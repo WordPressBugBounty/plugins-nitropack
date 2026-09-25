@@ -45,15 +45,15 @@ class GravityForms {
 
     /**
      * Renders the Gravity Forms option in the Dashboard if the plugin is active
-     * Default: Enabled
+     * Default: Disabled
      * @return void
      */
     public function render() {
         if ( GravityFormsPlugin::isActive() ) {
             $gravity_forms_setting = get_option( $this->option_name, null );
-            //set a default value of 1 - enabled
+            //set a default value of 0 - disabled
             if ( null === $gravity_forms_setting ) {
-                $gravity_forms_setting = 1;
+                $gravity_forms_setting = 0;
                 add_option( $this->option_name, $gravity_forms_setting );
             }
             ?>

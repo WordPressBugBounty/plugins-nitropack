@@ -7,6 +7,8 @@
 
 namespace NitroPack\Integration\Plugin;
 
+use NitroPack\WordPress\NitroPack;
+
 /**
  * GravityForms Class
  */
@@ -39,6 +41,16 @@ class GravityForms {
 	public function init( string $stage ) {  //phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found
 		if ( $this->isActive() ) {
 
+			add_filter( 'gform_state_lifespan', [ $this, 'extend_state_lifespan' ] );
+
+			// We need that for already cached pages, that have the NP GF compatibility
+			add_action( 'wp_ajax_' . self::AJAX_ACTION, [ $this, 'gravity_form_output_ajax' ] );
+			add_action( 'wp_ajax_nopriv_' . self::AJAX_ACTION, [ $this, 'gravity_form_output_ajax' ] );
+
+			if ( version_compare( \GFForms::$version, '3.1.1', '>=' ) ) {
+				return;
+			}
+
 			$option = get_option( "nitropack-gravity-forms-honeypot" );
 
 			if ( ! $option ) {
@@ -62,10 +74,33 @@ class GravityForms {
 			if ( ! wp_doing_ajax() ) {
 				add_action( 'init', [ $this, 'override_gravityform_shortcode' ], 20 );
 			}
-
-			add_action( 'wp_ajax_' . self::AJAX_ACTION, [ $this, 'gravity_form_output_ajax' ] );
-			add_action( 'wp_ajax_nopriv_' . self::AJAX_ACTION, [ $this, 'gravity_form_output_ajax' ] );
 		}
+	}
+
+	/**
+	 * Calculate the correct lifespan for Gravity Forms state
+	 *
+	 * @param int $lifespan The current state lifespan in seconds.
+	 *
+	 * @return int
+	 */
+	public function extend_state_lifespan( $lifespan ) {
+		$lifespan = (int) $lifespan;
+
+		try {
+			$sdk = NitroPack::getInstance()->getSdk();
+
+			if ( ! $sdk ) {
+				return $lifespan;
+			}
+
+			$config = $sdk->getConfig();
+			$cacheLifespan = (int) $config->PageCache->ExpireTime + (int) $config->PageCache->StaleExpireTime;
+		} catch (\Throwable $e) {
+			return $lifespan;
+		}
+
+		return $cacheLifespan > $lifespan ? $cacheLifespan : $lifespan;
 	}
 
 	/**

@@ -13,7 +13,7 @@
         'nitropack/httpclient' => array(
             'pretty_version' => 'dev-master',
             'version' => 'dev-master',
-            'reference' => 'b986457339b11d3ff0410512e2c621dff36a93e1',
+            'reference' => '8e2795b54b5a93892035fad80291d1d9a14d1f49',
             'type' => 'library',
             'install_path' => __DIR__ . '/../nitropack/httpclient',
             'aliases' => array(

@@ -7,12 +7,12 @@
             "source": {
                 "type": "git",
                 "url": "git@github.com:wpengine/np-httpclient.git",
-                "reference": "b986457339b11d3ff0410512e2c621dff36a93e1"
+                "reference": "8e2795b54b5a93892035fad80291d1d9a14d1f49"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/wpengine/np-httpclient/zipball/b986457339b11d3ff0410512e2c621dff36a93e1",
-                "reference": "b986457339b11d3ff0410512e2c621dff36a93e1",
+                "url": "https://api.github.com/repos/wpengine/np-httpclient/zipball/8e2795b54b5a93892035fad80291d1d9a14d1f49",
+                "reference": "8e2795b54b5a93892035fad80291d1d9a14d1f49",
                 "shasum": ""
             },
             "require": {
@@ -27,7 +27,7 @@
                 "phpunit/phpunit": "^9.6 || ^10.0",
                 "react/http": "^1.8"
             },
-            "time": "2026-09-15T08:37:45+00:00",
+            "time": "2026-09-23T11:10:48+00:00",
             "default-branch": true,
             "type": "library",
             "installation-source": "dist",
