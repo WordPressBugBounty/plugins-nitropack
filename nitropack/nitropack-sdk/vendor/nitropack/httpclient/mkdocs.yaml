@@ -1,7 +1,0 @@
-site_name: HttpClient Repository
-site_description: Homegrown http client with proxy chain support and no dependency on curl; used as part of the wordpress plugin as well as in-house.
-repo_url: https://github.com/wpengine/np-httpclient
-
-nav:
-  - Home: README.md
-  - Testing: TESTING.md
