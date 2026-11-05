@@ -89,7 +89,7 @@ class Scripts {
 
 	public function get_cookie_handler_script() {
 		return "<script nitro-exclude>
-                document.cookie = 'nitroCachedPage=' + (!window.NITROPACK_STATE ? '0' : '1') + '; path=/; SameSite=Lax';
+                document.cookie = 'nitroCachedPage=' + (!window.NITROPACK_STATE ? '0' : '1') + '; path=/; SameSite=Lax' + (location.protocol === 'https:' ? '; Secure' : '');
             </script>";
 	}
 }

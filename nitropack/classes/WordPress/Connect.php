@@ -258,6 +258,9 @@ class Connect {
 		}
 
 		get_nitropack()->unsetCurrentBlogConfig();
+		
+		//Wordfence allowlisted IPs removal
+		\NitroPack\Integration\Plugin\Wordfence::remove_allowlisted_ips();
 
 		$hostingNoticeFile = \NitroPack\WordPress\Notifications\Notifications::getInstance()->get_hosting_notice_file();
 		if ( file_exists( $hostingNoticeFile ) ) {

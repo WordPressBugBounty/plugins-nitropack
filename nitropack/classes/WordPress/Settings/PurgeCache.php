@@ -70,7 +70,7 @@ class PurgeCache {
 	public function nitropack_invalidate_entire_cache() {
 		nitropack_verify_ajax_nonce( $_REQUEST );
 		try {
-			if ( nitropack_sdk_invalidate( NULL, NULL, 'Manual invalidation of all pages' ) ) {
+			if ( nitropack_sdk_invalidate( null, null, 'Manual invalidation of all pages' ) ) {
 				NitroPack::getInstance()->getLogger()->notice( 'Manual invalidation of all pages' );
 				nitropack_json_and_exit( array(
 					"type" => "success",
@@ -95,7 +95,7 @@ class PurgeCache {
 	public function nitropack_purge_cache() {
 		nitropack_verify_ajax_nonce( $_REQUEST );
 		try {
-			if ( nitropack_sdk_purge( NULL, NULL, 'Light purge of all caches', \NitroPack\SDK\PurgeType::LIGHT_PURGE ) ) {
+			if ( nitropack_sdk_purge( null, null, 'Light purge of all caches', \NitroPack\SDK\PurgeType::LIGHT_PURGE ) ) {
 				NitroPack::getInstance()->getLogger()->notice( 'Light purge of all caches' );
 				nitropack_json_and_exit( array(
 					"type" => "success",
@@ -133,9 +133,9 @@ class PurgeCache {
 
 		if ( ! empty( $_POST["postId"] ) && is_numeric( $_POST["postId"] ) ) {
 			$postId = $_POST["postId"];
-			$postUrl = ! empty( $_POST["postUrl"] ) ? $_POST["postUrl"] : NULL;
+			$postUrl = ! empty( $_POST["postUrl"] ) ? $_POST["postUrl"] : null;
 			$reason = sprintf( "Manual purge of post %s via the WordPress admin panel", $postId );
-			$tag = $postId > 0 ? "single:$postId" : NULL;
+			$tag = $postId > 0 ? "post:$postId" : null;
 
 			if ( $postUrl ) {
 				if ( is_array( $postUrl ) ) {
@@ -178,9 +178,9 @@ class PurgeCache {
 
 		if ( ! empty( $_POST["postId"] ) && is_numeric( $_POST["postId"] ) ) {
 			$postId = $_POST["postId"];
-			$postUrl = ! empty( $_POST["postUrl"] ) ? $_POST["postUrl"] : NULL;
+			$postUrl = ! empty( $_POST["postUrl"] ) ? $_POST["postUrl"] : null;
 			$reason = sprintf( "Manual invalidation of post %s via the WordPress admin panel", $postId );
-			$tag = $postId > 0 ? "single:$postId" : NULL;
+			$tag = $postId > 0 ? "post:$postId" : null;
 
 			if ( $postUrl ) {
 				if ( is_array( $postUrl ) ) {
@@ -219,7 +219,7 @@ class PurgeCache {
 	 */
 	public function nitropack_clear_residual_cache() {
 		nitropack_verify_ajax_nonce( $_REQUEST );
-		$gde = ! empty( $_POST["gde"] ) ? $_POST["gde"] : NULL;
+		$gde = ! empty( $_POST["gde"] ) ? $_POST["gde"] : null;
 		if ( $gde && array_key_exists( $gde, ResidualCache::$modules ) ) {
 			$result = call_user_func( array( ResidualCache::$modules[ $gde ], "clearCache" ) ); // This needs to be like this because of compatibility with PHP 5.6
 			if ( ! in_array( false, $result ) ) {

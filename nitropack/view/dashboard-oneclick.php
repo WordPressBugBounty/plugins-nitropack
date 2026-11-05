@@ -90,6 +90,7 @@ $cache_warmup_enabled = ! empty( $cache_warmup_stats['status'] ) && $cache_warmu
 					$settings->beaver_builder->render();
 					$settings->editor_clear_cache->render();
 					$settings->gravity_forms->render();
+					$settings->divi_css_to_head->render();
 					?>
 				</div>
 			</div>

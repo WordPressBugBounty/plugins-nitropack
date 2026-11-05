@@ -14,6 +14,7 @@ use NitroPack\WordPress\Settings\TestMode;
 use NitroPack\WordPress\Settings\HTMLCompression;
 use NitroPack\WordPress\Settings\BeaverBuilder;
 use NitroPack\WordPress\Settings\GravityForms;
+use NitroPack\WordPress\Settings\DiviCssToHead;
 use NitroPack\WordPress\Settings\CartCache;
 use NitroPack\WordPress\Settings\StockRefresh;
 use NitroPack\WordPress\Settings\EditorClearCache;
@@ -96,6 +97,11 @@ class Settings {
 	 */
 	public $gravity_forms;
 	/**
+	 * Grabs DiviCssToHead class
+	 * @var DiviCssToHead
+	 */
+	public $divi_css_to_head;
+	/**
 	 * Grabs CartCache class
 	 * @var CartCache
 	 */
@@ -144,6 +150,7 @@ class Settings {
 		$this->cpt_optimization = CPTOptimization::getInstance();
 		$this->shortcodes = new Shortcodes();
 		$this->gravity_forms = GravityForms::getInstance();
+		$this->divi_css_to_head = DiviCssToHead::getInstance();
 		$this->cache_warmup = CacheWarmup::getInstance();
 		$this->test_mode = TestMode::getInstance();
 		$this->html_compression = HTMLCompression::getInstance();

@@ -152,6 +152,7 @@ if ( empty( $dismissed_notices['skip_cache_warmup'] ) && ! $cache_warmup_enabled
 					if ( isset( $settings->gravity_forms ) ) {
 						$settings->gravity_forms->render();
 					}
+					$settings->divi_css_to_head->render();
 					?>
 				</div>
 			</div>

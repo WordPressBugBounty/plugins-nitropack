@@ -113,6 +113,9 @@ class ActivateDeactivate {
 		} catch (\Exception $e) {
 			// Exception while signaling our 3rd party integration addons to purge their cache
 		}
+		
+		//Wordfence allowlisted IPs removal
+		\NitroPack\Integration\Plugin\Wordfence::remove_allowlisted_ips();
 
 		if ( get_nitropack()->isConnected() ) {
 			nitropack_event( "disable_extension", null, self::get_disconnect_deactivation_metadata() );

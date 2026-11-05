@@ -13,8 +13,6 @@ require_once $np_basePath . 'constants.php';
 $np_originalRequestCookies = $_COOKIE;
 $np_customExpirationTimes = array();
 $np_queriedObj = null;
-$np_loggedPurges = array();
-$np_loggedInvalidations = array();
 $np_integrationSetupEvent = "muplugins_loaded";
 
 /**
@@ -317,7 +315,7 @@ function nitropack_print_generic_nitro_script() {
 		return;
 	}
 	define( "NITROPACK_GENERIC_NITRO_SCRIPT_PRINTED", true );
-	//echo apply_filters( "nitro_script_output", nitropack_get_telemetry_meta() );
+	echo apply_filters( "nitro_script_output", nitropack_get_telemetry_meta() );
 	echo apply_filters( "nitro_script_output", nitropack_get_generic_nitro_script() );
 }
 
@@ -441,36 +439,19 @@ function nitropack_init() {
 					$GLOBALS["NitroPack.tags"][ "pageType:" . get_nitropack()->getPageType()] = 1;
 
 					/* The following if statement should stay as it is written.
-					 * is_archive() can return true if visiting a tax, category or tag page, so is_acrchive must be checked last
+					 * is_archive() can return true if visiting a tax, category or tag page, so is_archive must be checked last
 					 */
 					if ( is_tax() || is_category() || is_tag() ) {
 						$np_queriedObj = get_queried_object();
 						$GLOBALS["NitroPack.tags"][ "tax:" . $np_queriedObj->term_taxonomy_id ] = 1;
 					} else {
-						if ( is_single() || is_page() || is_attachment() ) {
-							$singlePost = get_post();
-							if ( $singlePost ) {
-								$GLOBALS["NitroPack.tags"][ "single:" . $singlePost->ID ] = 1;
-							}
-						}
+						// if ( is_single() || is_page() || is_attachment() ) {
+						// 	$singlePost = get_post();
+						// 	if ( $singlePost ) {
+						// 		$GLOBALS["NitroPack.tags"][ "single:" . $singlePost->ID ] = 1;
+						// 	}
+						// }
 					}
-
-					// Uncomment the code below in case object cache interferes with correct URL taggig
-					// The code below will attempt to temporarily disable using the object cache only for the requests coming from NitroPack
-					//wp_using_ext_object_cache(false);
-					//add_action("pre_get_posts", function($query) {
-					//    $query->query_vars["cache_results"] = false;
-					//});
-					//
-					//add_filter("all", function() {
-					//    $args = func_get_args();
-					//    if (count($args) > 1) {
-					//        list($filterName, $value) = func_get_args();
-					//        if (preg_match("/^transient_(.*)/", $filterName, $matches) && $value) {
-					//            return false;
-					//        }
-					//    }
-					//}, 10, 2);
 
 					add_filter( 'post_link', 'nitropack_post_link_listener', 10, 2 );
 					add_action( 'the_post', 'nitropack_handle_the_post' );
@@ -967,104 +948,37 @@ function nitropack_sdk_delete_backlog() {
 	return false;
 }
 
-function nitropack_purge( $url = null, $tag = null, $reason = null ) {
-	if ( $tag != "pageType:home" ) {
-		$siteConfig = nitropack_get_site_config();
-		$homeUrl = $siteConfig && ! empty( $siteConfig["home_url"] ) ? $siteConfig["home_url"] : get_home_url();
-		nitropack_log_invalidate( $homeUrl, "pageType:home", $reason );
-	}
-
-	if ( $tag != "pageType:archive" ) {
-		nitropack_log_invalidate( null, "pageType:archive", $reason );
-	}
-
-	nitropack_log_purge( $url, $tag, $reason );
-}
-
-function nitropack_log_purge( $url = null, $tag = null, $reason = null ) {
-	global $np_loggedPurges;
-	if ( $tag && is_array( $tag ) ) {
-		foreach ( $tag as $tagSingle ) {
-			nitropack_log_purge( $url, $tagSingle, $reason );
-		}
-		return;
-	}
-
-	$keyBase = "";
-	if ( $url ) {
-		$keyBase .= $url;
-	}
-
-	if ( $tag ) {
-		$tag = nitropack_filter_tag( $tag );
-		$keyBase .= $tag;
-	}
-
-	$purgeRequestKey = md5( $keyBase );
-	if ( is_array( $np_loggedPurges ) && array_key_exists( $purgeRequestKey, $np_loggedPurges ) ) {
-		$np_loggedPurges[ $purgeRequestKey ]["reason"] = $reason;
-		$np_loggedPurges[ $purgeRequestKey ]["priority"]++;
-	} else {
-		$np_loggedPurges[ $purgeRequestKey ] = array(
-			"url" => $url,
-			"tag" => $tag,
-			"reason" => $reason,
-			"priority" => 1
-		);
-	}
-}
 /**
- * Simple global function to invalidate a page
+ * Simple global function to purge a post
  * @param string|null $url
  * @param string|null $tag
  * @param string|null $reason
+ * @param bool $important_changes Whether to also purge the home & archive listings. Default true.
  * @return void
  */
-function nitropack_invalidate( ?string $url = null, ?string $tag = null, ?string $reason = null ) {
-	if ( $tag != "pageType:home" ) {
-		$siteConfig = nitropack_get_site_config();
-		$homeUrl = $siteConfig && ! empty( $siteConfig["home_url"] ) ? $siteConfig["home_url"] : get_home_url();
-		nitropack_log_invalidate( $homeUrl, "pageType:home", $reason );
+function nitropack_purge( $url = null, $tag = null, $reason = null, bool $important_changes = true ) {
+	if ( $important_changes ) {
+		\NitroPack\WordPress\Invalidations\InvalidationService::getInstance()->invalidate_listings($reason);
 	}
 
-	if ( $tag != "pageType:archive" ) {
-		nitropack_log_invalidate( null, "pageType:archive", $reason );
-	}
-
-	nitropack_log_invalidate( $url, $tag, $reason );
+	\NitroPack\WordPress\Invalidations\InvalidationService::getInstance()->log_purge( $url, $tag, $reason );
 }
 
-function nitropack_log_invalidate( ?string $url = null, ?string $tag = null, ?string $reason = null ) {
-	global $np_loggedInvalidations;
-	if ( $tag && is_array( $tag ) ) {
-		foreach ( $tag as $tagSingle ) {
-			nitropack_log_invalidate( $url, $tagSingle, $reason );
-		}
-		return;
+
+/**
+ * Simple global function to invalidate a post
+ * @param string|null $url
+ * @param string|null $tag
+ * @param string|null $reason
+ * @param bool $important_changes Whether to also invalidate the home & archive listings. Default true.
+ * @return void
+ */
+function nitropack_invalidate( ?string $url = null, ?string $tag = null, ?string $reason = null, bool $important_changes = true ) {
+	if ( $important_changes ) {
+		\NitroPack\WordPress\Invalidations\InvalidationService::getInstance()->invalidate_listings($reason);
 	}
 
-	$keyBase = "";
-	if ( $url ) {
-		$keyBase .= $url;
-	}
-
-	if ( $tag ) {
-		$tag = nitropack_filter_tag( $tag );
-		$keyBase .= $tag;
-	}
-
-	$invalidateRequestKey = md5( $keyBase );
-	if ( is_array( $np_loggedInvalidations ) && array_key_exists( $invalidateRequestKey, $np_loggedInvalidations ) ) {
-		$np_loggedInvalidations[ $invalidateRequestKey ]["reason"] = $reason;
-		$np_loggedInvalidations[ $invalidateRequestKey ]["priority"]++;
-	} else {
-		$np_loggedInvalidations[ $invalidateRequestKey ] = array(
-			"url" => $url,
-			"tag" => $tag,
-			"reason" => $reason,
-			"priority" => 1
-		);
-	}
+	\NitroPack\WordPress\Invalidations\InvalidationService::getInstance()->log_invalidate( $url, $tag, $reason );
 }
 
 /* End NitroPack SDK Purges and Invalidations */
@@ -1165,146 +1079,6 @@ function nitropack_verify_ajax_nonce( $request_data, $allowed_roles = null ) {
 }
 
 /**
- * Summary of nitropack_has_post_important_change
- * @param \WP_Post $post
- * @return bool
- **/
-function nitropack_has_post_important_change( $post ) {
-	$prevPost = nitropack_get_post_pre_update( $post );
-	return $prevPost && ( $prevPost->post_title != $post->post_title || $prevPost->post_name != $post->post_name || $prevPost->post_excerpt != $post->post_excerpt );
-}
-
-/**
- * Main logic of invalidating the cache for a post and its related taxonomies.
- * Checks if the post type is cacheable, and if so, invalidates the cache for the post and its related taxonomies.
- * @param \WP_Post $post
- * @param array | null $taxonomies
- * @param bool | null $hasImportantChangeInPost
- * @param string | null $reason
- * @param bool $usePurge
- * @return void
- */
-function nitropack_clean_post_cache( ?\WP_Post $post, $taxonomies = null, $hasImportantChangeInPost = null, $reason = null, $usePurge = false ) {
-	if ( ! $post ) {
-		return;
-	}
-
-	try {
-		$postID = $post->ID;
-		$postType = isset( $post->post_type ) ? $post->post_type : "post";
-		$nicePostTypeLabel = nitropack_get_nice_post_type_label( $postType );
-		$reason = $reason ? $reason : sprintf( "Updated %s '%s'", $nicePostTypeLabel, $post->post_title );
-		$CPTOptimization = NitroPack\WordPress\Settings\CPTOptimization::getInstance();
-		$cacheableObjectTypes = $CPTOptimization->nitropack_get_cacheable_object_types();
-
-		if ( in_array( $postType, $cacheableObjectTypes ) ) {
-			if ( $usePurge ) {
-				// We only purge the single pages because they have to immediately stop serving cache
-				// These pages no longer exists and if their URL is requested we must not server cache
-				nitropack_purge( null, "single:$postID", $reason );
-			} else {
-				nitropack_invalidate( null, "single:$postID", $reason );
-			}
-
-			nitropack_invalidate( null, "post:$postID", $reason );
-
-			if ( $hasImportantChangeInPost === null ) {
-				$hasImportantChangeInPost = nitropack_has_post_important_change( $post );
-			}
-			if ( $taxonomies === null ) {
-				if ( $hasImportantChangeInPost ) { // This change should be reflected in all taxonomy pages
-					$taxonomies = array( 'related' => nitropack_get_taxonomies( $post ) );
-				} else { // No important change, so only update taxonomy pages which have been added or removed from the post
-					$taxonomies = nitropack_get_taxonomies_for_update( $post );
-				}
-			}
-			if ( $taxonomies ) {
-				if ( ! empty( $taxonomies['added'] ) ) { // taxonomies that the post was just added to, must purge all pages for these taxonomies
-					foreach ( $taxonomies['added'] as $term_taxonomy_id ) {
-						nitropack_invalidate( null, "tax:$term_taxonomy_id", $reason );
-					}
-				}
-				if ( ! empty( $taxonomies['deleted'] ) ) { // taxonomy pages that the post was just removed from (also accounts for paginations via the taxpost: tag instead of only tax:)
-					foreach ( $taxonomies['deleted'] as $term_taxonomy_id ) {
-						nitropack_invalidate( null, "taxpost:$term_taxonomy_id:$postID", $reason );
-					}
-				}
-				if ( ! empty( $taxonomies['related'] ) ) { // taxonomy pages that the post is linked to (also accounts for paginations via the taxpost: tag instead of only tax:)
-					foreach ( $taxonomies['related'] as $term_taxonomy_id ) {
-						nitropack_invalidate( null, "taxpost:$term_taxonomy_id:$postID", $reason );
-					}
-				}
-			}
-		} else {
-			if ( $post->public ) {
-				nitropack_invalidate( null, "post:$postID", $reason );
-			}
-
-			$posts = get_post_ancestors( $postID );
-			foreach ( $posts as $parentID ) {
-				$parent = get_post( $parentID );
-				nitropack_clean_post_cache( $parent, false, false, $reason );
-			}
-		}
-	} catch (\Exception $e) {
-	}
-}
-
-/**
- * Formats the post type into a nice label
- * @param string $postType
- */
-function nitropack_get_nice_post_type_label( string $postType ) {
-	$postTypes = get_post_types( array(
-		"name" => $postType
-	), "objects" );
-
-	return ! empty( $postTypes[ $postType ] ) && ! empty( $postTypes[ $postType ]->labels ) ? $postTypes[ $postType ]->labels->singular_name : $postType;
-}
-
-/**
- * Detects changes in the post and cleans the post cache if necessary.
- * Compares the post before update and after update, and if there are any changes,
- * it cleans the cache for the post and its related taxonomies.
- * @param \WP_Post $post
- * @return void
- */
-function nitropack_detect_changes_and_clean_post_cache( \WP_Post $post ) {
-	if ( ! get_option( "nitropack-autoCachePurge", 1 ) ) {
-		return;
-	}
-
-	$post_before = nitropack_get_post_pre_update( $post );
-	$ignoredComparisonKeys = array( 'post_modified', 'post_modified_gmt' );
-	$canCleanPostCache = false;
-	$postStatesEqual = nitropack_compare_posts( (array) $post_before, (array) $post, $ignoredComparisonKeys );
-
-	if ( $postStatesEqual ) {
-		$taxCurrent = nitropack_get_taxonomies( $post );
-		$taxPreUpdate = nitropack_get_taxonomies_pre_update( $post );
-		$taxAreEqual = nitropack_compare_posts( $taxCurrent, $taxPreUpdate );
-		if ( $taxAreEqual ) {
-			$metaCurrent = get_post_meta( $post->ID );
-			$metaPreUpdate = nitropack_get_meta_pre_update( $post );
-			$metaIsEqual = nitropack_compare_posts( $metaCurrent, $metaPreUpdate );
-			if ( ! $metaIsEqual ) {
-				$canCleanPostCache = true;
-			}
-		} else {
-			$canCleanPostCache = true;
-		}
-	} else {
-		$canCleanPostCache = true;
-	}
-
-	if ( $canCleanPostCache ) {
-		\NitroPack\WordPress\NitroPack::$np_loggedWarmups[] = get_permalink( $post );
-		nitropack_clean_post_cache( $post );
-		define( 'NITROPACK_PURGE_CACHE', true );
-	}
-}
-
-/**
  * Used only in is_optimizer_nitropack_request(), we handle the post and add the tags for the post and its author.
  * @param string $permalink
  * @param \WP_Post $post
@@ -1347,135 +1121,6 @@ function nitropack_handle_the_post( \WP_Post $post ) {
 	if ( $np_queriedObj ) {
 		$GLOBALS["NitroPack.tags"][ "taxpost:" . $np_queriedObj->term_taxonomy_id . ":" . $post->ID ] = 1;
 	}
-}
-
-/**
- * Grabs the taxonomies for a given post and returns an array of term_taxonomy_ids
- * @param WP_Post $post
- * @return array of term_taxonomy_ids
- */
-function nitropack_get_taxonomies( \WP_Post $post ) {
-	$term_taxonomy_ids = array();
-	$taxonomies = get_object_taxonomies( $post->post_type );
-	foreach ( $taxonomies as $taxonomy ) {
-		$terms = get_the_terms( $post->ID, $taxonomy );
-		if ( ! empty( $terms ) ) {
-			foreach ( $terms as $term ) {
-				$term_taxonomy_ids[] = $term->term_taxonomy_id;
-			}
-		}
-	}
-	return $term_taxonomy_ids;
-}
-
-/**
- * Grabs the taxonomies for a given post and returns an array of term_taxonomy_ids that have been added or deleted since the last update
- * @param WP_Post $post
- * @return array{added: array, deleted: array}
- */
-function nitropack_get_taxonomies_for_update( \WP_Post $post ) {
-	$prevTaxonomies = nitropack_get_taxonomies_pre_update( $post );
-	$newTaxonomies = nitropack_get_taxonomies( $post );
-	$intersection = array_intersect( $newTaxonomies, $prevTaxonomies );
-	$prevTaxonomies = array_diff( $prevTaxonomies, $intersection );
-	$newTaxonomies = array_diff( $newTaxonomies, $intersection );
-	return array(
-		"added" => array_diff( $newTaxonomies, $prevTaxonomies ),
-		"deleted" => array_diff( $prevTaxonomies, $newTaxonomies )
-	);
-}
-
-/**
- * Returns the post before it was updated, or null if it wasn't logged.
- * @param WP_Post $post
- * @return WP_Post|null
- */
-function nitropack_get_post_pre_update( \WP_Post $post ) {
-	return ! empty( \NitroPack\WordPress\NitroPack::$preUpdatePosts[ $post->ID ] ) ? \NitroPack\WordPress\NitroPack::$preUpdatePosts[ $post->ID ] : null;
-}
-
-/**
- * Returns the taxonomies for a given post before it was updated, or an empty array if they weren't logged.
- * @param WP_Post $post
- * @return array of term_taxonomy_ids
- */
-function nitropack_get_taxonomies_pre_update( \WP_Post $post ) {
-	return ! empty( \NitroPack\WordPress\NitroPack::$preUpdateTaxonomies[ $post->ID ] ) ? \NitroPack\WordPress\NitroPack::$preUpdateTaxonomies[ $post->ID ] : array();
-}
-
-/**
- * Returns the post meta for a given post before it was updated, or an empty array if it wasn't logged.
- * @param WP_Post $post
- * @return array of post meta
- */
-function nitropack_get_meta_pre_update( \WP_Post $post ) {
-	return ! empty( \NitroPack\WordPress\NitroPack::$preUpdateMeta[ $post->ID ] ) ? \NitroPack\WordPress\NitroPack::$preUpdateMeta[ $post->ID ] : array();
-}
-
-/**
- * Compare two posts or one post and its associated data - post_meta or taxonomies
- * Return true if they are equal, false otherwise.
- * @param array $p1
- * @param array $p2
- * @param array|null $ignoredKeys
- * @return bool
- */
-function nitropack_compare_posts( array $p1, array $p2, ?array $ignoredKeys = null ) {
-	$p1keys = array_keys( $p1 );
-	$p2keys = array_keys( $p2 );
-	if ( count( $p1keys ) !== count( $p2keys ) ) {
-		return false;
-	}
-	if ( array_diff( $p1keys, $p2keys ) ) {
-		return false;
-	}
-
-	$isP1assoc = false;
-	$expectedKey = 0;
-	foreach ( $p2 as $i => $_ ) {
-		if ( $i !== $expectedKey ) {
-			$isP1assoc = true;
-		}
-		$expectedKey++;
-	}
-
-	$isP2assoc = false;
-	$expectedKey = 0;
-	foreach ( $p2 as $i => $_ ) {
-		if ( $i !== $expectedKey ) {
-			$isP2assoc = true;
-		}
-		$expectedKey++;
-	}
-
-	if ( $isP1assoc !== $isP2assoc ) {
-		return false;
-	}
-
-	if ( ! $isP1assoc && ! $isP2assoc ) {
-		sort( $p1 );
-		sort( $p2 );
-	}
-
-	foreach ( $p1 as $poKey => $poVal ) {
-		if ( $ignoredKeys && in_array( $poKey, $ignoredKeys, true ) ) {
-			continue;
-		}
-		$checkpoint01 = is_array( $poVal );
-		$checkpoint02 = is_array( $p2[ $poKey ] );
-		if ( $checkpoint01 && $checkpoint02 ) {
-			if ( ! nitropack_compare_posts( $poVal, $p2[ $poKey ], $ignoredKeys ) ) {
-				return false;
-			}
-		} elseif ( ! $checkpoint01 && ! $checkpoint02 ) {
-			if ( $poVal != $p2[ $poKey ] ) {
-				return false;
-			}
-		} else {
-			return false;
-		}
-	}
-	return true;
 }
 
 /**

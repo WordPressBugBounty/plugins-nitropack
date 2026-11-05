@@ -111,6 +111,10 @@ class Notifications {
 			$warnings,
 			$this->test_mode_notification()
 		);
+		/* Wordfence notification */
+		$wordfence_notifications = $this->wordfence_notification();
+		$infos = array_merge( $infos, $wordfence_notifications );
+
 		$conflictingPlugins = \NitroPack\WordPress\ConflictingPlugins::getInstance();
 		$nitropackIsConnected = get_nitropack()->isConnected();
 		$advanced_cache = new AdvancedCache();
@@ -310,6 +314,27 @@ class Notifications {
 		}
 	}
 
+	/**
+	 * Whether a plugin notice was dismissed, using the same checks render_notification() uses to skip it.
+	 *
+	 * @param array $notice A notice from nitropack_plugin_notices().
+	 * @return bool
+	 */
+	private function is_notice_dismissed( array $notice ) {
+		if ( empty( $notice['dismissibleId'] ) || empty( $notice['dismissBy'] ) ) {
+			return false;
+		}
+		if ( 'option' === $notice['dismissBy'] ) {
+			$dismissed = get_option( 'nitropack-dismissed-notices' );
+			return is_array( $dismissed ) && in_array( $notice['dismissibleId'], $dismissed );
+		}
+		if ( 'transient' === $notice['dismissBy'] ) {
+			$dismissed_until = get_transient( $notice['dismissibleId'] );
+			return $dismissed_until && time() < $dismissed_until;
+		}
+		return false;
+	}
+
 	public function admin_bar_notices_counter() {
 		if ( ! $this->pass_notification_capabilities() )
 			return;
@@ -322,6 +347,10 @@ class Notifications {
 		foreach ( array( "warning", "error", "info" ) as $type ) {
 
 			foreach ( $notices[ $type ] as $notice ) {
+				/* Don't count notices that render_notification() won't display */
+				if ( $this->is_notice_dismissed( $notice ) ) {
+					continue;
+				}
 				switch ( $type ) {
 					case "error":
 						$errors++;
@@ -940,5 +969,21 @@ class Notifications {
 		}
 
 		return $warnings;
+	}
+	private function wordfence_notification() {
+		$infos = [];
+
+		if ( \NitroPack\Integration\Plugin\Wordfence::isActive() ) {
+			$infos[] = array(
+				'title' => esc_html__( "Wordfence firewall updated", 'nitropack' ),
+				'msg' => esc_html__( 'To make sure NitroPack works properly with Wordfence, we\'ve added our servers to its firewall allowlist. You can review the entries under Wordfence > Firewall > Allowlisted IPs.', 'nitropack' ),
+				'button' => esc_html__( 'Dismiss', 'nitropack' ),
+				'dismissibleId' => 'wordfence_allowlisted_ips',
+				'dismissBy' => 'option',
+			);
+			NitroPack::getInstance()->getLogger()->notice( "Wordfence firewall updated." );
+		}
+
+		return $infos;
 	}
 }

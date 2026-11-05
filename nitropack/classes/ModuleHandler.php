@@ -61,6 +61,8 @@ class ModuleHandler {
         "NitroPack/Integration/Plugin/GeoTargetingWP",
         "NitroPack/Integration/Plugin/WPML",
         Integration\Plugin\ACF::class,
+        Integration\Plugin\Wordfence::class,
+        Integration\Theme\Divi::class,
         "NitroPack/Feature/SubrequestCache",
         Feature\AjaxShortcodes::class,
     ];

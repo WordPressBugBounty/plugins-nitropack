@@ -19,11 +19,7 @@ class NitroPack {
 	private static $instance = null;
 	public static $nitroDirMigrated = false;
 	public static $nitroConfigMigrated = false;
-	public static $preUpdatePosts = array();
-	public static $preUpdateTaxonomies = array();
-	public static $preUpdateMeta = array();
-	public static $ignoreUpdatePostIDs = array();
-	public static $np_loggedWarmups = array();
+
 	public static $optionsToCache = [
 		'cache_handler_cache_handler',
 		'woocommerce_default_customer_address',

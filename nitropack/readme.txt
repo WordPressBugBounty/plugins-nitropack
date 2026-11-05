@@ -2,9 +2,9 @@
 Contributors: nitropack
 Tags: cache, performance, page speed, website speed, core web vitals
 Requires at least: 4.7
-Tested up to: 7.1.2
+Tested up to: 7.1.4
 Requires PHP: 7.4
-Stable tag: 1.20.3
+Stable tag: 1.20.4
 License: GNU General Public License, version 2
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -269,6 +269,14 @@ Yes, the plugin uses the [Intercom Chat Widget](https://widget.intercom.io), whi
 5. The only solution you will ever need
 
 == Changelog ==
+= 1.20.4 =
+2026-11-05
+
+* Improvement: Invalidations fully refactored
+* Improvement: Added a constant NITROPACK_SERVE_CACHE_WHEN_API_DOWN. When set and our API is down, the local cache will remain intact and only updated posts (and their related) will have their cache purged
+* Compatibility: Theme Divi - move inline css to head as a setting option.
+* Compatibility: Wordfence - allowlist (whitelist) our IPs dynamically.
+
 = 1.20.3 =
 2026-09-24
 

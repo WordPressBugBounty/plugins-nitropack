@@ -62,12 +62,12 @@ class StockRefresh {
 
 		$went_out_of_stock = null !== $product_new_stock && 0.0 === $product_new_stock && ( null === $product_old_stock || 0.0 !== $product_old_stock );
 		$went_back_in_stock = null !== $product_old_stock && 0.0 === $product_old_stock && null !== $product_new_stock && $product_new_stock > 0;
-		
+
 		if ( $went_out_of_stock || $went_back_in_stock ) {
 			$reason = $went_out_of_stock ? "out of stock" : "back in stock";
-			nitropack_clean_post_cache( $post, array( 'added' => nitropack_get_taxonomies( $post ) ), true, sprintf( "Invalidate related pages due to %s change on product '%s'", $reason, $post->post_title ), true );
+			\NitroPack\WordPress\Invalidations\InvalidationService::getInstance()->clean_post_cache( $post, array( 'added' => \NitroPack\WordPress\Invalidations\InvalidationService::getInstance()->get_taxonomies( $post ) ), true, sprintf( "Invalidate related pages due to %s change on product '%s'", $reason, $post->post_title ), true );
 		} else {
-			nitropack_clean_post_cache( $post, NULL, false, sprintf( "Invalidate stock change on product '%s'", $post->post_title ) );
+			\NitroPack\WordPress\Invalidations\InvalidationService::getInstance()->clean_post_cache( $post, null, false, sprintf( "Invalidate stock change on product '%s'", $post->post_title ) );
 		}
 	}
 	/**

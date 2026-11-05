@@ -414,11 +414,21 @@ class NitroPack {
         }
     }
 
+    // The backlog is what keeps the local and remote caches in sync, so this mode needs it enabled.
+    private function shouldServeCacheWhenApiDown() {
+        return defined('NITROPACK_SERVE_CACHE_WHEN_API_DOWN') && (!defined('NITROPACK_DISABLE_BACKLOG') || !NITROPACK_DISABLE_BACKLOG);
+    }
+
     public function hasLocalCache($checkIfRequestIsAllowed = true) {
-        if ($this->backlog->exists()) return false;
+        if ($this->shouldServeCacheWhenApiDown()) {
+            // Keep serving the local cache while the API is down. Only a backlog on a healthy API means pending purges.
+            if ($this->getHealthStatus() == HealthStatus::HEALTHY && $this->backlog->exists()) return false;
+        } else {
+            if ($this->backlog->exists()) return false;
+        }
         if (!$this->isAllowedUrl($this->url) || ($checkIfRequestIsAllowed && !$this->isAllowedRequest())) return false;
         $cacheRevision = !empty($this->config->RevisionHash) ? $this->config->RevisionHash : NULL;
-        if ($this->getHealthStatus() !== HealthStatus::HEALTHY) {
+        if (!$this->shouldServeCacheWhenApiDown() && $this->getHealthStatus() !== HealthStatus::HEALTHY) {
             return false;
         }
 
@@ -620,6 +630,9 @@ class NitroPack {
                     try {
                         $apiResult &= $this->api->purgeCache($url, false, $reason, $lightPurge);
                     } catch (ServiceDownException $e) {
+                        if (!$this->shouldServeCacheWhenApiDown()) {
+                            $this->purgeLocalCache(true);
+                        }
                         $apiResult = false;
                         // TODO: Potentially log this
                     }
@@ -642,7 +655,9 @@ class NitroPack {
                                 }
                             }
                         } catch (ServiceDownException $e) {
-                            $this->purgeLocalCache(true); // TODO: This will leave stale cache files. Think of a way to delete them on systems that do not have a heartbeat (i.e custom integrations).
+                            if (!$this->shouldServeCacheWhenApiDown()) {
+                                $this->purgeLocalCache(true); // TODO: This will leave stale cache files. Think of a way to delete them on systems that do not have a heartbeat (i.e custom integrations).
+                            }
                             $apiResult = false;
                             // TODO: Log this
                             break;

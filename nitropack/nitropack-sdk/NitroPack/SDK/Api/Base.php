@@ -11,6 +11,15 @@ class Base {
     protected $isBacklogEnabled;
     protected $backlog;
     protected $nitropack;
+    protected static $globalHeaders = array();
+
+    public static function setGlobalHeader($name, $value) {
+        self::$globalHeaders[$name] = $value;
+    }
+
+    public static function removeGlobalHeader($name) {
+        unset(self::$globalHeaders[$name]);
+    }
 
     public function __construct($siteId) {
         $this->siteId = $siteId;
@@ -36,6 +45,8 @@ class Base {
     }
 
     protected function makeRequest($path, $headers = array(), $cookies = array(), $type = 'GET', $bodyData=array(), $async = false, $verifySSL = false) {
+        $headers = $headers + self::$globalHeaders;
+
         // If CF-Access-Client-Id and CF-Access-Client-Secret are defined in wordpress, add them to headers
         if (defined('NITROPACK_CF_ACCESS_CLIENT_ID') && defined('NITROPACK_CF_ACCESS_CLIENT_SECRET')) {
             $headers['CF-Access-Client-Id'] = NITROPACK_CF_ACCESS_CLIENT_ID;
